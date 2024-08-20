@@ -20,7 +20,6 @@ endef
 
 # prototype: git_commit(msg)
 define git_commit
-	echo "call git_commit"
 	-@flock $(LOCK_DIR) $(MAKE) -C $(YSYX_HOME) .git_commit MSG='$(1)'
 	-@sync $(LOCK_DIR)
 endef
@@ -31,6 +30,7 @@ endef
 	-@cp -a .git/index $(WORK_INDEX)                                     `# backup git index`
 	-@$(call git_soft_checkout, $(TRACER_BRANCH))                        `# switch to tracer branch`
 	-@git add . -A --ignore-errors                                       `# add files to commit`
+	echo "commit"
 	-@(echo "> $(MSG)" && echo $(STUID) $(STUNAME) && uname -a && uptime `# generate commit msg`) \
 	                | git commit -F - $(GITFLAGS)                        `# commit changes in tracer branch`
 	-@$(call git_soft_checkout, $(WORK_BRANCH))                          `# switch to work branch`
