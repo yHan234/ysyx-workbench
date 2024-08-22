@@ -27,7 +27,7 @@ void isa_reg_display() {
   extern CPU_state cpu;
   printf("pc\t\t%#08x\n", cpu.pc);
   for (int i = 0; i < 32; ++i) {
-    printf("%s\t\t%#010x\n", regs[i], cpu.gpr[i]+1);
+    printf("%s\t\t%#010x\n", regs[i], cpu.gpr[i]);
   }
 }
 
