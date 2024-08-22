@@ -21,9 +21,9 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, TK_EQ, TK_INT
 
-  /* TODO: Add more token types */
+  /* Add more token types */
 
 };
 
@@ -32,13 +32,19 @@ static struct rule {
   int token_type;
 } rules[] = {
 
-  /* TODO: Add more rules.
+  /*
    * Pay attention to the precedence level of different rules.
    */
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"-", '-'},           // minus
+  {"\\*", '*'},         // multiplication
+  {"/", '/'},           // division
   {"==", TK_EQ},        // equal
+  {"\\(", '('},         // left parenthesis
+  {"\\)", ')'},         // right parenthesis
+  {"[0-9]+", TK_INT},   // decimal integers
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -65,16 +71,20 @@ void init_regex() {
 typedef struct token {
   int type;
   char str[32];
+  int bo;
 } Token;
 
 static Token tokens[32] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
+
+static char *expression;
 
 static bool make_token(char *e) {
   int position = 0;
   int i;
   regmatch_t pmatch;
 
+  expression = e;
   nr_token = 0;
 
   while (e[position] != '\0') {
@@ -87,16 +97,30 @@ static bool make_token(char *e) {
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
-        position += substr_len;
-
-        /* TODO: Now a new token is recognized with rules[i]. Add codes
+        /* Now a new token is recognized with rules[i]. Add codes
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
 
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_NOTYPE: break;
+          default:
+            if (nr_token == 32) {
+              puts("Too many tokens!\n");
+              return false;
+            }
+            if (pmatch.rm_eo > 31) {
+              printf("The token is too long at position %d\n%s\n%*.s^\n", position, e, position, "");
+              return false;
+            }
+            tokens[nr_token].type = rules[i].token_type;
+            memcpy(tokens[nr_token].str, e + position, pmatch.rm_eo);
+            tokens[nr_token].str[pmatch.rm_eo] = '\0';
+            tokens[nr_token].bo = i;
+            nr_token += 1;
         }
+
+        position += substr_len;
 
         break;
       }
@@ -111,15 +135,131 @@ static bool make_token(char *e) {
   return true;
 }
 
+// evaluate
+
+enum OP{
+  OP_NOOP,
+
+  // list by priority
+  OP_ADD,
+  OP_SUB,
+  OP_MUL,
+  OP_DIV,
+  OP_POS,
+  OP_NEG,
+
+  // special operation
+  OP_LPAREN,
+  OP_RPAREN,
+};
+
+enum OP token_to_op(Token token, bool may_be_unary) {
+
+  if (token.type == '+' && may_be_unary) return OP_POS;
+  if (token.type == '-' && may_be_unary) return OP_NEG;
+
+  if (token.type == '+') return OP_ADD;
+  if (token.type == '-') return OP_SUB;
+  if (token.type == '*') return OP_MUL;
+  if (token.type == '/') return OP_DIV;
+  if (token.type == '(') return OP_LPAREN;
+  if (token.type == ')') return OP_RPAREN;
+
+  panic("Unexpected token at position %d\n%s\n%*.s^\n", token.bo, expression, token.bo, "");
+}
+
+
+word_t eval(bool *success, int bo, int eo) {
+#define FAIL(format, ...) do { printf(format, __VA_ARGS__); *success = false; return 0; } while(0)
+
+  if (bo >= eo) {
+    panic("eval: The algorithm is buggy.");
+  } else if (bo + 1 == eo) {
+    // only one token, it must be a number.
+    if (tokens[bo].type == TK_INT) {
+      char *endptr = NULL;
+      word_t num = strtoul(tokens[bo].str, &endptr, 10);
+
+      if (*endptr == '\0') return num;
+      else
+        FAIL("eval: The number is too long at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+    } else {
+      FAIL("eval: Expect a number at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+    }
+  } else if (token_to_op(tokens[bo], false) == OP_LPAREN && token_to_op(tokens[eo - 1], false) == OP_RPAREN) {
+    // remove the parentheses.
+    if (bo + 1 == eo - 1) FAIL("eval: Expressions should be in parentheses at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+    return eval(success, bo + 1, eo - 1);
+  } else {
+    // divide and conquer
+
+    // find the highest priority binary operator
+    int p = -1;
+    enum OP op = OP_NOOP;
+    int paren_cnt = 0;
+    bool may_be_unary = true;
+    for (int i = bo; i < eo; ++i) {
+      if (tokens[i].type == TK_INT) {
+        may_be_unary = false;
+        continue;
+      }
+
+      enum OP cur_op = token_to_op(tokens[i], may_be_unary);
+      if (cur_op == OP_POS || cur_op == OP_NEG) {
+        may_be_unary = true;
+      } else if (cur_op == OP_ADD || cur_op == OP_SUB) {
+        may_be_unary = true;
+        if (!paren_cnt && p == -1) {
+          p = i;
+          op = cur_op;
+        }
+      } else if (cur_op == OP_MUL || cur_op == OP_DIV) {
+        may_be_unary = true;
+        if (!paren_cnt && (p == -1 || op == OP_ADD || op == OP_SUB)) {
+          p = i;
+          op = cur_op;
+        }
+      } else if (cur_op == OP_LPAREN) {
+        paren_cnt += 1;
+        may_be_unary = true;
+      } else if (cur_op == OP_RPAREN) {
+        paren_cnt -= 1;
+        may_be_unary = false;
+      }
+    }
+
+    // If there is no binary operator, then the beginning must be a unary operator
+    if (p == -1) {
+      op = token_to_op(tokens[bo], true);
+      if (op == OP_POS) {
+        return eval(success, bo + 1, eo);
+      } else if (op == OP_NEG) {
+        return ~eval(success, bo + 1, eo) + 1;
+      } else {
+        FAIL("eval: Invalid expression at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+      }
+    }
+
+    // there is a binary operator
+    word_t lhs = eval(success, bo, p);
+    word_t rhs = eval(success, p + 1, eo);
+    switch (op)
+    {
+    case OP_ADD: return lhs + rhs;
+    case OP_SUB: return lhs - rhs;
+    case OP_MUL: return lhs * rhs;
+    case OP_DIV: return lhs / rhs;
+    default: panic("eval: Invalid oeprator");
+    }
+  }
+
+#undef FAIL
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
+  return eval(success, 0, nr_token);
 }

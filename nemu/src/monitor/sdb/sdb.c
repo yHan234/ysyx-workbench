@@ -82,24 +82,24 @@ static int cmd_info(char *args) {
 
 static int cmd_x(char *args) {
   char *arg_n = strtok(NULL, " ");
-  char *arg_expr = strtok(NULL, " ");
+  char *arg_expr = strtok(NULL, "\0");
   char *endptr = NULL;
 
   uint64_t n = strtoul(arg_n, &endptr, 0);
   if (*endptr) {
-    puts("Invalid arg N");
+    puts("command x: Invalid arg N");
     return 0;
   }
 
-  // TODO: 表达式求值
-  uint64_t expr = strtoul(arg_expr, &endptr, 0);
-  if (*endptr) {
-    puts("Invalid arg EXPR");
+  bool success = false;
+  word_t e = expr(arg_expr, &success);
+  if (!success) {
+    puts("command x: Invalid expression.");
     return 0;
   }
 
   for (uint64_t i = 0; i < n; ++i) {
-    vaddr_t addr = expr + i * 4;
+    vaddr_t addr = e + i * 4;
     printf("0x%08x\t\t0x%08x\n", addr, vaddr_read(addr, 4));
   }
 
