@@ -54,16 +54,13 @@ static int cmd_q(char *args) {
 
 static int cmd_si(char *args) {
   char *arg = strtok(NULL, " ");
-  unsigned long long num_steps;
+  uint64_t  num_steps;
   if (!arg) {
     num_steps = 1;
   } else {
     num_steps = strtoull(arg, NULL, 0);
-    if (num_steps == 0) {
-      puts("Warning: arg is parsed as 0.");
-    }
   }
-  printf("step %lld instruction(s)\n", num_steps);
+  printf("step %ld instruction(s)\n", num_steps);
   cpu_exec(num_steps);
   return 0;
 }
@@ -78,7 +75,7 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  { "si", "Step instruction. Usage: si num_steps(decimal/octal/hexadecimal)(unsigned 64 bits)", cmd_si },
+  { "si", "Step instruction. Usage: si N(decimal/octal/hexadecimal)(unsigned 64 bits)", cmd_si },
 
   /* TODO: Add more commands */
 
