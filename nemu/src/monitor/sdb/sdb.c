@@ -99,7 +99,7 @@ static int cmd_x(char *args) {
   }
 
   for (uint64_t i = 0; i < n; ++i) {
-    vaddr_t addr = expr + i * 32;
+    vaddr_t addr = expr + i * 4;
     printf("0x%08x\t\t0x%08x\n", addr, vaddr_read(addr, 4));
   }
 
