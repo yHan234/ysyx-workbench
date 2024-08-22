@@ -58,12 +58,17 @@ void gen_rand_uop() {
   if (rand() % 2) gen(' ');
 }
 
-static void gen_rand_expr() {
-  switch (rand() % 3) {
+static void gen_rand_expr(int dep) {
+  if (dep == 4) {
+    gen_num();
+    return;
+  }
+
+  switch (rand() % 4) {
     case 0: gen_num(); break;
-    case 1: gen('('); gen_rand_expr(); gen(')'); break;
-    case 2: gen_rand_expr(); gen_rand_bop(); gen_rand_expr(); break;
-    case 3: gen_rand_uop(); gen_rand_expr(); break;
+    case 1: gen('('); gen_rand_expr(dep + 1); gen(')'); break;
+    case 2: gen_rand_expr(dep + 1); gen_rand_bop(); gen_rand_expr(dep + 1); break;
+    case 3: gen(' '); gen_rand_uop(); gen_rand_expr(dep + 1); break;
   }
 }
 
@@ -77,7 +82,7 @@ int main(int argc, char *argv[]) {
   int i;
   for (i = 0; i < loop; i ++) {
     buf_p = 0;
-    gen_rand_expr();
+    gen_rand_expr(0);
     buf[buf_p] = '\0';
 
     sprintf(code_buf, code_format, buf);
