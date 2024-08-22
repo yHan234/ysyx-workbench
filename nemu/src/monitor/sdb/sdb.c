@@ -68,6 +68,7 @@ static int cmd_si(char *args) {
       return 0;
     }
   }
+  Log("%lld", num_steps);
   cpu_exec(num_steps);
   return 0;
 }
