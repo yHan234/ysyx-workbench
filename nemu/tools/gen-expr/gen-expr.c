@@ -43,6 +43,7 @@ void gen_num() {
     if (w == 0) gen('1' + rand() % 9);
     else gen('0' + rand() % 10);
   }
+  gen('u');
   if (rand() % 2) gen(' ');
 }
 
@@ -59,16 +60,19 @@ void gen_rand_uop() {
 }
 
 static void gen_rand_expr(int dep) {
-  if (dep == 4) {
+  if (dep == 8) {
     gen_num();
     return;
   }
 
-  switch (rand() % 4) {
-    case 0: gen_num(); break;
-    case 1: gen('('); gen_rand_expr(dep + 1); gen(')'); break;
-    case 2: gen_rand_expr(dep + 1); gen_rand_bop(); gen_rand_expr(dep + 1); break;
-    case 3: gen(' '); gen_rand_uop(); gen_rand_expr(dep + 1); break;
+  if (rand() % 10) {
+    switch (rand() % 3) {
+      case 0: gen('('); gen_rand_expr(dep + 1); gen(')'); break;
+      case 1: gen_rand_expr(dep + 1); gen_rand_bop(); gen_rand_expr(dep + 1); break;
+      case 2: gen(' '); gen_rand_uop(); gen_rand_expr(dep + 1); break;
+    }
+  } else {
+    gen_num();
   }
 }
 

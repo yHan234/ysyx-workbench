@@ -59,7 +59,10 @@ static int cmd_si(char *args) {
   if (!arg) {
     num_steps = 1;
   } else {
+    #include <errno.h>
+    errno = 0;
     num_steps = strtoul(arg, NULL, 0);
+    printf("errno = %d\n", errno);
   }
   printf("step %lu instruction(s)\n", num_steps);
   cpu_exec(num_steps);

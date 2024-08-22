@@ -44,7 +44,7 @@ static struct rule {
   {"==", TK_EQ},        // equal
   {"\\(", '('},         // left parenthesis
   {"\\)", ')'},         // right parenthesis
-  {"[0-9]+", TK_INT},   // decimal integers
+  {"[0-9]+u?", TK_INT},   // decimal integers
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -168,6 +168,26 @@ enum OP token_to_op(Token token, bool may_be_unary) {
   panic("Unexpected token at position %d\n%s\n%*.s^\n", token.bo, expression, token.bo, "");
 }
 
+bool check_parentheses(int bo, int eo) {
+  if (token_to_op(tokens[bo], false) != OP_LPAREN || token_to_op(tokens[eo - 1], false) != OP_RPAREN) {
+    return false;
+  }
+
+  int paren_cnt = 0;
+  for (int i = 0; i < eo - 1; ++i) {
+    enum OP op = token_to_op(tokens[i], false);
+    if (op == OP_LPAREN) {
+      paren_cnt += 1;
+    } else {
+      paren_cnt -= 1;
+      if (paren_cnt == 0)
+        return false;
+    }
+  }
+
+  return paren_cnt == 1;
+}
+
 
 word_t eval(bool *success, int bo, int eo) {
 #define FAIL(format, ...) do { printf(format, __VA_ARGS__); *success = false; return 0; } while(0)
@@ -186,7 +206,7 @@ word_t eval(bool *success, int bo, int eo) {
     } else {
       FAIL("eval: Expect a number at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
     }
-  } else if (token_to_op(tokens[bo], false) == OP_LPAREN && token_to_op(tokens[eo - 1], false) == OP_RPAREN) {
+  } else if (check_parentheses(bo, eo)) {
     // remove the parentheses.
     if (bo + 1 == eo - 1) FAIL("eval: Expressions should be in parentheses at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
     return eval(success, bo + 1, eo - 1);
