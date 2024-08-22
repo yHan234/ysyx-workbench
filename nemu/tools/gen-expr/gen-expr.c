@@ -31,8 +31,40 @@ static char *code_format =
 "  return 0; "
 "}";
 
+static uint32_t buf_p = 0;
+
+void gen(char c) {
+  if (buf_p == 65535) return;
+  buf[buf_p++] = c;
+}
+
+void gen_num() {
+  for (int w = 0; w < rand() % 7 + 1; ++w) {
+    if (w == 0) gen('1' + rand() % 9);
+    else gen('0' + rand() % 10);
+  }
+  if (rand() % 2) gen(' ');
+}
+
+void gen_rand_bop() {
+  static char *ops = "+-*/";
+  gen(ops[rand() % 4]);
+  if (rand() % 2) gen(' ');
+}
+
+void gen_rand_uop() {
+  static char *ops = "+-";
+  gen(ops[rand() % 2]);
+  if (rand() % 2) gen(' ');
+}
+
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  switch (rand() % 3) {
+    case 0: gen_num(); break;
+    case 1: gen('('); gen_rand_expr(); gen(')'); break;
+    case 2: gen_rand_expr(); gen_rand_bop(); gen_rand_expr(); break;
+    case 3: gen_rand_uop(); gen_rand_expr(); break;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -44,7 +76,9 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    buf_p = 0;
     gen_rand_expr();
+    buf[buf_p] = '\0';
 
     sprintf(code_buf, code_format, buf);
 
@@ -53,8 +87,15 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr > /tmp/gen-expr.log 2>&1");
     if (ret != 0) continue;
+
+    fp = fopen("/tmp/gen-expr.log", "r");
+    fseek(fp, 0, SEEK_END);
+    if (ftell(fp) != 0) {
+      i--;
+      continue;
+    }
 
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);

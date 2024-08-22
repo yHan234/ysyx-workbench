@@ -248,7 +248,9 @@ word_t eval(bool *success, int bo, int eo) {
     case OP_ADD: return lhs + rhs;
     case OP_SUB: return lhs - rhs;
     case OP_MUL: return lhs * rhs;
-    case OP_DIV: return lhs / rhs;
+    case OP_DIV:
+      if (rhs == 0) FAIL("eval: Divide by zero at position %d\n%s\n%*.s^\n", tokens[p].bo, expression, tokens[p].bo, "");
+      return lhs / rhs;
     default: panic("eval: Invalid oeprator");
     }
   }
