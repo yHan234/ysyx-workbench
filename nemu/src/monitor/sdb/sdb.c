@@ -19,8 +19,6 @@
 #include <readline/history.h>
 #include "sdb.h"
 
-#include <errno.h>
-
 static int is_batch_mode = false;
 
 void init_regex();
@@ -49,22 +47,9 @@ static int cmd_c(char *args) {
   return 0;
 }
 
-static int cmd_q(char *args) {
-  nemu_state.state = NEMU_QUIT;
-  return -1;
-}
 
-static int cmd_si(char *args) {
-  char *arg = strtok(NULL, " ");
-  unsigned long long num_steps;
-  if (!arg) {
-    num_steps = 1;
-  } else {
-    num_steps = strtoull(arg, NULL, 0);
-  }
-  printf("step %lld instruction(s)\n", num_steps);
-  cpu_exec(num_steps);
-  return 0;
+static int cmd_q(char *args) {
+  return -1;
 }
 
 static int cmd_help(char *args);
@@ -77,7 +62,6 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  { "si", "Step instruction. Usage: si num_steps(decimal/octal/hexadecimal)(unsigned 64 bits)", cmd_si },
 
   /* TODO: Add more commands */
 
