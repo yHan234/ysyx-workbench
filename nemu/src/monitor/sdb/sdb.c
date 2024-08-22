@@ -19,6 +19,8 @@
 #include <readline/history.h>
 #include "sdb.h"
 
+#include <errno.h>
+
 static int is_batch_mode = false;
 
 void init_regex();
@@ -55,6 +57,10 @@ static int cmd_q(char *args) {
 static int cmd_si(char *args) {
   char **endptr = NULL;
   unsigned long long num_steps = strtoull(args, endptr, 0);
+  if (errno || **endptr != 0) {
+    errno = 0;
+    puts("Usage: si num_steps(decimal/octal/hexadecimal)(unsigned 64 bits)");
+  }
   cpu_exec(num_steps);
   return 0;
 }
@@ -69,7 +75,7 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  { "si", "Step instruction", cmd_si },
+  { "si", "Step instruction. Usage: si num_steps(decimal/octal/hexadecimal)(unsigned 64 bits)", cmd_si },
 
   /* TODO: Add more commands */
 
