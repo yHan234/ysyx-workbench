@@ -17,6 +17,7 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <memory/vaddr.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
@@ -97,10 +98,8 @@ static int cmd_x(char *args) {
     return 0;
   }
 
-  printf("%lu\n", expr);
-
-  for (int i = 0; i < n; ++i) {
-
+  for (uint64_t i = 0; i < n; ++i) {
+    printf("0x%08lx\t\t0x%08x\n", expr + i * 32, vaddr_read(expr, 4));
   }
 
   return 0;
