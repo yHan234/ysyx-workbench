@@ -60,15 +60,11 @@ static int cmd_si(char *args) {
   if (!arg) {
     num_steps = 1;
   } else {
-    errno = 0;
     num_steps = strtoull(arg, NULL, 0);
-    if (errno) {
-      errno = 0;
-      puts("Usage: si num_steps(decimal/octal/hexadecimal)(unsigned 64 bits)");
-      return 0;
+    if (num_steps == 0) {
+      puts("Warning: arg is parsed as 0.");
     }
   }
-  Log("%lld", num_steps);
   cpu_exec(num_steps);
   return 0;
 }
