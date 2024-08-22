@@ -64,6 +64,8 @@ static int cmd_si(char *args) {
   }
   if (*end != 0) {
     printf("*end != 0");
+  } else {
+    printf("*end == 0");
   }
   printf("step %lu instruction(s)\n", num_steps);
   cpu_exec(num_steps);
