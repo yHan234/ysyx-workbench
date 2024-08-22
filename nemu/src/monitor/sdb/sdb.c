@@ -55,13 +55,14 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_si(char *args) {
+  char *arg = strtok(args, " ");
   unsigned long long num_steps;
-  if (!args) {
+  if (!arg) {
     num_steps = 1;
   } else {
-    char **endptr = NULL;
-    num_steps = strtoull(args, endptr, 0);
-    if (errno || **endptr != 0) {
+    num_steps = strtoull(arg, NULL, 0);
+    errno = 0;
+    if (errno) {
       errno = 0;
       puts("Usage: si num_steps(decimal/octal/hexadecimal)(unsigned 64 bits)");
       return 0;
