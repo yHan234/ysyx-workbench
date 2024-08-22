@@ -83,18 +83,18 @@ static int cmd_info(char *args) {
 static int cmd_x(char *args) {
   char *arg_n = strtok(NULL, " ");
   char *arg_expr = strtok(NULL, " ");
-  char **endptr = NULL;
+  char *endptr = NULL;
 
-  uint64_t n = strtoul(arg_n, endptr, 0);
+  uint64_t n = strtoul(arg_n, &endptr, 0);
   printf("%ld", n);
-  if (**endptr) {
+  if (*endptr) {
     puts("Invalid arg N");
     return 0;
   }
 
   // TODO: 表达式求值
-  uint64_t expr = strtoul(arg_expr, endptr, 0);
-  if (**endptr) {
+  uint64_t expr = strtoul(arg_expr, &endptr, 0);
+  if (*endptr) {
     puts("Invalid arg EXPR");
     return 0;
   }
