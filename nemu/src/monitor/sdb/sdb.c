@@ -65,6 +65,20 @@ static int cmd_si(char *args) {
   return 0;
 }
 
+static int cmd_info(char *args) {
+  char *arg = strtok(NULL, " ");
+  if (strlen(arg) != 1) {
+    puts("Usage: info r/w");
+  } else if (arg[0] == 'r') {
+    isa_reg_display();
+  } else if (arg[0] == 'w') {
+
+  } else {
+    puts("Usage: info r/w");
+  }
+  return -1;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -75,7 +89,8 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  { "si", "Step instruction. Usage: si N(decimal/octal/hexadecimal)(unsigned 64 bits)", cmd_si },
+  { "si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si },
+  { "info", "Print register or watchpoint information. Usage: info r/w", cmd_info },
 
   /* TODO: Add more commands */
 
