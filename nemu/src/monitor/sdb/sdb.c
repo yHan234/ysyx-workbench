@@ -76,7 +76,7 @@ static int cmd_info(char *args) {
   } else {
     puts("Usage: info r/w");
   }
-  return -1;
+  return 0;
 }
 
 static int cmd_help(char *args);
