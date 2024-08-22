@@ -59,9 +59,6 @@ static int cmd_si(char *args) {
     num_steps = 1;
   } else {
     num_steps = strtoull(arg, NULL, 0);
-    if (num_steps == 0) {
-      puts("Warning: arg is parsed as 0.");
-    }
   }
   printf("step %lld instruction(s)\n", num_steps);
   cpu_exec(num_steps);
