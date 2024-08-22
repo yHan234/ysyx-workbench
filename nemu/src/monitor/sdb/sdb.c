@@ -60,7 +60,7 @@ static int cmd_si(char *args) {
   } else {
     num_steps = strtoull(arg, NULL, 0);
   }
-  printf("step %ld instruction(s)\n", num_steps);
+  printf("step %lu instruction(s)\n", num_steps);
   cpu_exec(num_steps);
   return 0;
 }
