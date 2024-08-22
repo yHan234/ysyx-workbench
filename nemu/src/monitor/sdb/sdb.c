@@ -86,6 +86,7 @@ static int cmd_x(char *args) {
   char **endptr = NULL;
 
   uint64_t n = strtoul(arg_n, endptr, 0);
+  printf("%ld", n);
   if (**endptr) {
     puts("Invalid arg N");
     return 0;
