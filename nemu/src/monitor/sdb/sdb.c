@@ -17,6 +17,7 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <memory/vaddr.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
@@ -58,7 +59,7 @@ static int cmd_si(char *args) {
   if (!arg) {
     num_steps = 1;
   } else {
-    num_steps = strtoull(arg, NULL, 0);
+    num_steps = strtoul(arg, NULL, 0);
   }
   printf("step %lu instruction(s)\n", num_steps);
   cpu_exec(num_steps);
@@ -79,6 +80,32 @@ static int cmd_info(char *args) {
   return 0;
 }
 
+static int cmd_x(char *args) {
+  char *arg_n = strtok(NULL, " ");
+  char *arg_expr = strtok(NULL, " ");
+  char *endptr = NULL;
+
+  uint64_t n = strtoul(arg_n, &endptr, 0);
+  if (*endptr) {
+    puts("Invalid arg N");
+    return 0;
+  }
+
+  // TODO: 表达式求值
+  uint64_t expr = strtoul(arg_expr, &endptr, 0);
+  if (*endptr) {
+    puts("Invalid arg EXPR");
+    return 0;
+  }
+
+  for (uint64_t i = 0; i < n; ++i) {
+    vaddr_t addr = expr + i * 4;
+    printf("0x%08x\t\t0x%08x\n", addr, vaddr_read(addr, 4));
+  }
+
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -91,6 +118,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si },
   { "info", "Print register or watchpoint information. Usage: info r/w", cmd_info },
+  { "x", "Scann N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
 
   /* TODO: Add more commands */
 
