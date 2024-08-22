@@ -63,7 +63,7 @@ static int cmd_si(char *args) {
   } else {
     num_steps = strtoul(arg, NULL, 0);
     if (errno == ERANGE) {
-      printf("too large");
+      printf("too large\n");
       return 0;
     }
   }
