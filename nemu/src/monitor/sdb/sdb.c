@@ -55,11 +55,15 @@ static int cmd_q(char *args) {
 
 static int cmd_si(char *args) {
   char *arg = strtok(NULL, " ");
+  char *end = NULL;
   uint64_t  num_steps;
   if (!arg) {
     num_steps = 1;
   } else {
-    num_steps = strtoul(arg, NULL, 0);
+    num_steps = strtoul(arg, &end, 0);
+  }
+  if (*end != 0) {
+    printf("*end != 0");
   }
   printf("step %lu instruction(s)\n", num_steps);
   cpu_exec(num_steps);
