@@ -86,7 +86,6 @@ static int cmd_x(char *args) {
   char *endptr = NULL;
 
   uint64_t n = strtoul(arg_n, &endptr, 0);
-  printf("%ld", n);
   if (*endptr) {
     puts("Invalid arg N");
     return 0;
@@ -100,7 +99,8 @@ static int cmd_x(char *args) {
   }
 
   for (uint64_t i = 0; i < n; ++i) {
-    printf("0x%08lx\t\t0x%08x\n", expr + i * 32, vaddr_read(expr, 4));
+    vaddr_t addr = expr + i * 32;
+    printf("0x%08x\t\t0x%08x\n", addr, vaddr_read(addr, 4));
   }
 
   return 0;
