@@ -285,6 +285,10 @@ static word_t eval(bool *success, int bo, int eo) {
   }
 }
 
+#undef EVAL_FAIL
+#undef INDICATE_FMT
+#undef INDICATE_EXPR_ARG
+
 word_t expr(char *e, bool *success) {
   *success = true;
   if (!make_token(e)) {
@@ -293,7 +297,3 @@ word_t expr(char *e, bool *success) {
   }
   return eval(success, 0, nr_token);
 }
-
-#undef EVAL_FAIL
-#undef INDICATE_FMT
-#undef INDICATE_EXPR_ARG
