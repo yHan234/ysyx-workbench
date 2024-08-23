@@ -224,12 +224,15 @@ word_t eval(bool *success, int bo, int eo) {
   } else {
     // divide and conquer
 
-    // find the lowest priority binary operator
+    // find the last lowest priority binary operator
+    // 1. 正序寻找，方便判断一元运算符
+    // 2. 先找最低优先级的二元运算符，高优先级的会先递归执行
+    // 3. 同优先级找右边的二元运算符，左边的会先递归执行
     int p = -1;
     enum OP op = OP_NOOP;
     int paren_cnt = 0;
     bool may_be_unary = true;
-    for (int i = eo - 1; i >= bo; --i) {
+    for (int i = bo; i < eo; ++i) {
       if (tokens[i].type == TK_INT) {
         may_be_unary = false;
         continue;
@@ -240,13 +243,13 @@ word_t eval(bool *success, int bo, int eo) {
         may_be_unary = true;
       } else if (cur_op == OP_MUL || cur_op == OP_DIV) {
         may_be_unary = true;
-        if (!paren_cnt && p == -1) {
+        if (!paren_cnt && (p == -1 || cur_op == OP_MUL || cur_op == OP_DIV)) {
           p = i;
           op = cur_op;
         }
       } else if (cur_op == OP_ADD || cur_op == OP_SUB) {
         may_be_unary = true;
-        if (!paren_cnt && (p == -1 || op == OP_MUL || op == OP_DIV)) {
+        if (!paren_cnt && (p == -1 || op == OP_MUL || op == OP_DIV || op == OP_ADD || op == OP_SUB)) {
           p = i;
           op = cur_op;
         }
