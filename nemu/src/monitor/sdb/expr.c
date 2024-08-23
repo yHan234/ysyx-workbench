@@ -117,7 +117,7 @@ static bool make_token(char *e) {
             tokens[nr_token].type = rules[i].token_type;
             memcpy(tokens[nr_token].str, e + position, pmatch.rm_eo);
             tokens[nr_token].str[pmatch.rm_eo] = '\0';
-            tokens[nr_token].bo = i;
+            tokens[nr_token].bo = position;
             nr_token += 1;
         }
 
