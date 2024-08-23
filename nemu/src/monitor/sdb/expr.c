@@ -249,7 +249,7 @@ word_t eval(bool *success, int bo, int eo) {
         }
       } else if (cur_op == OP_MUL || cur_op == OP_DIV) {
         may_be_unary = true;
-        if (!paren_cnt && (p == -1 || cur_op == OP_MUL || cur_op == OP_DIV)) {
+        if (!paren_cnt && (p == -1 || op == OP_MUL || op == OP_DIV)) {
           p = i;
           op = cur_op;
         }
