@@ -229,7 +229,7 @@ word_t eval(bool *success, int bo, int eo) {
     enum OP op = OP_NOOP;
     int paren_cnt = 0;
     bool may_be_unary = true;
-    for (int i = bo; i < eo; ++i) {
+    for (int i = eo - 1; i >= bo; --i) {
       if (tokens[i].type == TK_INT) {
         may_be_unary = false;
         continue;
