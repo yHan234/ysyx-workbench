@@ -106,7 +106,7 @@ static bool make_token(char *e) {
         switch (rules[i].token_type) {
           case TK_NOTYPE: break;
           default:
-            if (nr_token == 32) {
+            if (nr_token == 65536) {
               puts("Too many tokens!\n");
               return false;
             }
