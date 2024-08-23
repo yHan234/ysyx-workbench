@@ -35,18 +35,18 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-  {"\\s+",              TK_NOTYPE},
-  {"\\$\\w+|\\$\\$0",   TK_REG},
-  {"(0x)?[0-9]+u?",     TK_INT},
-  {"\\(",               TK_LPAREN},
-  {"\\)",               TK_RPAREN},
-  {"\\+",               TK_PLUS},
-  {"-",                 TK_MINUS},
-  {"\\*",               TK_STAR},
-  {"/",                 TK_DIV},
-  {"==",                TK_EQ},
-  {"!=",                TK_NE},
-  {"&&",                TK_ANDAND},
+  {"\\s+",              TK_NOTYPE },
+  {"\\$\\w+|\\$\\$0",   TK_REG    },
+  {"(0x)?[0-9]+u?",     TK_INT    },
+  {"\\(",               TK_LPAREN },
+  {"\\)",               TK_RPAREN },
+  {"\\+",               TK_PLUS   },
+  {"-",                 TK_MINUS  },
+  {"\\*",               TK_STAR   },
+  {"/",                 TK_DIV    },
+  {"==",                TK_EQ     },
+  {"!=",                TK_NE     },
+  {"&&",                TK_ANDAND },
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -171,6 +171,7 @@ static word_t tk_to_int(Token tk, bool *success) {
 }
 
 static word_t tk_reg_get(Token tk, bool *success) {
+  if (!tk_is_reg(tk)) { success = false; return 0; }
   bool local_success = true;
   wchar_t num = isa_reg_str2val(tk.str + 1, &local_success);
   if (!local_success) {
@@ -215,7 +216,7 @@ static word_t eval(bool *success, int bo, int eo) {
     bool may_be_unary = true;
     for (int i = bo; i < eo; ++i) {
       Token tk = tokens[i];
-      if (tk_is_int(tk)) {
+      if (tk_is_terminal(tk)) {
         may_be_unary = false;
       } else if (tk_is_rparen(tk)) {
         paren_cnt -= 1;
