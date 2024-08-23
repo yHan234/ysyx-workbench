@@ -42,10 +42,11 @@ word_t expr(char *e, bool *success);
 
 void test_expr() {
   FILE *fp = fopen("input", "r");
+  int passed = 0;
 
   while (1) {
     word_t std;
-    Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
+    if (!fscanf(fp, "%u", &std)) break;
     printf("std: %d\n", std);
 
     char *e = NULL;
@@ -58,5 +59,7 @@ void test_expr() {
     Assert(success, "Eval faild");
     Assert(ans == std, "Wrong answer: std = %u, ans = %u\n", std, ans);
     printf("Accepted\n");
+
+    passed += 1;
   }
 }
