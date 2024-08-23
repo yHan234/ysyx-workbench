@@ -56,7 +56,7 @@ void test_expr() {
 
     bool success;
     word_t ans = expr(e, &success);
-    Assert(success, "Eval faild");
+    Assert(success, "Eval fail");
     Assert(ans == std, "Wrong answer: std = %u, ans = %u\n", std, ans);
     printf("Accepted\n");
 

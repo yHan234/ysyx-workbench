@@ -21,12 +21,10 @@
  */
 #include <regex.h>
 
-enum {
-  TK_NOTYPE = 256, TK_EQ, TK_INT
+#include <memory/vaddr.h>
 
-  /* Add more token types */
-
-};
+#include "token.h"
+#include "operator.h"
 
 static struct rule {
   const char *regex;
@@ -37,15 +35,18 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-  {"\\s+", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
-  {"-", '-'},           // minus
-  {"\\*", '*'},         // multiplication
-  {"/", '/'},           // division
-  {"==", TK_EQ},        // equal
-  {"\\(", '('},         // left parenthesis
-  {"\\)", ')'},         // right parenthesis
-  {"[0-9]+u?", TK_INT},   // decimal integers
+  {"\\s+",              TK_NOTYPE },
+  {"\\$\\w+|\\$\\$0",   TK_REG    },
+  {"(0x)?[0-9]+u?",     TK_INT    },
+  {"\\(",               TK_LPAREN },
+  {"\\)",               TK_RPAREN },
+  {"\\+",               TK_PLUS   },
+  {"-",                 TK_MINUS  },
+  {"\\*",               TK_STAR   },
+  {"/",                 TK_DIV    },
+  {"==",                TK_EQ     },
+  {"!=",                TK_NE     },
+  {"&&",                TK_ANDAND },
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -69,23 +70,14 @@ void init_regex() {
   }
 }
 
-typedef struct token {
-  int type;
-  char str[32];
-  int bo;
-} Token;
-
 static Token tokens[65536] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
-
-static char *expression;
 
 static bool make_token(char *e) {
   int position = 0;
   int i;
   regmatch_t pmatch;
 
-  expression = e;
   nr_token = 0;
 
   while (e[position] != '\0') {
@@ -117,7 +109,7 @@ static bool make_token(char *e) {
             tokens[nr_token].type = rules[i].token_type;
             memcpy(tokens[nr_token].str, e + position, pmatch.rm_eo);
             tokens[nr_token].str[pmatch.rm_eo] = '\0';
-            tokens[nr_token].bo = position;
+            tokens[nr_token].pos = position;
             nr_token += 1;
         }
 
@@ -136,52 +128,16 @@ static bool make_token(char *e) {
   return true;
 }
 
-// evaluate
-
-enum OP{
-  OP_NOOP,
-
-  // list by priority
-  OP_ADD,
-  OP_SUB,
-  OP_MUL,
-  OP_DIV,
-  OP_POS,
-  OP_NEG,
-
-  // special operation
-  OP_LPAREN,
-  OP_RPAREN,
-};
-
-enum OP token_to_op(Token token, bool may_be_unary) {
-
-  if (token.type == '+' && may_be_unary) return OP_POS;
-  if (token.type == '-' && may_be_unary) return OP_NEG;
-
-  if (token.type == '+') return OP_ADD;
-  if (token.type == '-') return OP_SUB;
-  if (token.type == '*') return OP_MUL;
-  if (token.type == '/') return OP_DIV;
-  if (token.type == '(') return OP_LPAREN;
-  if (token.type == ')') return OP_RPAREN;
-
-  return OP_NOOP;
-}
-
-bool check_parentheses(int bo, int eo) {
-  if (token_to_op(tokens[bo], false) != OP_LPAREN || token_to_op(tokens[eo - 1], false) != OP_RPAREN) {
+static bool is_paren_paring(int bo, int eo) {
+  if (!tk_is_lparen(tokens[bo]) || !tk_is_rparen(tokens[eo - 1])) {
     return false;
   }
 
   int paren_cnt = 0;
   for (int i = bo; i < eo - 1; ++i) {
-    if (tokens[i].type == TK_INT) continue;
-
-    enum OP op = token_to_op(tokens[i], false);
-    if (op == OP_LPAREN) {
+    if (tk_is_lparen(tokens[i])) {
       paren_cnt += 1;
-    } else if (op == OP_RPAREN) {
+    } else if (tk_is_rparen(tokens[i])) {
       paren_cnt -= 1;
       if (paren_cnt == 0)
         return false;
@@ -191,113 +147,153 @@ bool check_parentheses(int bo, int eo) {
   return paren_cnt == 1;
 }
 
+// evaluate
 
-word_t eval(bool *success, int bo, int eo) {
-#define FAIL(format, ...) do { printf(format, __VA_ARGS__); *success = false; return 0; } while(0)
+#define EVAL_FAIL(format, ...) do { printf("eval: " format, __VA_ARGS__); *success = false; return 0; } while(0)
+#define INDICATE_FMT " at position %d\n%s\n%*.s^\n"
+#define INDICATE_ARG(str, pos) pos, str, pos, ""
+#define INDICATE_EXPR_ARG(pos) pos, expr_str, pos, ""
 
+static char *expr_str;
+
+static word_t tk_to_int(Token tk, bool *success) {
+  if (!tk_is_int(tk)) { success = false; return 0; }
+  errno = 0;
+  word_t num = strtoul(tk.str, NULL, 0);
+
+  if (errno == ERANGE) {
+    errno = 0;
+    EVAL_FAIL("The number is too long" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos));
+  } else {
+    Log("Terminal integer: %u" INDICATE_FMT, num, INDICATE_EXPR_ARG(tk.pos));
+    return num;
+  }
+}
+
+static word_t tk_reg_get(Token tk, bool *success) {
+  if (!tk_is_reg(tk)) { success = false; return 0; }
+  bool local_success = true;
+  wchar_t num = isa_reg_str2val(tk.str + 1, &local_success);
+  if (!local_success) {
+    EVAL_FAIL("Wrong register name %s" INDICATE_FMT, tk.str, INDICATE_EXPR_ARG(tk.pos));
+  } else {
+    Log("Terminal register: %s: 0x%08x" INDICATE_FMT, tk.str, num, INDICATE_EXPR_ARG(tk.pos));
+    return num;
+  }
+}
+
+static word_t eval(int bo, int eo, bool *success) {
   if (bo >= eo) {
     panic("eval internal error: Errors need to be caught before.");
   } else if (bo + 1 == eo) {
-    // only one token, it must be a number.
-    if (tokens[bo].type == TK_INT) {
-      errno = 0;
-      word_t num = strtoul(tokens[bo].str, NULL, 10);
-
-      if (errno == ERANGE) {
-        errno = 0;
-        FAIL("eval: The number is too long at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
-      } else {
-        Log("Terminal integer: %d at position %d\n%s\n%*.s^\n", num, tokens[bo].bo, expression, tokens[bo].bo, "");
-        return num;
-      }
+    // only one token, it must be a number or a register.
+    Token tk = tokens[bo];
+    if (tk_is_int(tk)) {
+      return tk_to_int(tk, success);
+    } else if (tk_is_reg(tk)) {
+      return tk_reg_get(tk, success);
     } else {
-      FAIL("eval: Expect a number at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+      EVAL_FAIL("Expect a number or a register" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos + 1));
     }
-  } else if (check_parentheses(bo, eo)) {
+  } else if (is_paren_paring(bo, eo)) {
     // remove the parentheses.
-    if (bo + 1 == eo - 1) FAIL("eval: Expressions should be in parentheses at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
-    Log("Enter parentheses at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
-    return eval(success, bo + 1, eo - 1);
+    Token tk = tokens[bo];
+    if (bo + 1 == eo - 1) {
+      EVAL_FAIL("Expressions should be in parentheses" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos));
+    } else {
+      Log("Enter parentheses" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos));
+      return eval(bo + 1, eo - 1, success);
+    }
   } else {
-    // divide and conquer
+    // divide and conquer:
+    // find the last lowest priority binary operator, then divide
 
-    // find the last lowest priority binary operator
-    // 1. 正序寻找，方便判断一元运算符
-    // 2. 先找最低优先级的二元运算符，高优先级的会先递归执行
-    // 3. 同优先级找右边的二元运算符，左边的会先递归执行
-    int p = -1;
-    enum OP op = OP_NOOP;
+    enum OP op = OP_NOTOP;  // the last lowest priority binary operator
+    int p = -1;             // the position of "the last lowest priority binary operator"
     int paren_cnt = 0;
     bool may_be_unary = true;
+    // 正序寻找，方便判断一元运算符
     for (int i = bo; i < eo; ++i) {
-      if (tokens[i].type == TK_INT) {
+      Token tk = tokens[i];
+      if (tk_is_terminal(tk)) {
         may_be_unary = false;
-        continue;
-      }
-
-      enum OP cur_op = token_to_op(tokens[i], may_be_unary);
-      if (cur_op == OP_POS || cur_op == OP_NEG) {
-        may_be_unary = true;
-      } else if (cur_op == OP_ADD || cur_op == OP_SUB) {
-        may_be_unary = true;
-        if (!paren_cnt && (p == -1 || op == OP_MUL || op == OP_DIV || op == OP_ADD || op == OP_SUB)) {
-          p = i;
-          op = cur_op;
-        }
-      } else if (cur_op == OP_MUL || cur_op == OP_DIV) {
-        may_be_unary = true;
-        if (!paren_cnt && (p == -1 || op == OP_MUL || op == OP_DIV)) {
-          p = i;
-          op = cur_op;
-        }
-      } else if (cur_op == OP_LPAREN) {
-        paren_cnt += 1;
-        may_be_unary = true;
-      } else if (cur_op == OP_RPAREN) {
+      } else if (tk_is_rparen(tk)) {
         paren_cnt -= 1;
         may_be_unary = false;
+      } else if (tk_is_lparen(tk)) {
+        paren_cnt += 1;
+        may_be_unary = true;
+      } else if (tk_is_op(tk)) {
+        enum OP cur_op = tk_to_op(tk, may_be_unary);
+        may_be_unary = true;  // 一元二元运算符后都可能是一元运算符
+        if (op_is_binary(cur_op)) {
+          // 不能从内层括号中的二元运算符分开
+          // 先找最低优先级的二元运算符，然后高优先级的会先递归执行
+          // 同优先级找右边的二元运算符，然后左边的会先递归执行
+          if (!paren_cnt && (p == -1 || op_precedence(cur_op) >= op_precedence(op))) {
+            p = i;
+            op = cur_op;
+          }
+        }
       }
     }
 
     // If there is no binary operator, then the beginning must be a unary operator
-    if (p == -1) {
-      op = token_to_op(tokens[bo], true);
-      Log("Process unary operator %s at position %d\n%s\n%*.s^\n", tokens[bo].str, tokens[bo].bo, expression, tokens[bo].bo, "");
-      if (op == OP_POS) {
-        return eval(success, bo + 1, eo);
-      } else if (op == OP_NEG) {
-        return ~eval(success, bo + 1, eo) + 1;
+    if (op == OP_NOTOP) {
+      Token tk = tokens[bo];
+      if (tk_is_op(tk) && op_is_unary(op = tk_to_op(tk, true))) {
+        Log("Process unary operator %s" INDICATE_FMT, tk.str, INDICATE_EXPR_ARG(tk.pos));
+        if (bo + 1 >= eo) EVAL_FAIL("Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos + 1));
+        word_t x = eval(bo + 1, eo, success), res;
+        switch (op)
+        {
+        case OP_POS   : res = x; break;
+        case OP_NEG   : res = ~x + 1; break;
+        case OP_DEREF : res = vaddr_read(x, 4); break;
+        default       : panic("eval internal error: Invalid unary operator");
+        }
+        Log("Calculate: %s%u => %u" INDICATE_FMT, tk.str, x, res, INDICATE_EXPR_ARG(tk.pos));
+        return res;
       } else {
-        FAIL("eval: Invalid expression at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+        EVAL_FAIL("Invalid expression"  INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos));
       }
     }
 
     // there is a binary operator
-    Log("Divide from binary operator %s at position %d\n%s\n%*.s^\n", tokens[p].str, tokens[p].bo, expression, tokens[p].bo, "");
-    if (bo >= p) FAIL("eval: Expect a expression at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
-    if (p + 1 >= eo) FAIL("eval: Expect a expression at position %d\n%s\n%*.s^\n", tokens[p + 1].bo, expression, tokens[p + 1].bo, "");
-    word_t lhs = eval(success, bo, p);
-    word_t rhs = eval(success, p + 1, eo);
+    Log("Divide from binary operator %s" INDICATE_FMT, tokens[p].str, INDICATE_EXPR_ARG(tokens[p].pos));
+    if (bo >= p) EVAL_FAIL("Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[bo].pos));
+    if (p + 1 >= eo) EVAL_FAIL("Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[p + 1].pos + 1));
+    word_t lhs = eval(bo, p, success), rhs, res;
     switch (op)
     {
-    case OP_ADD: return lhs + rhs;
-    case OP_SUB: return lhs - rhs;
-    case OP_MUL: return lhs * rhs;
-    case OP_DIV:
-      if (rhs == 0) FAIL("eval: Divide by zero at position %d\n%s\n%*.s^\n", tokens[p].bo, expression, tokens[p].bo, "");
-      return lhs / rhs;
-    default: panic("eval: Invalid oeprator");
+    case OP_ADD : rhs = eval(p + 1, eo, success); res = lhs + rhs; break;
+    case OP_SUB : rhs = eval(p + 1, eo, success); res = lhs - rhs; break;
+    case OP_MUL : rhs = eval(p + 1, eo, success); res = lhs * rhs; break;
+    case OP_DIV :
+      rhs = eval(p + 1, eo, success);
+      if (rhs == 0) EVAL_FAIL("Divide by zero" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[p].pos));
+      res = lhs / rhs;
+      break;
+    case OP_EQ  : rhs = eval(p + 1, eo, success); res = lhs == rhs; break;
+    case OP_NE  : rhs = eval(p + 1, eo, success); res = lhs != rhs; break;
+    case OP_LAND: res = lhs ? rhs = !!eval(p + 1, eo, success) : 0; break;
+    default: assert(0 && "Invalid operator");
     }
+    Log("Calculate: %u %s %u => %u" INDICATE_FMT, lhs, tokens[p].str, rhs, res, INDICATE_EXPR_ARG(tokens[p].pos));
+    return res;
   }
-
-#undef FAIL
 }
 
+#undef EVAL_FAIL
+#undef INDICATE_FMT
+#undef INDICATE_EXPR_ARG
+
 word_t expr(char *e, bool *success) {
+  expr_str = e;
   *success = true;
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-  return eval(success, 0, nr_token);
+  return eval(0, nr_token, success);
 }

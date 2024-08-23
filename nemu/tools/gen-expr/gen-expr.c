@@ -48,8 +48,10 @@ void gen_num() {
 }
 
 void gen_rand_bop() {
-  static char *ops = "+-*/";
-  gen(ops[rand() % 4]);
+  static char *ops[] = { "+", "-", "*", "/", "==", "!=", "&&" };
+  for (char *p = ops[rand() % 7]; *p; ++p) {
+    gen(*p);
+  }
   if (rand() % 2) gen(' ');
 }
 
@@ -60,12 +62,12 @@ void gen_rand_uop() {
 }
 
 static void gen_rand_expr(int dep) {
-  if (dep == 16) {
+  if (dep == 8) {
     gen_num();
     return;
   }
 
-  if (rand() % 100) {
+  if (rand() % 10) {
     switch (rand() % 3) {
       case 0: gen('('); gen_rand_expr(dep + 1); gen(')'); break;
       case 1: gen_rand_expr(dep + 1); gen_rand_bop(); gen_rand_expr(dep + 1); break;

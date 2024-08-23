@@ -113,6 +113,20 @@ static int cmd_x(char *args) {
   return 0;
 }
 
+static int cmd_p(char *args) {
+  char *arg_expr = strtok(NULL, "\0");
+
+  bool success = false;
+  word_t e = expr(arg_expr, &success);
+  if (!success) {
+    puts("command p: Invalid expression.");
+    return 0;
+  }
+  printf("%u\n", e);
+
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -126,6 +140,7 @@ static struct {
   { "si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si },
   { "info", "Print register or watchpoint information. Usage: info r/w", cmd_info },
   { "x", "Scann N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
+  { "p", "Print value. Usage: p EXPR", cmd_p},
 
   /* TODO: Add more commands */
 
