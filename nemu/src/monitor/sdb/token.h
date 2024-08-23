@@ -1,6 +1,8 @@
 #ifndef __MONITOR_SDB_TOKEN_H__
 #define __MONITOR_SDB_TOKEN_H__
 
+#include <stdbool.h>
+
 enum TK {
   TK_NOTYPE,
   TK_INT,
@@ -15,5 +17,15 @@ enum TK {
   TK_NE,
   TK_ANDAND
 };
+
+typedef struct token {
+  enum TK type;
+  char str[32];
+  int pos;
+} Token;
+
+bool tk_is_lparen(Token tk);
+bool tk_is_rparen(Token tk);
+bool tk_is_int(Token tk);
 
 #endif

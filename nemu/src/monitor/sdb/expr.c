@@ -67,12 +67,6 @@ void init_regex() {
   }
 }
 
-typedef struct token {
-  enum TK type;
-  char str[32];
-  int pos;
-} Token;
-
 static Token tokens[65536] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
@@ -134,14 +128,6 @@ static bool make_token(char *e) {
   return true;
 }
 
-static bool tk_is_lparen(Token tk) {
-  return tk.type == TK_LPAREN;
-}
-
-static bool tk_is_rparen(Token tk) {
-  return tk.type == TK_RPAREN;
-}
-
 static bool is_paren_paring(int bo, int eo) {
   if (tk_is_lparen(tokens[bo]) || tk_is_rparen(tokens[eo - 1])) {
     return false;
@@ -159,10 +145,6 @@ static bool is_paren_paring(int bo, int eo) {
   }
 
   return paren_cnt == 1;
-}
-
-static bool tk_is_int(Token tk) {
-  return tk.type == TK_INT;
 }
 
 // evaluate
