@@ -178,7 +178,7 @@ bool check_parentheses(int bo, int eo) {
   }
 
   int paren_cnt = 0;
-  for (int i = 0; i < eo - 1; ++i) {
+  for (int i = bo; i < eo - 1; ++i) {
     if (tokens[i].type == TK_INT) continue;
 
     enum OP op = token_to_op(tokens[i], false);
