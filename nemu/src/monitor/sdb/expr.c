@@ -225,8 +225,8 @@ static word_t eval(bool *success, int bo, int eo) {
         paren_cnt += 1;
         may_be_unary = true;
       } else if (tk_is_op(tk)) {
-        may_be_unary = true;  // 一元二元运算符后都可能是一元运算符
         enum OP cur_op = tk_to_op(tk, may_be_unary);
+        may_be_unary = true;  // 一元二元运算符后都可能是一元运算符
         if (op_is_binary(cur_op)) {
           // 不能从内层括号中的二元运算符分开
           if (!paren_cnt && (p == -1 || op_precedence(cur_op) >= op_precedence(op))) {
