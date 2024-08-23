@@ -60,7 +60,7 @@ void gen_rand_uop() {
 }
 
 static void gen_rand_expr(int dep) {
-  if (dep == 16) {
+  if (dep == 8) {
     gen_num();
     return;
   }
