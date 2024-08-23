@@ -7,8 +7,6 @@
 
 // The smaller the number, the higher the priority.
 enum OP{
-  // list by precedence
-
   // unary
   OP_POS,
   OP_NEG,

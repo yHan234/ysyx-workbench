@@ -74,10 +74,13 @@ uint32_t op_calc_u(enum OP op, uint32_t x) {
 uint32_t op_calc_b(enum OP op, uint32_t lhs, uint32_t rhs) {
   switch (op)
   {
-  case OP_ADD: return lhs + rhs;
-  case OP_SUB: return lhs - rhs;
-  case OP_MUL: return lhs * rhs;
-  case OP_DIV: return rhs == 0 ? -1 : lhs / rhs;
+  case OP_ADD : return lhs + rhs;
+  case OP_SUB : return lhs - rhs;
+  case OP_MUL : return lhs * rhs;
+  case OP_DIV : return rhs == 0 ? -1 : lhs / rhs;
+  case OP_EQ  : return lhs == rhs;
+  case OP_NE  : return lhs != rhs;
+  case OP_LAND: return lhs && rhs;
   default: assert(0 && "Invalid operator");
   }
 }

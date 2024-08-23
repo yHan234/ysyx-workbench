@@ -15,7 +15,7 @@ enum TK {
   TK_DIV,
   TK_EQ,
   TK_NE,
-  TK_ANDAND
+  TK_ANDAND,
 };
 
 typedef struct token {
