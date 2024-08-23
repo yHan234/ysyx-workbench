@@ -22,6 +22,7 @@
 #include <regex.h>
 
 #include "token.h"
+#include "operator.h"
 
 static struct rule {
   const char *regex;
@@ -149,29 +150,7 @@ static bool is_paren_paring(int bo, int eo) {
 
 // evaluate
 
-enum OP{
-  // list by precedence
 
-  // unary
-  OP_POS,
-  OP_NEG,
-  OP_DEREF,
-
-  // binary
-  OP_MUL,
-  OP_DIV,
-
-  OP_ADD,
-  OP_SUB,
-
-  OP_EQ,
-  OP_NE,
-
-  OP_LAND,  // logical and
-
-  // not an operator
-  OP_NOTOP,
-};
 
 // static bool op_is_unary(enum OP op) {
 //   return op <= OP_DEREF;
