@@ -47,7 +47,8 @@ void test_expr() {
   Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
 
   char *e;
-  Assert(getline(&e, NULL, fp) != -1, "read expr fail");
+  size_t sz;
+  Assert(getline(&e, &sz, fp) != -1, "read expr fail");
 
   bool success = false;
   word_t ans = expr(e, &success);
