@@ -241,6 +241,7 @@ static word_t eval(bool *success, int bo, int eo) {
     if (op == OP_NOTOP) {
       if (tk_is_op(tokens[bo]) && op_is_unary(op = tk_to_op(tokens[bo], true))) {
         Log("Process unary operator %s" INDICATE_TK_FMT, tokens[bo].str, INDICATE_TK_ARG(tokens[bo]));
+        if (bo + 1 >= eo) FAIL("eval: Expect a expression" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
         word_t x = eval(success, bo + 1, eo), res;
         switch (op)
         {
