@@ -130,7 +130,7 @@ static bool make_token(char *e) {
 }
 
 static bool is_paren_paring(int bo, int eo) {
-  if (tk_is_lparen(tokens[bo]) || tk_is_rparen(tokens[eo - 1])) {
+  if (!tk_is_lparen(tokens[bo]) || !tk_is_rparen(tokens[eo - 1])) {
     return false;
   }
 
