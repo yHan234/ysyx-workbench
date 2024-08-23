@@ -21,6 +21,8 @@
  */
 #include <regex.h>
 
+#include <memory/vaddr.h>
+
 #include "token.h"
 #include "operator.h"
 
@@ -224,8 +226,14 @@ static word_t eval(bool *success, int bo, int eo) {
     if (op == OP_NOTOP) {
       if (tk_is_op(tokens[bo]) && op_is_unary(op = tk_to_op(tokens[bo], true))) {
         Log("Process unary operator %s" INDICATE_TK_FMT, tokens[bo].str, INDICATE_TK_ARG(tokens[bo]));
-        word_t x = eval(success, bo + 1, eo);
-        word_t res = op_calc_u(op, x);
+        word_t x = eval(success, bo + 1, eo), res;
+        switch (op)
+        {
+        case OP_POS   : res = x; break;
+        case OP_NEG   : res = ~x + 1; break;
+        case OP_DEREF : res = vaddr_read(x, 4); break;
+        default       : panic("eval: Invalid unary operator");
+        }
         Log("Calculate: %s%u => %u" INDICATE_TK_FMT, tokens[bo].str, x, res, INDICATE_TK_ARG(tokens[bo]));
         return res;
       } else {
@@ -237,15 +245,24 @@ static word_t eval(bool *success, int bo, int eo) {
     Log("Divide from binary operator %s" INDICATE_TK_FMT, tokens[p].str, INDICATE_TK_ARG(tokens[p]));
     if (bo >= p) FAIL("eval: Expect a expression" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
     if (p + 1 >= eo) FAIL("eval: Expect a expression" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[p + 1]));
-    word_t lhs = eval(success, bo, p);
-    word_t rhs = eval(success, p + 1, eo);
-    if (op == OP_DIV && rhs == 0) {
-      FAIL("eval: Divide by zero at position %d\n%s\n%*.s^\n", tokens[p].pos, expression, tokens[p].pos, "");
-    } else {
-      word_t res = op_calc_b(op, lhs, rhs);
-      Log("Calculate: %u %s %u => %u" INDICATE_TK_FMT, lhs, tokens[p].str, rhs, res, INDICATE_TK_ARG(tokens[p]));
-      return res;
+    word_t lhs = eval(success, bo, p), rhs, res;
+    switch (op)
+    {
+    case OP_ADD : rhs = eval(success, p + 1, eo); res = lhs + rhs; break;
+    case OP_SUB : rhs = eval(success, p + 1, eo); res = lhs - rhs; break;
+    case OP_MUL : rhs = eval(success, p + 1, eo); res = lhs * rhs; break;
+    case OP_DIV :
+      rhs = eval(success, p + 1, eo);
+      if (rhs == 0) FAIL("eval: Divide by zero" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[p]));
+      res = lhs / rhs;
+      break;
+    case OP_EQ  : rhs = eval(success, p + 1, eo); res = lhs == rhs; break;
+    case OP_NE  : rhs = eval(success, p + 1, eo); res = lhs != rhs; break;
+    case OP_LAND: res = lhs ? rhs = eval(success, p + 1, eo) : 0; break;
+    default: assert(0 && "Invalid operator");
     }
+    Log("Calculate: %u %s %u => %u" INDICATE_TK_FMT, lhs, tokens[p].str, rhs, res, INDICATE_TK_ARG(tokens[p]));
+    return res;
   }
 }
 
