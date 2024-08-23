@@ -43,15 +43,18 @@ word_t expr(char *e, bool *success);
 void test_expr() {
   FILE *fp = popen("tools/gen-expr/build/gen-expr", "r");
 
-  word_t std;
-  Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
+  while (1) {
+    word_t std;
+    Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
 
-  char *e;
-  size_t sz;
-  Assert(getline(&e, &sz, fp) != -1, "read expr fail");
+    char *e;
+    size_t sz;
+    Assert(getline(&e, &sz, fp) != -1, "read expr fail");
 
-  bool success = false;
-  word_t ans = expr(e, &success);
+    bool success = false;
+    word_t ans = expr(e, &success);
 
-  Assert(ans == std, "Wrong answer: std = %u, ans = %u\n", std, ans);
+    Assert(ans == std, "Wrong answer: std = %u, ans = %u\n", std, ans);
+    printf("Accepted\n");
+  }
 }
