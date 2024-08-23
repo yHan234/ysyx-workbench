@@ -165,7 +165,7 @@ static word_t tk_to_int(Token tk, bool *success) {
     errno = 0;
     FAIL("eval: The number is too long at position" INDICATE_TK_FMT, INDICATE_TK_ARG(tk));
   } else {
-    Log("Terminal integer: %d at position" INDICATE_TK_FMT, num, INDICATE_TK_ARG(tk));
+    Log("Terminal integer: %u at position" INDICATE_TK_FMT, num, INDICATE_TK_ARG(tk));
     return num;
   }
 }
