@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 word_t expr(char *e, bool *success);
 
 void test_expr() {
-  FILE *fp = fopen("tools/gen-expr/input", "r");
+  FILE *fp = fopen("input", "r");
 
   while (1) {
     word_t std;
