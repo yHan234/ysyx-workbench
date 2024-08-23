@@ -166,7 +166,7 @@ enum OP token_to_op(Token token, bool may_be_unary) {
   if (token.type == '(') return OP_LPAREN;
   if (token.type == ')') return OP_RPAREN;
 
-  panic("Unexpected token at position %d\n%s\n%*.s^\n", token.bo, expression, token.bo, "");
+  panic("Unexpected token \"%s\" at position %d\n%s\n%*.s^\n", token.str, token.bo, expression, token.bo, "");
 }
 
 bool check_parentheses(int bo, int eo) {
