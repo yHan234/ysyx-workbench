@@ -153,8 +153,9 @@ static bool is_paren_paring(int bo, int eo) {
 // evaluate
 
 #define FAIL(format, ...) do { printf(format, __VA_ARGS__); *success = false; return 0; } while(0)
-#define INDICATE_TK_FMT " at position %d\n%s\n%*.s^\n"
-#define INDICATE_TK_ARG(tk) tk.pos, expression, tk.pos, ""
+#define INDICATE_FMT " at position %d\n%s\n%*.s^\n"
+#define INDICATE_ARG(str, pos) pos, str, pos, ""
+#define INDICATE_EXPR_ARG(pos) pos, expression, pos, ""
 
 static word_t tk_to_int(Token tk, bool *success) {
   if (!tk_is_int(tk)) { success = false; return 0; }
@@ -163,9 +164,9 @@ static word_t tk_to_int(Token tk, bool *success) {
 
   if (errno == ERANGE) {
     errno = 0;
-    FAIL("eval: The number is too long" INDICATE_TK_FMT, INDICATE_TK_ARG(tk));
+    FAIL("eval: The number is too long" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos));
   } else {
-    Log("Terminal integer: %u" INDICATE_TK_FMT, num, INDICATE_TK_ARG(tk));
+    Log("Terminal integer: %u" INDICATE_FMT, num, INDICATE_EXPR_ARG(tk.pos));
     return num;
   }
 }
@@ -175,9 +176,9 @@ static word_t tk_reg_get(Token tk, bool *success) {
   bool local_success = true;
   wchar_t num = isa_reg_str2val(tk.str + 1, &local_success);
   if (!local_success) {
-    FAIL("eval: Wrong register name %s" INDICATE_TK_FMT, tk.str, INDICATE_TK_ARG(tk));
+    FAIL("eval: Wrong register name %s" INDICATE_FMT, tk.str, INDICATE_EXPR_ARG(tk.pos));
   } else {
-    Log("Terminal register: %s: 0x%08x" INDICATE_TK_FMT, tk.str, num, INDICATE_TK_ARG(tk));
+    Log("Terminal register: %s: 0x%08x" INDICATE_FMT, tk.str, num, INDICATE_EXPR_ARG(tk.pos));
     return num;
   }
 }
@@ -193,14 +194,14 @@ static word_t eval(bool *success, int bo, int eo) {
     } else if (tk_is_reg(tk)) {
       return tk_reg_get(tk, success);
     } else {
-      FAIL("eval: Expect a number or a register" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
+      FAIL("eval: Expect a number or a register" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos + 1));
     }
   } else if (is_paren_paring(bo, eo)) {
     // remove the parentheses.
     if (bo + 1 == eo - 1) {
-      FAIL("eval: Expressions should be in parentheses" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
+      FAIL("eval: Expressions should be in parentheses" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[bo].pos));
     } else {
-      Log("Enter parentheses" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
+      Log("Enter parentheses" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[bo].pos));
       return eval(success, bo + 1, eo - 1);
     }
   } else {
@@ -240,8 +241,8 @@ static word_t eval(bool *success, int bo, int eo) {
     // If there is no binary operator, then the beginning must be a unary operator
     if (op == OP_NOTOP) {
       if (tk_is_op(tokens[bo]) && op_is_unary(op = tk_to_op(tokens[bo], true))) {
-        Log("Process unary operator %s" INDICATE_TK_FMT, tokens[bo].str, INDICATE_TK_ARG(tokens[bo]));
-        if (bo + 1 >= eo) FAIL("eval: Expect a expression" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
+        Log("Process unary operator %s" INDICATE_FMT, tokens[bo].str, INDICATE_EXPR_ARG(tokens[bo].pos));
+        if (bo + 1 >= eo) FAIL("eval: Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[bo].pos + 1));
         word_t x = eval(success, bo + 1, eo), res;
         switch (op)
         {
@@ -250,17 +251,17 @@ static word_t eval(bool *success, int bo, int eo) {
         case OP_DEREF : res = vaddr_read(x, 4); break;
         default       : panic("eval: Invalid unary operator");
         }
-        Log("Calculate: %s%u => %u" INDICATE_TK_FMT, tokens[bo].str, x, res, INDICATE_TK_ARG(tokens[bo]));
+        Log("Calculate: %s%u => %u" INDICATE_FMT, tokens[bo].str, x, res, INDICATE_EXPR_ARG(tokens[bo].pos));
         return res;
       } else {
-        FAIL("eval: Invalid expression"  INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
+        FAIL("eval: Invalid expression"  INDICATE_FMT, INDICATE_EXPR_ARG(tokens[bo].pos));
       }
     }
 
     // there is a binary operator
-    Log("Divide from binary operator %s" INDICATE_TK_FMT, tokens[p].str, INDICATE_TK_ARG(tokens[p]));
-    if (bo >= p) FAIL("eval: Expect a expression" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
-    if (p + 1 >= eo) FAIL("eval: Expect a expression" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[p + 1]));
+    Log("Divide from binary operator %s" INDICATE_FMT, tokens[p].str, INDICATE_EXPR_ARG(tokens[p].pos));
+    if (bo >= p) FAIL("eval: Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[bo].pos));
+    if (p + 1 >= eo) FAIL("eval: Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[p + 1].pos + 1));
     word_t lhs = eval(success, bo, p), rhs, res;
     switch (op)
     {
@@ -269,7 +270,7 @@ static word_t eval(bool *success, int bo, int eo) {
     case OP_MUL : rhs = eval(success, p + 1, eo); res = lhs * rhs; break;
     case OP_DIV :
       rhs = eval(success, p + 1, eo);
-      if (rhs == 0) FAIL("eval: Divide by zero" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[p]));
+      if (rhs == 0) FAIL("eval: Divide by zero" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[p].pos));
       res = lhs / rhs;
       break;
     case OP_EQ  : rhs = eval(success, p + 1, eo); res = lhs == rhs; break;
@@ -277,7 +278,7 @@ static word_t eval(bool *success, int bo, int eo) {
     case OP_LAND: res = lhs ? rhs = !!eval(success, p + 1, eo) : 0; break;
     default: assert(0 && "Invalid operator");
     }
-    Log("Calculate: %u %s %u => %u" INDICATE_TK_FMT, lhs, tokens[p].str, rhs, res, INDICATE_TK_ARG(tokens[p]));
+    Log("Calculate: %u %s %u => %u" INDICATE_FMT, lhs, tokens[p].str, rhs, res, INDICATE_EXPR_ARG(tokens[p].pos));
     return res;
   }
 }
@@ -292,5 +293,5 @@ word_t expr(char *e, bool *success) {
 }
 
 #undef FAIL
-#undef INDICATE_TK_FMT
-#undef INDICATE_TK_ARG
+#undef INDICATE_FMT
+#undef INDICATE_EXPR_ARG
