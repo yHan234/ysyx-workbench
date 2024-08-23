@@ -199,7 +199,7 @@ word_t eval(bool *success, int bo, int eo) {
 #define FAIL(format, ...) do { printf(format, __VA_ARGS__); *success = false; return 0; } while(0)
 
   if (bo >= eo) {
-    panic("eval: The algorithm is buggy.");
+    panic("eval internal error: Errors need to be caught before.");
   } else if (bo + 1 == eo) {
     // only one token, it must be a number.
     if (tokens[bo].type == TK_INT) {
@@ -277,6 +277,8 @@ word_t eval(bool *success, int bo, int eo) {
 
     // there is a binary operator
     Log("Divide from binary operator %s at position %d\n%s\n%*.s^\n", tokens[p].str, tokens[p].bo, expression, tokens[p].bo, "");
+    if (bo >= p) FAIL("eval: Expect a expression at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+    if (p + 1 >= eo) FAIL("eval: Expect a expression at position %d\n%s\n%*.s^\n", tokens[p + 1].bo, expression, tokens[p + 1].bo, "");
     word_t lhs = eval(success, bo, p);
     word_t rhs = eval(success, p + 1, eo);
     switch (op)
