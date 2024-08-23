@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <errno.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -74,7 +75,7 @@ typedef struct token {
   int bo;
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[65536] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static char *expression;
@@ -197,12 +198,13 @@ word_t eval(bool *success, int bo, int eo) {
   } else if (bo + 1 == eo) {
     // only one token, it must be a number.
     if (tokens[bo].type == TK_INT) {
-      char *endptr = NULL;
-      word_t num = strtoul(tokens[bo].str, &endptr, 10);
+      errno = 0;
+      word_t num = strtoul(tokens[bo].str, NULL, 10);
 
-      if (*endptr == '\0') return num;
-      else
+      if (errno == ERANGE) {
+        errno = 0;
         FAIL("eval: The number is too long at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+      } else return num;
     } else {
       FAIL("eval: Expect a number at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
     }

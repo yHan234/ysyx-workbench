@@ -96,15 +96,8 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr > /tmp/gen-expr.log 2>&1");
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr -Werror");
     if (ret != 0) continue;
-
-    fp = fopen("/tmp/gen-expr.log", "r");
-    fseek(fp, 0, SEEK_END);
-    if (ftell(fp) != 0) {
-      i--;
-      continue;
-    }
 
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);

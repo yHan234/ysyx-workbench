@@ -38,6 +38,19 @@ int main(int argc, char *argv[]) {
   return is_exit_status_bad();
 }
 
+word_t expr(char *e, bool *success);
+
 void test_expr() {
-  // fp = fopen("/tmp/gen-expr.log", "r");
+  FILE *fp = popen("tools/gen-expr", "r");
+
+  word_t std;
+  Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
+
+  char *e;
+  Assert(getline(&e, NULL, fp) != -1, "read expr fail");
+
+  bool success = false;
+  word_t ans = expr(e, &success);
+
+  Assert(ans == std, "Wrong answer: std = %u, ans = %u\n", std, ans);
 }
