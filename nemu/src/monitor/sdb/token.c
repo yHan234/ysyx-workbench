@@ -11,3 +11,7 @@ bool tk_is_rparen(Token tk) {
 bool tk_is_int(Token tk) {
   return tk.type == TK_INT;
 }
+
+bool tk_is_reg(Token tk) {
+  return tk.type == TK_REG;
+}

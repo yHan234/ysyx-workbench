@@ -163,9 +163,20 @@ static word_t tk_to_int(Token tk, bool *success) {
 
   if (errno == ERANGE) {
     errno = 0;
-    FAIL("eval: The number is too long at position" INDICATE_TK_FMT, INDICATE_TK_ARG(tk));
+    FAIL("eval: The number is too long" INDICATE_TK_FMT, INDICATE_TK_ARG(tk));
   } else {
-    Log("Terminal integer: %u at position" INDICATE_TK_FMT, num, INDICATE_TK_ARG(tk));
+    Log("Terminal integer: %u" INDICATE_TK_FMT, num, INDICATE_TK_ARG(tk));
+    return num;
+  }
+}
+
+static word_t tk_reg_get(Token tk, bool *success) {
+  bool local_success = true;
+  wchar_t num = isa_reg_str2val(tk.str + 1, &local_success);
+  if (!local_success) {
+    FAIL("eval: Wrong register name %s" INDICATE_TK_FMT, tk.str, INDICATE_TK_ARG(tk));
+  } else {
+    Log("Terminal register: %s: 0x%08x" INDICATE_TK_FMT, tk.str, num, INDICATE_TK_ARG(tk));
     return num;
   }
 }
@@ -174,11 +185,14 @@ static word_t eval(bool *success, int bo, int eo) {
   if (bo >= eo) {
     panic("eval internal error: Errors need to be caught before.");
   } else if (bo + 1 == eo) {
-    // only one token, it must be a number.
-    if (tk_is_int(tokens[bo])) {
-      return tk_to_int(tokens[bo], success);
+    // only one token, it must be a number or a register.
+    Token tk = tokens[bo];
+    if (tk_is_int(tk)) {
+      return tk_to_int(tk, success);
+    } else if (tk_is_reg(tk)) {
+      return tk_reg_get(tk, success);
     } else {
-      FAIL("eval: Expect a number" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
+      FAIL("eval: Expect a number or a register" INDICATE_TK_FMT, INDICATE_TK_ARG(tokens[bo]));
     }
   } else if (is_paren_paring(bo, eo)) {
     // remove the parentheses.
