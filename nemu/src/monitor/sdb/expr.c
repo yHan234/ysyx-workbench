@@ -184,7 +184,7 @@ bool check_parentheses(int bo, int eo) {
     enum OP op = token_to_op(tokens[i], false);
     if (op == OP_LPAREN) {
       paren_cnt += 1;
-    } else {
+    } else if (op == OP_RPAREN) {
       paren_cnt -= 1;
       if (paren_cnt == 0)
         return false;
