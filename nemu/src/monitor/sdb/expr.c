@@ -170,7 +170,10 @@ enum OP token_to_op(Token token, bool may_be_unary) {
 }
 
 bool check_parentheses(int bo, int eo) {
-  if (token_to_op(tokens[bo], false) != OP_LPAREN || token_to_op(tokens[eo - 1], false) != OP_RPAREN) {
+  if (tokens[bo].type == TK_INT ||
+      tokens[eo - 1].type == TK_INT ||
+      token_to_op(tokens[bo], false) != OP_LPAREN ||
+      token_to_op(tokens[eo - 1], false) != OP_RPAREN) {
     return false;
   }
 
