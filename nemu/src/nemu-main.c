@@ -62,4 +62,6 @@ void test_expr() {
 
     passed += 1;
   }
+
+  Log("Passed %d passes.", passed);
 }
