@@ -38,7 +38,7 @@ enum OP tk_to_op(Token tk, bool unary) {
     {
     case TK_PLUS  : return OP_POS;
     case TK_MINUS : return OP_NEG;
-    case TK_STAR  : return OP_POS;
+    case TK_STAR  : return OP_DEREF;
     default       : return OP_NOTOP;
     }
   } else {
