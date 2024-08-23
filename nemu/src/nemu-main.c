@@ -48,8 +48,8 @@ void test_expr() {
     Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
     printf("std: %d\n", std);
 
-    char *e;
-    size_t sz;
+    char *e = NULL;
+    size_t sz = 0;
     Assert(getline(&e, &sz, fp) != -1, "read expr fail");
     printf("exp: %s\n", e);
 
