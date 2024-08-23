@@ -41,16 +41,16 @@ int main(int argc, char *argv[]) {
 word_t expr(char *e, bool *success);
 
 void test_expr() {
-  // FILE *fp = popen("tools/gen-expr/build/gen-expr", "r");
+  FILE *fp = popen("tools/gen-expr/input", "r");
 
   while (1) {
     word_t std;
-    Assert(scanf("%u", &std) == 1, "read std fail");
+    Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
     printf("std: %d\n", std);
 
     char *e;
     size_t sz;
-    Assert(getline(&e, &sz, stdin) != -1, "read expr fail");
+    Assert(getline(&e, &sz, fp) != -1, "read expr fail");
     printf("exp: %s\n", e);
 
     bool success = false;
