@@ -258,7 +258,7 @@ static word_t eval(bool *success, int bo, int eo) {
       break;
     case OP_EQ  : rhs = eval(success, p + 1, eo); res = lhs == rhs; break;
     case OP_NE  : rhs = eval(success, p + 1, eo); res = lhs != rhs; break;
-    case OP_LAND: res = lhs ? rhs = eval(success, p + 1, eo) : 0; break;
+    case OP_LAND: res = lhs ? rhs = !!eval(success, p + 1, eo) : 0; break;
     default: assert(0 && "Invalid operator");
     }
     Log("Calculate: %u %s %u => %u" INDICATE_TK_FMT, lhs, tokens[p].str, rhs, res, INDICATE_TK_ARG(tokens[p]));
