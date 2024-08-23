@@ -29,7 +29,7 @@ bool op_is_unary(enum OP op) {
 }
 
 bool op_is_binary(enum OP op) {
-  return op > OP_DEREF && op < OP_NOTOP;
+  return op >= OP_MUL && op < OP_NOTOP;
 }
 
 enum OP tk_to_op(Token tk, bool unary) {

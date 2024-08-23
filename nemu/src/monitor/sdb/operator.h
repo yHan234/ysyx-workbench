@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include "token.h"
 
-// The smaller the number, the higher the priority.
 enum OP{
   // unary
   OP_POS,
@@ -32,7 +31,6 @@ enum OP{
 int op_precedence(enum OP op);
 bool op_is_unary(enum OP op);
 bool op_is_binary(enum OP op);
-enum OP tk_to_op(Token token, bool unary);
-// bool tk_is_op(Token token);
+enum OP tk_to_op(Token tk, bool unary);
 
 #endif
