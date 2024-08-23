@@ -30,6 +30,8 @@ enum OP{
   OP_NOTOP,
 };
 
+// https://en.cppreference.com/w/c/language/operator_precedence
+int op_precedence(enum OP op);
 bool op_is_unary(enum OP op);
 bool op_is_binary(enum OP op);
 enum OP tk_to_op(Token token, bool unary);
