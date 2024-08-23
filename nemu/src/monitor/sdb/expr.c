@@ -209,13 +209,17 @@ word_t eval(bool *success, int bo, int eo) {
       if (errno == ERANGE) {
         errno = 0;
         FAIL("eval: The number is too long at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
-      } else return num;
+      } else {
+        Log("Terminal integer: %d at position %d\n%s\n%*.s^\n", num, tokens[bo].bo, expression, tokens[bo].bo, "");
+        return num;
+      }
     } else {
       FAIL("eval: Expect a number at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
     }
   } else if (check_parentheses(bo, eo)) {
     // remove the parentheses.
     if (bo + 1 == eo - 1) FAIL("eval: Expressions should be in parentheses at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
+    Log("Enter parentheses at position %d\n%s\n%*.s^\n", tokens[bo].bo, expression, tokens[bo].bo, "");
     return eval(success, bo + 1, eo - 1);
   } else {
     // divide and conquer
@@ -258,6 +262,7 @@ word_t eval(bool *success, int bo, int eo) {
     // If there is no binary operator, then the beginning must be a unary operator
     if (p == -1) {
       op = token_to_op(tokens[bo], true);
+      Log("Process unary operator %s at position %d\n%s\n%*.s^\n", tokens[bo].str, tokens[bo].bo, expression, tokens[bo].bo, "");
       if (op == OP_POS) {
         return eval(success, bo + 1, eo);
       } else if (op == OP_NEG) {
@@ -268,6 +273,7 @@ word_t eval(bool *success, int bo, int eo) {
     }
 
     // there is a binary operator
+    Log("Divide from binary operator %s at position %d\n%s\n%*.s^\n", tokens[p].str, tokens[p].bo, expression, tokens[p].bo, "");
     word_t lhs = eval(success, bo, p);
     word_t rhs = eval(success, p + 1, eo);
     switch (op)
@@ -286,6 +292,7 @@ word_t eval(bool *success, int bo, int eo) {
 }
 
 word_t expr(char *e, bool *success) {
+  *success = true;
   if (!make_token(e)) {
     *success = false;
     return 0;

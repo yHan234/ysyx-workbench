@@ -53,9 +53,9 @@ void test_expr() {
     Assert(getline(&e, &sz, fp) != -1, "read expr fail");
     printf("exp: %s\n", e);
 
-    bool success = false;
+    bool success;
     word_t ans = expr(e, &success);
-
+    Assert(success, "Eval faild");
     Assert(ans == std, "Wrong answer: std = %u, ans = %u\n", std, ans);
     printf("Accepted\n");
   }

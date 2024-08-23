@@ -65,7 +65,7 @@ static void gen_rand_expr(int dep) {
     return;
   }
 
-  if (rand() % 10) {
+  if (rand() % 100) {
     switch (rand() % 3) {
       case 0: gen('('); gen_rand_expr(dep + 1); gen(')'); break;
       case 1: gen_rand_expr(dep + 1); gen_rand_bop(); gen_rand_expr(dep + 1); break;
