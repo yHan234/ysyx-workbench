@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 word_t expr(char *e, bool *success);
 
 void test_expr() {
-  FILE *fp = popen("tools/gen-expr", "r");
+  FILE *fp = popen("tools/gen-expr/build/gen-expr", "r");
 
   word_t std;
   Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
