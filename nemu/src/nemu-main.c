@@ -46,7 +46,7 @@ void test_expr() {
 
   while (1) {
     word_t std;
-    if (!fscanf(fp, "%u", &std)) break;
+    if (fscanf(fp, "%u", &std) != 1) break;
     printf("std: %d\n", std);
 
     char *e = NULL;
