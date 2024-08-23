@@ -241,15 +241,15 @@ word_t eval(bool *success, int bo, int eo) {
       enum OP cur_op = token_to_op(tokens[i], may_be_unary);
       if (cur_op == OP_POS || cur_op == OP_NEG) {
         may_be_unary = true;
-      } else if (cur_op == OP_MUL || cur_op == OP_DIV) {
-        may_be_unary = true;
-        if (!paren_cnt && (p == -1 || cur_op == OP_MUL || cur_op == OP_DIV)) {
-          p = i;
-          op = cur_op;
-        }
       } else if (cur_op == OP_ADD || cur_op == OP_SUB) {
         may_be_unary = true;
         if (!paren_cnt && (p == -1 || op == OP_MUL || op == OP_DIV || op == OP_ADD || op == OP_SUB)) {
+          p = i;
+          op = cur_op;
+        }
+      } else if (cur_op == OP_MUL || cur_op == OP_DIV) {
+        may_be_unary = true;
+        if (!paren_cnt && (p == -1 || cur_op == OP_MUL || cur_op == OP_DIV)) {
           p = i;
           op = cur_op;
         }
