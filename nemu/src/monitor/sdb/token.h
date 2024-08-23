@@ -28,5 +28,6 @@ bool tk_is_lparen(Token tk);
 bool tk_is_rparen(Token tk);
 bool tk_is_int(Token tk);
 bool tk_is_reg(Token tk);
+bool tk_is_op(Token tk);
 
 #endif

@@ -33,6 +33,6 @@ int op_precedence(enum OP op);
 bool op_is_unary(enum OP op);
 bool op_is_binary(enum OP op);
 enum OP tk_to_op(Token token, bool unary);
-bool tk_is_op(Token token);
+// bool tk_is_op(Token token);
 
 #endif

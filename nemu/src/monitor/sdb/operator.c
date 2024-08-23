@@ -55,8 +55,3 @@ enum OP tk_to_op(Token tk, bool unary) {
     }
   }
 }
-
-bool tk_is_op(Token tk) {
-  // 所有一元运算符字面上也可以被看做二元运算符，所以 unary 可以直接传 false。
-  return tk_to_op(tk, false) != OP_NOTOP;
-}
