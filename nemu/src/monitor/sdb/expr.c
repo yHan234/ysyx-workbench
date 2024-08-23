@@ -37,7 +37,7 @@ static struct rule {
 
   {"\\s+",          TK_NOTYPE},
   {"(0x)?[0-9]+u?", TK_INT},
-  {"\\$\\w+",         TK_REG},
+  {"\\$[\\w\\$]+",         TK_REG},
   {"\\(",           TK_LPAREN},
   {"\\)",           TK_RPAREN},
   {"\\+",           TK_PLUS},
