@@ -44,12 +44,16 @@ void test_expr() {
   FILE *fp = popen("tools/gen-expr/build/gen-expr", "r");
 
   while (1) {
+    // sleep(1);
+
     word_t std;
     Assert(fscanf(fp, "%u", &std) == 1, "read std fail");
+    printf("std: %d\n", std);
 
     char *e;
     size_t sz;
     Assert(getline(&e, &sz, fp) != -1, "read expr fail");
+    printf("exp: %s\n", e);
 
     bool success = false;
     word_t ans = expr(e, &success);
