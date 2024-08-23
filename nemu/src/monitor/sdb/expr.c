@@ -166,14 +166,11 @@ enum OP token_to_op(Token token, bool may_be_unary) {
   if (token.type == '(') return OP_LPAREN;
   if (token.type == ')') return OP_RPAREN;
 
-  panic("Unexpected token \"%s\" at position %d\n%s\n%*.s^\n", token.str, token.bo, expression, token.bo, "");
+  return OP_NOOP;
 }
 
 bool check_parentheses(int bo, int eo) {
-  if (tokens[bo].type == TK_INT ||
-      tokens[eo - 1].type == TK_INT ||
-      token_to_op(tokens[bo], false) != OP_LPAREN ||
-      token_to_op(tokens[eo - 1], false) != OP_RPAREN) {
+  if (token_to_op(tokens[bo], false) != OP_LPAREN || token_to_op(tokens[eo - 1], false) != OP_RPAREN) {
     return false;
   }
 
