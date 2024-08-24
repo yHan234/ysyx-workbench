@@ -54,9 +54,10 @@ static WP* new_wp_node() {
   free_ = free_->next;
   free_->prev = NULL;
 
-  Assert(wp->prev == NULL, "Invalid List Node");
+  Assert(wp->prev == NULL, "Invalid watchpoint list node");
   wp->next = head;
 
+  head->prev = wp;
   head = wp;
   wp->is_free = false;
 
@@ -108,7 +109,7 @@ bool del_wp(uint32_t no) {
 }
 
 void print_watchpoints() {
-  printf("%-16s%-16s%-16s%8s\n", "num", "val(d)", "val(h)", "expr");
+  printf("%-16s%-16s%-16s%8s\n", "NO.", "val(d)", "val(h)", "expr");
   for (WP *p = head; p; p = p->next) {
     bool success;
     word_t val = expr(p->expr, &success);
