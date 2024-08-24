@@ -128,11 +128,21 @@ static int cmd_p(char *args) {
 }
 
 static int cmd_w(char *args) {
-  // char *arg_expr = strtok(NULL, "\0");
+  char *arg_expr = strtok(NULL, "\0");
+  if (!set_wp(arg_expr)) {
+    puts("command w: Too much watchpoints(32).");
+  }
   return 0;
 }
 
 static int cmd_d(char *args) {
+  char *arg_n = strtok(NULL, " ");
+  uint64_t n = strtouq(arg_n, NULL, 0);
+  if (n > 32) {
+    puts("command d: Watchpoint numbers range from 1 to 32.");
+  } else if (!del_wp(n)) {
+    printf("command d: Watchpoint %lu is free\n", n);
+  }
   return 0;
 }
 

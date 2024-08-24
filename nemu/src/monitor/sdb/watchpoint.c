@@ -22,6 +22,7 @@ typedef struct watchpoint {
   struct watchpoint *prev;
   struct watchpoint *next;
 
+  bool is_free;
   char *expr;
 } WP;
 
@@ -31,9 +32,10 @@ static WP *head = NULL, *free_ = NULL;
 void init_wp_pool() {
   int i;
   for (i = 0; i < NR_WP; i ++) {
-    wp_pool[i].NO = i;
+    wp_pool[i].NO = i + 1;
     wp_pool[i].prev = (i == 0 ? NULL : &wp_pool[i - 1]);
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+    wp_pool[i].is_free = true;
   }
 
   head = NULL;
@@ -42,7 +44,7 @@ void init_wp_pool() {
 
 /* Implement the functionality of watchpoint */
 
-WP* new_wp() {
+static WP* new_wp_node() {
   if (!free_) {
     return NULL;
   }
@@ -56,10 +58,16 @@ WP* new_wp() {
   wp->next = head;
 
   head = wp;
+  wp->is_free = false;
+
   return wp;
 }
 
-void free_wp(WP *wp) {
+static void free_wp_node(WP *wp) {
+  if (wp->is_free) {
+    return;
+  }
+
   if (wp->prev) {
     wp->prev->next = wp->next;
   } else {
@@ -75,5 +83,25 @@ void free_wp(WP *wp) {
   wp->next = free_;
 
   free_ = wp;
+  wp->is_free = true;
 }
 
+bool set_wp(char *expr) {
+  WP* wp = new_wp_node();
+  if (wp) {
+    wp->expr = expr;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool del_wp(uint32_t no) {
+  if (no >= 32) return false;
+  if (wp_pool[no - 1].is_free) {
+    return false;
+  } else {
+    free_wp_node(&wp_pool[no - 1]);
+    return true;
+  }
+}
