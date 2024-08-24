@@ -80,7 +80,7 @@ static int cmd_info(char *args) {
   } else if (arg[0] == 'r') {
     isa_reg_display();
   } else if (arg[0] == 'w') {
-    print_watchpoints();
+    display_watchpoints();
   } else {
     puts("Usage: info r/w");
   }

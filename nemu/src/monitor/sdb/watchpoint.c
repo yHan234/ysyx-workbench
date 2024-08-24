@@ -110,8 +110,8 @@ bool del_wp(uint32_t no) {
   }
 }
 
-void print_watchpoints() {
-  printf("%-16s%-16s%-16s%8s\n", "NO.", "val(d)", "val(h)", "expr");
+void display_watchpoints() {
+  printf("%-16s%-16s%-16s%8s\n", "NO.", "dec", "hex", "expr");
   for (WP *p = head; p; p = p->next) {
     bool success;
     word_t val = expr(p->expr, &success);
