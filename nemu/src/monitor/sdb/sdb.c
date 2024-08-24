@@ -162,7 +162,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si },
   { "info", "Print register or watchpoint information. Usage: info r/w", cmd_info },
-  { "x", "Scann N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
+  { "x", "Scan N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
   { "p", "Print value. Usage: p EXPR", cmd_p},
   { "w", "Set up watchpoint. Usage: w EXPR", cmd_w},
   { "d", "Delete watchpoint. Usage: d N", cmd_d},

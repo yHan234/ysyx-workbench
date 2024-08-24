@@ -23,7 +23,7 @@ typedef struct watchpoint {
   struct watchpoint *next;
 
   bool is_free;
-  char *expr;
+  char expr[65536];
 } WP;
 
 static WP wp_pool[NR_WP] = {};
@@ -89,7 +89,8 @@ static void free_wp_node(WP *wp) {
 bool set_wp(char *expr) {
   WP* wp = new_wp_node();
   if (wp) {
-    wp->expr = expr;
+    Assert(strlen(expr) < 65535, "Expression is too long.");
+    strcpy(wp->expr, expr);
     return true;
   } else {
     return false;
@@ -107,14 +108,14 @@ bool del_wp(uint32_t no) {
 }
 
 void print_watchpoints() {
-  printf("%-8s%-16s%-16s%8s\n", "num", "val(d)", "val(h)", "expr");
+  printf("%-16s%-16s%-16s%8s\n", "num", "val(d)", "val(h)", "expr");
   for (WP *p = head; p; p = p->next) {
     bool success;
     word_t val = expr(p->expr, &success);
     if (!success) {
-      printf("%-8d%-16s%-16s%8s\n", p->NO, "err", "err", "expr");
+      printf("%-16d%-16s%-16s%8s\n", p->NO, "err", "err", "expr");
     } else {
-      printf("%-8d%-16u%-16x%8s\n", p->NO, val, val, "expr");
+      printf("%-16d%-16u%-16x%8s\n", p->NO, val, val, "expr");
     }
   }
 }

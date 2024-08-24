@@ -73,14 +73,11 @@ void init_regex() {
 static Token tokens[65536] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
-static char *expression;
-
 static bool make_token(char *e) {
   int position = 0;
   int i;
   regmatch_t pmatch;
 
-  expression = e;
   nr_token = 0;
 
   while (e[position] != '\0') {
@@ -155,7 +152,9 @@ static bool is_paren_paring(int bo, int eo) {
 #define EVAL_FAIL(format, ...) do { printf("eval: " format, __VA_ARGS__); *success = false; return 0; } while(0)
 #define INDICATE_FMT " at position %d\n%s\n%*.s^\n"
 #define INDICATE_ARG(str, pos) pos, str, pos, ""
-#define INDICATE_EXPR_ARG(pos) pos, expression, pos, ""
+#define INDICATE_EXPR_ARG(pos) pos, expr_str, pos, ""
+
+static char *expr_str;
 
 static word_t tk_to_int(Token tk, bool *success) {
   if (!tk_is_int(tk)) { success = false; return 0; }
@@ -183,7 +182,7 @@ static word_t tk_reg_get(Token tk, bool *success) {
   }
 }
 
-static word_t eval(bool *success, int bo, int eo) {
+static word_t eval(int bo, int eo, bool *success) {
   if (bo >= eo) {
     panic("eval internal error: Errors need to be caught before.");
   } else if (bo + 1 == eo) {
@@ -203,7 +202,7 @@ static word_t eval(bool *success, int bo, int eo) {
       EVAL_FAIL("Expressions should be in parentheses" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos));
     } else {
       Log("Enter parentheses" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos));
-      return eval(success, bo + 1, eo - 1);
+      return eval(bo + 1, eo - 1, success);
     }
   } else {
     // divide and conquer:
@@ -245,7 +244,7 @@ static word_t eval(bool *success, int bo, int eo) {
       if (tk_is_op(tk) && op_is_unary(op = tk_to_op(tk, true))) {
         Log("Process unary operator %s" INDICATE_FMT, tk.str, INDICATE_EXPR_ARG(tk.pos));
         if (bo + 1 >= eo) EVAL_FAIL("Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tk.pos + 1));
-        word_t x = eval(success, bo + 1, eo), res;
+        word_t x = eval(bo + 1, eo, success), res;
         switch (op)
         {
         case OP_POS   : res = x; break;
@@ -264,20 +263,20 @@ static word_t eval(bool *success, int bo, int eo) {
     Log("Divide from binary operator %s" INDICATE_FMT, tokens[p].str, INDICATE_EXPR_ARG(tokens[p].pos));
     if (bo >= p) EVAL_FAIL("Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[bo].pos));
     if (p + 1 >= eo) EVAL_FAIL("Expect a expression" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[p + 1].pos + 1));
-    word_t lhs = eval(success, bo, p), rhs, res;
+    word_t lhs = eval(bo, p, success), rhs, res;
     switch (op)
     {
-    case OP_ADD : rhs = eval(success, p + 1, eo); res = lhs + rhs; break;
-    case OP_SUB : rhs = eval(success, p + 1, eo); res = lhs - rhs; break;
-    case OP_MUL : rhs = eval(success, p + 1, eo); res = lhs * rhs; break;
+    case OP_ADD : rhs = eval(p + 1, eo, success); res = lhs + rhs; break;
+    case OP_SUB : rhs = eval(p + 1, eo, success); res = lhs - rhs; break;
+    case OP_MUL : rhs = eval(p + 1, eo, success); res = lhs * rhs; break;
     case OP_DIV :
-      rhs = eval(success, p + 1, eo);
+      rhs = eval(p + 1, eo, success);
       if (rhs == 0) EVAL_FAIL("Divide by zero" INDICATE_FMT, INDICATE_EXPR_ARG(tokens[p].pos));
       res = lhs / rhs;
       break;
-    case OP_EQ  : rhs = eval(success, p + 1, eo); res = lhs == rhs; break;
-    case OP_NE  : rhs = eval(success, p + 1, eo); res = lhs != rhs; break;
-    case OP_LAND: res = lhs ? rhs = !!eval(success, p + 1, eo) : 0; break;
+    case OP_EQ  : rhs = eval(p + 1, eo, success); res = lhs == rhs; break;
+    case OP_NE  : rhs = eval(p + 1, eo, success); res = lhs != rhs; break;
+    case OP_LAND: res = lhs ? rhs = !!eval(p + 1, eo, success) : 0; break;
     default: assert(0 && "Invalid operator");
     }
     Log("Calculate: %u %s %u => %u" INDICATE_FMT, lhs, tokens[p].str, rhs, res, INDICATE_EXPR_ARG(tokens[p].pos));
@@ -290,10 +289,11 @@ static word_t eval(bool *success, int bo, int eo) {
 #undef INDICATE_EXPR_ARG
 
 word_t expr(char *e, bool *success) {
+  expr_str = e;
   *success = true;
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-  return eval(success, 0, nr_token);
+  return eval(0, nr_token, success);
 }
