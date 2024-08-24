@@ -129,18 +129,7 @@ static int cmd_p(char *args) {
 
 static int cmd_w(char *args) {
   char *arg_expr = strtok(NULL, "\0");
-  if (strlen(arg_expr) >= 65536) {
-    puts("command w: EXPR is too long.");
-    return 0;
-  }
-
-  bool success = false;
-  expr(arg_expr, &success);
-  if (!success) {
-    puts("command w: Invalid EXPR.");
-    return 0;
-  }
-
+  // watchpoint 内部有 expr 长度限制，过长会导致程序崩溃。
   if (!set_wp(arg_expr)) {
     puts("command w: Too much watchpoints(32).");
   }

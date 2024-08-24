@@ -16,6 +16,7 @@
 #include "sdb.h"
 
 #define NR_WP 32
+#define EXPR_LEN 65536
 
 typedef struct watchpoint {
   int NO;
@@ -23,7 +24,10 @@ typedef struct watchpoint {
   struct watchpoint *next;
 
   bool is_free;
-  char expr[65536];
+  char expr[EXPR_LEN];
+
+  word_t val;
+  bool val_err;
 } WP;
 
 static WP wp_pool[NR_WP] = {};
@@ -89,11 +93,19 @@ static void free_wp_node(WP *wp) {
   wp->is_free = true;
 }
 
-bool set_wp(char *expr) {
+bool set_wp(char *e) {
   WP* wp = new_wp_node();
   if (wp) {
-    Assert(strlen(expr) < 65536, "Expression is too long.");
-    strcpy(wp->expr, expr);
+    Assert(strlen(e) < EXPR_LEN, "Expression is too long.");
+    strcpy(wp->expr, e);
+
+    bool success;
+    wp->val = expr(wp->expr, &success);
+    wp->val_err = !success;
+    if (!success) {
+      printf("watchpoint warning: watchpoint is set, but eval failed.\n");
+    }
+
     return true;
   } else {
     return false;
@@ -113,12 +125,32 @@ bool del_wp(uint32_t no) {
 void display_watchpoints() {
   printf("%-16s%-16s%-16s%8s\n", "NO.", "dec", "hex", "expr");
   for (WP *p = head; p; p = p->next) {
+    if (p->val_err) {
+      printf("%-16d%-16s%-16s%s\n", p->NO, "err", "err", p->expr);
+    } else {
+      printf("%-16d%-16u0x%08x%6s%s\n", p->NO, p->val, p->val, "", p->expr);
+    }
+  }
+}
+
+void display_watchpoint(WP *p) {
+  if (p->val_err) {
+    printf("NO.%-13ddec:%-12shex:%-12s%s\n", p->NO, "err", "err", p->expr);
+  } else {
+    printf("NO.%-13ddec:%-12uhex:0x%08x%2s%s\n", p->NO, p->val, p->val, "", p->expr);
+  }
+}
+
+void check_watchpoints() {
+  for (WP *p = head; p; p = p->next) {
     bool success;
     word_t val = expr(p->expr, &success);
-    if (!success) {
-      printf("%-16d%-16s%-16s%8s\n", p->NO, "err", "err", "expr");
-    } else {
-      printf("%-16d%-16u0x%08x%6s%8s\n", p->NO, val, val, "", "expr");
+    bool val_err = !success;
+    if (val_err != p->val_err || (!val_err && val != p->val)) {
+      nemu_state.state = NEMU_STOP;
+      printf("pre: "); display_watchpoint(p);
+      p->val = val; p->val_err = val_err;
+      printf("now: "); display_watchpoint(p);
     }
   }
 }
