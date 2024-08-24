@@ -129,7 +129,11 @@ static int cmd_p(char *args) {
 
 static int cmd_w(char *args) {
   char *arg_expr = strtok(NULL, "\0");
-  if (!set_wp(arg_expr)) {
+  bool success = false;
+  expr(arg_expr, &success);
+  if (!success) {
+    puts("command w: Invalid EXPR.");
+  } else if (!set_wp(arg_expr)) {
     puts("command w: Too much watchpoints(32).");
   }
   return 0;
