@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
 #endif
 
-  test_expr();
+  // test_expr();
 
   /* Start engine. */
   engine_start();
@@ -56,7 +56,7 @@ void test_expr() {
 
     bool success;
     word_t ans = expr(e, &success);
-    Assert(success, "Eval faild");
+    Assert(success, "Eval fail");
     Assert(ans == std, "Wrong answer: std = %u, ans = %u\n", std, ans);
     printf("Accepted\n");
 

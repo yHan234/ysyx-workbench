@@ -127,6 +127,15 @@ static int cmd_p(char *args) {
   return 0;
 }
 
+static int cmd_w(char *args) {
+  // char *arg_expr = strtok(NULL, "\0");
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -141,9 +150,8 @@ static struct {
   { "info", "Print register or watchpoint information. Usage: info r/w", cmd_info },
   { "x", "Scann N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
   { "p", "Print value. Usage: p EXPR", cmd_p},
-
-  /* TODO: Add more commands */
-
+  { "w", "Set up watchpoint. Usage: w EXPR", cmd_w},
+  { "d", "Delete watchpoint. Usage: d N", cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
