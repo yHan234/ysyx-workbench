@@ -118,7 +118,7 @@ void print_watchpoints() {
     if (!success) {
       printf("%-16d%-16s%-16s%8s\n", p->NO, "err", "err", "expr");
     } else {
-      printf("%-16d%-16u0x%08x%8s%8s\n", p->NO, val, val, "", "expr");
+      printf("%-16d%-16u0x%08x%6s%8s\n", p->NO, val, val, "", "expr");
     }
   }
 }
