@@ -89,7 +89,7 @@ static void free_wp_node(WP *wp) {
 bool set_wp(char *expr) {
   WP* wp = new_wp_node();
   if (wp) {
-    Assert(strlen(expr) < 65535, "Expression is too long.");
+    Assert(strlen(expr) < 65536, "Expression is too long.");
     strcpy(wp->expr, expr);
     return true;
   } else {
