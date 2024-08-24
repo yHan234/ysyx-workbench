@@ -57,7 +57,9 @@ static WP* new_wp_node() {
   Assert(wp->prev == NULL, "Invalid watchpoint list node");
   wp->next = head;
 
-  head->prev = wp;
+  if (head) {
+    head->prev = wp;
+  }
   head = wp;
   wp->is_free = false;
 
