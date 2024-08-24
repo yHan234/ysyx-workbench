@@ -27,6 +27,10 @@ static int is_batch_mode = false;
 void init_regex();
 void init_wp_pool();
 
+bool set_wp(char *expr);
+bool del_wp(uint32_t no);
+void display_watchpoints();
+
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -75,12 +79,12 @@ static int cmd_si(char *args) {
 
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
-  if (strlen(arg) != 1) {
+  if (!arg || strlen(arg) != 1) {
     puts("Usage: info r/w");
   } else if (arg[0] == 'r') {
     isa_reg_display();
   } else if (arg[0] == 'w') {
-    // TODO: print watchpoint info
+    display_watchpoints();
   } else {
     puts("Usage: info r/w");
   }
@@ -127,6 +131,26 @@ static int cmd_p(char *args) {
   return 0;
 }
 
+static int cmd_w(char *args) {
+  char *arg_expr = strtok(NULL, "\0");
+  // watchpoint 内部有 expr 长度限制，过长会导致程序崩溃。
+  if (!set_wp(arg_expr)) {
+    puts("command w: Too much watchpoints(32).");
+  }
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  char *arg_n = strtok(NULL, " ");
+  uint64_t n = strtouq(arg_n, NULL, 0);
+  if (n > 32) {
+    puts("command d: Watchpoint numbers range from 1 to 32.");
+  } else if (!del_wp(n)) {
+    printf("command d: Watchpoint %lu is free\n", n);
+  }
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -139,11 +163,10 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si },
   { "info", "Print register or watchpoint information. Usage: info r/w", cmd_info },
-  { "x", "Scann N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
+  { "x", "Scan N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
   { "p", "Print value. Usage: p EXPR", cmd_p},
-
-  /* TODO: Add more commands */
-
+  { "w", "Set up watchpoint. Usage: w EXPR", cmd_w},
+  { "d", "Delete watchpoint. Usage: d N", cmd_d},
 };
 
 #define NR_CMD ARRLEN(cmd_table)
