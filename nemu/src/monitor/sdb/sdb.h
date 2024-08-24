@@ -20,8 +20,4 @@
 
 word_t expr(char *e, bool *success);
 
-bool set_wp(char *expr);
-bool del_wp(uint32_t no);
-void display_watchpoints();
-
 #endif

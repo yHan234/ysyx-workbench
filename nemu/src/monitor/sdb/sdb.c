@@ -73,6 +73,10 @@ static int cmd_si(char *args) {
   return 0;
 }
 
+bool set_wp(char *expr);
+bool del_wp(uint32_t no);
+void display_watchpoints();
+
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
   if (!arg || strlen(arg) != 1) {
