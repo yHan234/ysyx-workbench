@@ -27,6 +27,10 @@ static int is_batch_mode = false;
 void init_regex();
 void init_wp_pool();
 
+bool set_wp(char *expr);
+bool del_wp(uint32_t no);
+void display_watchpoints();
+
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -72,10 +76,6 @@ static int cmd_si(char *args) {
   cpu_exec(num_steps);
   return 0;
 }
-
-bool set_wp(char *expr);
-bool del_wp(uint32_t no);
-void display_watchpoints();
 
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
