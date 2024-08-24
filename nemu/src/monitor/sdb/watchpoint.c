@@ -107,14 +107,14 @@ bool del_wp(uint32_t no) {
 }
 
 void print_watchpoints() {
-  printf("%-8s%-16s%-16s%8s", "num", "val(d)", "val(h)", "expr");
+  printf("%-8s%-16s%-16s%8s\n", "num", "val(d)", "val(h)", "expr");
   for (WP *p = head; p; p = p->next) {
     bool success;
     word_t val = expr(p->expr, &success);
     if (!success) {
-      printf("%-8d%-16s%-16s%8s", p->NO, "err", "err", "expr");
+      printf("%-8d%-16s%-16s%8s\n", p->NO, "err", "err", "expr");
     } else {
-      printf("%-8d%-16u%-16x%8s", p->NO, val, val, "expr");
+      printf("%-8d%-16u%-16x%8s\n", p->NO, val, val, "expr");
     }
   }
 }
