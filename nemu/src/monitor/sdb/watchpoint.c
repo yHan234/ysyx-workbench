@@ -116,9 +116,9 @@ void print_watchpoints() {
     bool success;
     word_t val = expr(p->expr, &success);
     if (!success) {
-      printf("%-16d%-16s%-16s%8s\n", p->NO, "err", "err", "expr");
+      printf("%-16d%-16s%-1608s%8s\n", p->NO, "err", "err", "expr");
     } else {
-      printf("%-16d%-16u%-16x%8s\n", p->NO, val, val, "expr");
+      printf("%-16d%-16u%-1608x%8s\n", p->NO, val, val, "expr");
     }
   }
 }
