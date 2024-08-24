@@ -123,6 +123,10 @@ bool del_wp(uint32_t no) {
 }
 
 void display_watchpoints() {
+  if (head == NULL) {
+    printf("No watchpoints\n");
+    return;
+  }
   printf("%-16s%-16s%-16s%8s\n", "NO.", "dec", "hex", "expr");
   for (WP *p = head; p; p = p->next) {
     if (p->val_err) {
