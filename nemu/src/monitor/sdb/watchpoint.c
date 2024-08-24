@@ -139,9 +139,9 @@ void display_watchpoints() {
 
 void display_watchpoint(WP *p) {
   if (p->val_err) {
-    printf("NO.%-13ddec:%-12shex:%-12s%s\n", p->NO, "err", "err", p->expr);
+    printf("NO.%-5ddec:%-12shex:%-12s%s\n", p->NO, "err", "err", p->expr);
   } else {
-    printf("NO.%-13ddec:%-12uhex:0x%08x%2s%s\n", p->NO, p->val, p->val, "", p->expr);
+    printf("NO.%-5ddec:%-12uhex:0x%08x%2s%s\n", p->NO, p->val, p->val, "", p->expr);
   }
 }
 
