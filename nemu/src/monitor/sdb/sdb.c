@@ -75,7 +75,7 @@ static int cmd_si(char *args) {
 
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
-  if (strlen(arg) != 1) {
+  if (!arg || strlen(arg) != 1) {
     puts("Usage: info r/w");
   } else if (arg[0] == 'r') {
     isa_reg_display();
