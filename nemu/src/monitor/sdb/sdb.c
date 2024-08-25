@@ -13,23 +13,16 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <errno.h>
-
 #include <isa.h>
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <memory/vaddr.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
-
-bool set_wp(char *expr);
-bool del_wp(uint32_t no);
-void display_watchpoints();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -54,101 +47,9 @@ static int cmd_c(char *args) {
   return 0;
 }
 
+
 static int cmd_q(char *args) {
-  nemu_state.state = NEMU_QUIT;
   return -1;
-}
-
-static int cmd_si(char *args) {
-  char *arg = strtok(NULL, " ");
-  uint64_t  num_steps;
-  if (!arg) {
-    num_steps = 1;
-  } else {
-    num_steps = strtoul(arg, NULL, 0);
-    if (errno == ERANGE) {
-      errno = 0;
-      printf("si: too large\n");
-      return 0;
-    }
-  }
-  printf("step %lu instruction(s)\n", num_steps);
-  cpu_exec(num_steps);
-  return 0;
-}
-
-static int cmd_info(char *args) {
-  char *arg = strtok(NULL, " ");
-  if (!arg || strlen(arg) != 1) {
-    puts("Usage: info r/w");
-  } else if (arg[0] == 'r') {
-    isa_reg_display();
-  } else if (arg[0] == 'w') {
-    display_watchpoints();
-  } else {
-    puts("Usage: info r/w");
-  }
-  return 0;
-}
-
-static int cmd_x(char *args) {
-  char *arg_n = strtok(NULL, " ");
-  char *arg_expr = strtok(NULL, "\0");
-  char *endptr = NULL;
-
-  uint64_t n = strtoul(arg_n, &endptr, 0);
-  if (*endptr) {
-    puts("command x: Invalid arg N");
-    return 0;
-  }
-
-  bool success = false;
-  word_t e = expr(arg_expr, &success);
-  if (!success) {
-    puts("command x: Invalid expression.");
-    return 0;
-  }
-
-  for (uint64_t i = 0; i < n; ++i) {
-    vaddr_t addr = e + i * 4;
-    printf("0x%08x\t\t0x%08x\n", addr, vaddr_read(addr, 4));
-  }
-
-  return 0;
-}
-
-static int cmd_p(char *args) {
-  char *arg_expr = strtok(NULL, "\0");
-
-  bool success = false;
-  word_t e = expr(arg_expr, &success);
-  if (!success) {
-    puts("command p: Invalid expression.");
-    return 0;
-  }
-  printf("%u\n", e);
-
-  return 0;
-}
-
-static int cmd_w(char *args) {
-  char *arg_expr = strtok(NULL, "\0");
-  // watchpoint 内部有 expr 长度限制，过长会导致程序崩溃。
-  if (!set_wp(arg_expr)) {
-    puts("command w: Too much watchpoints(32).");
-  }
-  return 0;
-}
-
-static int cmd_d(char *args) {
-  char *arg_n = strtok(NULL, " ");
-  uint64_t n = strtouq(arg_n, NULL, 0);
-  if (n > 32) {
-    puts("command d: Watchpoint numbers range from 1 to 32.");
-  } else if (!del_wp(n)) {
-    printf("command d: Watchpoint %lu is free\n", n);
-  }
-  return 0;
 }
 
 static int cmd_help(char *args);
@@ -161,12 +62,9 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  { "si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si },
-  { "info", "Print register or watchpoint information. Usage: info r/w", cmd_info },
-  { "x", "Scan N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x },
-  { "p", "Print value. Usage: p EXPR", cmd_p},
-  { "w", "Set up watchpoint. Usage: w EXPR", cmd_w},
-  { "d", "Delete watchpoint. Usage: d N", cmd_d},
+
+  /* TODO: Add more commands */
+
 };
 
 #define NR_CMD ARRLEN(cmd_table)
