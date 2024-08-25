@@ -178,13 +178,6 @@ config DIFFTEST_REF_KVM
 endif
 endchoice
 
-config WATCHPOINT
-  bool "Enable SDB watchpoint"
-  default n
-  help
-    Enable check watchpoint after each instruction is executed.
-    Note that this will significantly reduce the performance of NEMU.
-
 config DIFFTEST_REF_PATH
   string
   default "tools/qemu-diff" if DIFFTEST_REF_QEMU
