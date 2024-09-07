@@ -23,7 +23,7 @@
 #define Mw vaddr_write
 
 enum {
-  TYPE_I, TYPE_U, TYPE_S, TYPE_J,
+  TYPE_R, TYPE_I, TYPE_U, TYPE_S, TYPE_J,
   TYPE_N, // none
 };
 
@@ -40,6 +40,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
   int rs2 = BITS(i, 24, 20);
   *rd     = BITS(i, 11, 7);
   switch (type) {
+    case TYPE_R: src1R(); src2R();       ; break;
     case TYPE_I: src1R();          immI(); break;
     case TYPE_U:                   immU(); break;
     case TYPE_S: src1R(); src2R(); immS(); break;
@@ -59,6 +60,8 @@ static int decode_exec(Decode *s) {
 }
 
   INSTPAT_START();
+  INSTPAT("0000000 ????? ????? 000 ????? 0110011", add, R, R(rd) = src1 + src2);
+
   INSTPAT("????????????????? 000 ????? 1100111", jalr, I, R(rd) = s->pc + 4; s->dnpc = src1 + imm;);
   INSTPAT("????????????????? 010 ????? 0000011", lw  , I, R(rd) = Mr(src1 + imm, 4));
   INSTPAT("????????????????? 100 ????? 0000011", lbu , I, R(rd) = Mr(src1 + imm, 1));
