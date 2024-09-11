@@ -9,5 +9,7 @@
 !*.cpp
 !.gitignore
 !README.md
-!ArchGraph/*
 build/
+
+!ArchGraph/*
+!tests/*.py

@@ -31,7 +31,7 @@ uint32_t pmem_read(uint32_t pc) {
     return 0;
 
   uint32_t img_idx = (pc - 0x80000000) / 4;
-  if (img_idx > img_size / 4) {
+  if (img_idx >= img_size / 4) {
     printf("image execution is complete\n");
     exit(0);
   }
