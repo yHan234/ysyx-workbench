@@ -5,7 +5,6 @@ module IDU(
         output [6:0] op,
         output [2:0] func3,
         output [6:0] func7,
-        output [2:0] itype,
         output [4:0] rd,
         output [4:0] rs1,
         output [4:0] rs2,

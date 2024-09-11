@@ -52,7 +52,6 @@ module top(
             .op    	( op     ),
             .func3 	( func3  ),
             .func7 	( func7  ),
-            .itype 	( itype  ),
             .rd    	( rd     ),
             .rs1   	( rs1    ),
             .rs2   	( rs2    ),
