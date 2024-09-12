@@ -1,13 +1,11 @@
 module top(
         input clk,
-        input rst,
-        input [31:0] instr,
-        output [31:0] pc
+        input rst
     );
 
     // PC
 
-    wire [31:0] NextPC;
+    wire [31:0] NextPC, pc;
     Reg #(32, 32'h80000000) pc_r(
             .clk  ( clk    ),
             .rst  ( rst    ),
@@ -33,6 +31,14 @@ module top(
             .busB  ( reg_src2                   )
         );
 
+    // Instruction Memory
+
+    wire [31:0] instr;
+
+    InstrMem instr_mem(
+                 .pc    ( pc     ),
+                 .instr ( instr  )
+             );
 
     // Instruction Decode
 

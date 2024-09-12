@@ -14,12 +14,16 @@ def generate_addi_test():
     return binary_instructions
 
 
+ebreak = int("00000000000100000000000001110011", base=2)
+
+
 def write_binary_file(filename, binary_instructions):
     with open(filename, "wb") as f:
         for instruction in binary_instructions:
             f.write(
                 instruction.to_bytes(4, byteorder="little")
             )  # 每条指令4个字节，小端序写入
+        f.write(ebreak.to_bytes(4, byteorder="little"))
 
 
 if __name__ == "__main__":

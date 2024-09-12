@@ -38,7 +38,6 @@ module IDU(
            );
 
     always @(*) begin
-        $display("instr: %b", instr);
         $display("immI: ", immI);
         $display("imm: ", imm);
     end
