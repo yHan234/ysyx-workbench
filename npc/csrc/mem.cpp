@@ -36,8 +36,8 @@ extern "C" void pmem_read(u_int32_t pc, u_int32_t *instr) {
 
   uint32_t img_idx = (pc - 0x80000000) / 4;
   if (img_idx >= img_size / 4) {
-    printf("image execution is complete\n");
-    exit(0);
+    printf("Image read out of bounds\n");
+    exit(1);
   }
 
   *instr = ((u_int32_t *)img)[img_idx];
