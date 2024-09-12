@@ -33,6 +33,7 @@ extern "C" void pmem_read(u_int32_t pc, u_int32_t *instr) {
 
   if (pc == 0) {
     *instr = 0;
+    return;
   }
 
   uint32_t img_idx = (pc - 0x80000000) / 4;
