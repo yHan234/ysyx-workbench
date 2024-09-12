@@ -3,12 +3,12 @@
 static Vtop dut;
 
 static void single_cycle() {
-  printf("\n\n===== clk = 0 =====\n");
+  printf("\n\n===== clk => 0 =====\n");
 
   dut.clk = 0;
   dut.eval();
 
-  printf("\n\n===== clk = 1 =====\n");
+  printf("\n\n===== clk => 1 =====\n");
 
   dut.clk = 1;
   dut.eval();
