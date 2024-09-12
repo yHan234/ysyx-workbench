@@ -29,6 +29,8 @@ void load_img(char *img_file) {
 }
 
 extern "C" void pmem_read(u_int32_t pc, u_int32_t *instr) {
+  printf("%d\n", pc);
+
   if (pc == 0) {
     *instr = 0;
   }
