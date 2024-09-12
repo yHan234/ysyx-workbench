@@ -7,7 +7,7 @@ module InstrMem (
 
     always @(*) begin
         pmem_read(pc, instr);
-        $display(pc, instr);
+        $display("PC: ", pc, "instr: ", instr);
     end
 
 endmodule
