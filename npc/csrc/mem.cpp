@@ -10,14 +10,14 @@ long img_size;
 void load_img(char *img_file) {
   FILE *fp = fopen(img_file, "rb");
   if (!fp) {
-    printf("Can not open '%s'", img_file);
+    printf("Can not open '%s'\n", img_file);
     exit(1);
   }
 
   fseek(fp, 0, SEEK_END);
   img_size = ftell(fp);
 
-  printf("The image is %s, size = %ld", img_file, img_size);
+  printf("The image is %s, size = %ld\n", img_file, img_size);
 
   img = malloc(img_size);
 
