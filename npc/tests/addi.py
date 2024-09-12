@@ -20,6 +20,11 @@ def write_binary_file(filename, binary_instructions):
             f.write(
                 instruction.to_bytes(4, byteorder="little")
             )  # 每条指令4个字节，小端序写入
+        f.write(
+            int("00000000000100000000000001110011", base=2).to_bytes(
+                4, byteorder="little"
+            )
+        )
 
 
 if __name__ == "__main__":
