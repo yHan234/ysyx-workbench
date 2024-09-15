@@ -1,8 +1,6 @@
 module top(
         input clk,
         input rst
-        // input [31:0] instr,
-        // output [31:0] pc
     );
 
     // PC

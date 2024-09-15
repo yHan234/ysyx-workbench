@@ -17,10 +17,9 @@ module GPR (
     );
 
     reg [31:0] gpr [31:0];
-    assign gpr[0] = 0;
 
-    assign busA = gpr[Ra];
-    assign busB = gpr[Rb];
+    assign busA = Ra == 0 ? 0 : gpr[Ra];
+    assign busB = Rb == 0 ? 0 : gpr[Rb];
 
     always @(posedge WrClk) begin
         $display("regs:");
