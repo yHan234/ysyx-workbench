@@ -17,10 +17,9 @@ module GPR (
     );
 
     reg [31:0] gpr [31:0];
-    assign gpr[0] = 0;
 
-    assign busA = gpr[Ra];
-    assign busB = gpr[Rb];
+    assign busA = Ra == 0 ? 0 : gpr[Ra];
+    assign busB = Rb == 0 ? 0 : gpr[Rb];
 
     always @(posedge WrClk) begin
         $display("regs:");
@@ -36,7 +35,7 @@ module GPR (
                 gpr[i] <= 0;
             end
         end
-        else if (RegWr && Rw != 0) begin
+        else if (RegWr) begin
             $display("store ", busW, " to register ", Rw, " which contains ", gpr[Rw]);
             gpr[Rw] <= busW;
         end
