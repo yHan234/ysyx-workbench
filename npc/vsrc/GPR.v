@@ -35,7 +35,7 @@ module GPR (
                 gpr[i] <= 0;
             end
         end
-        else if (RegWr && Rw != 0) begin
+        else if (RegWr) begin
             $display("store ", busW, " to register ", Rw, " which contains ", gpr[Rw]);
             gpr[Rw] <= busW;
         end
