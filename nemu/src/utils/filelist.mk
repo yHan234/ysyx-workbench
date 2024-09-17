@@ -16,5 +16,5 @@
 ifneq ($(CONFIG_ITRACE)$(CONFIG_IQUEUE),)
 CXXSRC = src/utils/disasm.cc
 CXXFLAGS += $(shell llvm-config --cxxflags) -fPIE
-LIBS += -lz -ltinfo $(shell llvm-config --libs)
+LIBS += $(shell llvm-config --libs) -lz -ltinfo
 endif
