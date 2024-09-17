@@ -10,6 +10,3 @@
 !.gitignore
 !README.md
 build/
-
-!ArchGraph/*
-!tests/*.py
