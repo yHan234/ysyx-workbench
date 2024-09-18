@@ -19,6 +19,9 @@ char *strcpy(char *dst, const char *src) {
     dst[i] = src[i];
   dst[i] = '\0';
 
+  for (i = 0; src[i] != '\0'; i++)
+    putch(src[i]);
+
   return dst;
 }
 
