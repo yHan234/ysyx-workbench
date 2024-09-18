@@ -6,7 +6,7 @@
 
 size_t strlen(const char *s) {
   for (size_t i = 0;; i++, s += 1) {
-    if (*s != '\0') {
+    if (*s == '\0') {
       return i;
     }
   }
@@ -18,9 +18,6 @@ char *strcpy(char *dst, const char *src) {
   for (i = 0; src[i] != '\0'; i++)
     dst[i] = src[i];
   dst[i] = '\0';
-
-  for (i = 0; src[i] != '\0'; i++)
-    putch(src[i]);
 
   return dst;
 }
