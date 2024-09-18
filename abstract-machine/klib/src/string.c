@@ -41,8 +41,6 @@ char *strcat(char *dst, const char *src) {
     dst[dst_len + i] = src[i];
   dst[dst_len + i] = '\0';
 
-  printf("%s\n", dst);
-
   return dst;
 }
 
