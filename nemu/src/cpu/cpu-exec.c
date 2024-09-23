@@ -37,7 +37,7 @@ void check_watchpoints();
 #define LOGBUF_LEN 128
 static char iringbuf[IRINGBUF_LEN][LOGBUF_LEN];
 static uint iringbuf_wptr = 0;
-static bool iringbuf_full = false;
+static uint iringbuf_size = 0;
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
@@ -53,7 +53,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #ifdef CONFIG_ITRACE
   s->logbuf = iringbuf[iringbuf_wptr++];
   iringbuf_wptr %= IRINGBUF_LEN;
-  iringbuf_full |= iringbuf_wptr == 0;
+  if (iringbuf_size < IRINGBUF_LEN) {
+    iringbuf_size += 1;
+  }
 
   char *p = s->logbuf;
   p += snprintf(p, LOGBUF_LEN, FMT_WORD ":", s->pc);
@@ -127,8 +129,8 @@ void cpu_exec(uint64_t n) {
 
     case NEMU_END: case NEMU_ABORT:
       #ifdef CONFIG_ITRACE_COND
-        if (ITRACE_COND) {
-          uint i = iringbuf_full ? iringbuf_wptr : 0;
+        if (ITRACE_COND && iringbuf_size) {
+          uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;
           do {
             extern FILE *log_fp;
             fprintf(log_fp, "%s\n", iringbuf[i++]);
