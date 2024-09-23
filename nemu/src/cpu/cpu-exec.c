@@ -33,14 +33,19 @@ static bool g_print_step = false;
 void device_update();
 void check_watchpoints();
 
-static char iringbuf[128][128];
+#define IRINGBUF_LEN 128
+static char iringbuf[IRINGBUF_LEN][128];
 static uint iringbuf_end = 0;
 static bool iringbuf_full = false;
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   // if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
-  if (ITRACE_COND) { strcpy(iringbuf[iringbuf_end++], _this->logbuf); iringbuf_end %= 128; iringbuf_full |= iringbuf_end == 0; }
+  if (ITRACE_COND) {
+    strcpy(iringbuf[iringbuf_end++], _this->logbuf);
+    iringbuf_end %= IRINGBUF_LEN;
+    iringbuf_full |= iringbuf_end == 0;
+  }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
