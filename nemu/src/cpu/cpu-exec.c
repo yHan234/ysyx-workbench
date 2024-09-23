@@ -58,6 +58,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);
   cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
+  printf("%d\n", iringbuf_wptr);
   s->logbuf = iringbuf[iringbuf_wptr];
   char *p = s->logbuf;
   p += snprintf(p, LOGBUF_LEN, FMT_WORD ":", s->pc);
