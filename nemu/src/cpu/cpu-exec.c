@@ -51,7 +51,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);
   cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
-  s->logbuf = iringbuf[iringbuf_wptr];
+  s->logbuf = iringbuf[iringbuf_wptr++];
   iringbuf_wptr %= IRINGBUF_LEN;
   iringbuf_full |= iringbuf_wptr == 0;
 
