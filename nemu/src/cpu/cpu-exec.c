@@ -129,7 +129,9 @@ void cpu_exec(uint64_t n) {
 
     case NEMU_END: case NEMU_ABORT:
       extern FILE *log_fp;
+      log_write("\n");
 #ifdef CONFIG_ITRACE_COND
+      log_write("==================== ITRACE ====================");
       if (ITRACE_COND && iringbuf_size) {
         uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;
         do {
@@ -137,12 +139,16 @@ void cpu_exec(uint64_t n) {
           i %= IRINGBUF_LEN;
         } while(i != iringbuf_wptr);
       }
+      log_write("==================== ITRACE ====================");
 #endif
-
+      log_write("\n");
 #ifdef CONFIG_MTRACE
       void mringbuf_print();
+      log_write("==================== MTRACE ====================");
       mringbuf_print();
+      log_write("==================== MTRACE ====================");
 #endif
+      log_write("\n");
 
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
