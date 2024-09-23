@@ -34,15 +34,14 @@ void device_update();
 void check_watchpoints();
 
 #define IRINGBUF_LEN 128
-#define LOGBUF_LEN 128
-static char iringbuf[IRINGBUF_LEN][LOGBUF_LEN];
+static char iringbuf[IRINGBUF_LEN][128];
 static uint iringbuf_wptr = 0;
 static bool iringbuf_full = false;
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) {
-    // strcpy(iringbuf[iringbuf_wptr++], _this->logbuf);
+    strcpy(iringbuf[iringbuf_wptr++], _this->logbuf);
     iringbuf_wptr %= IRINGBUF_LEN;
     iringbuf_full |= iringbuf_wptr == 0;
   }
@@ -58,10 +57,8 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);
   cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
-  printf("%d\n", iringbuf_wptr);
-  s->logbuf = iringbuf[iringbuf_wptr];
   char *p = s->logbuf;
-  p += snprintf(p, LOGBUF_LEN, FMT_WORD ":", s->pc);
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
