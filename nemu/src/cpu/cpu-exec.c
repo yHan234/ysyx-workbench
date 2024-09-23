@@ -134,6 +134,7 @@ void cpu_exec(uint64_t n) {
           uint i = iringbuf_full ? iringbuf_end : 0;
           do {
             log_write("%s\n", iringbuf[i++]);
+            i %= IRINGBUF_LEN;
           } while(i != iringbuf_end);
         }
       #endif
