@@ -50,6 +50,21 @@ void init_mem() {
   Log("physical memory area [" FMT_PADDR ", " FMT_PADDR "]", PMEM_LEFT, PMEM_RIGHT);
 }
 
+#ifdef CONFIG_MTRACE
+extern CPU_state cpu;
+struct {
+  vaddr_t pc;
+  char op;
+  paddr_t addr;
+  int len;
+  word_t data;
+} mringbuf[128];
+word_t mtrace_begin = MTRACE_BEGIN;
+word_t mtrace_end = MTRACE_END;
+uint mringbuf_wptr = 0;
+uint mringbuf_size = 0;
+#endif
+
 word_t paddr_read(paddr_t addr, int len) {
   if (likely(in_pmem(addr))) return pmem_read(addr, len);
   IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
