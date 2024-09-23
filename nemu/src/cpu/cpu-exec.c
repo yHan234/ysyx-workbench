@@ -40,7 +40,6 @@ static bool iringbuf_full = false;
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
-  // if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
   if (ITRACE_COND) {
     strcpy(iringbuf[iringbuf_end++], _this->logbuf);
     iringbuf_end %= IRINGBUF_LEN;
@@ -133,7 +132,8 @@ void cpu_exec(uint64_t n) {
         if (ITRACE_COND) {
           uint i = iringbuf_full ? iringbuf_end : 0;
           do {
-            log_write("%s\n", iringbuf[i++]);
+            extern FILE *log_fp;
+            fprintf(log_fp, "%s\n", iringbuf[i++]);
             i %= IRINGBUF_LEN;
           } while(i != iringbuf_end);
         }
