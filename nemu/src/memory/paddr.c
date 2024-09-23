@@ -24,16 +24,63 @@ static uint8_t *pmem = NULL;
 static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 #endif
 
+#ifdef CONFIG_MTRACE
+extern CPU_state cpu;
+#define MRINGBUF_LEN 128
+struct {
+  vaddr_t pc;
+  char op;
+  paddr_t addr;
+  int len;
+  word_t data;
+} mringbuf[MRINGBUF_LEN];
+word_t mtrace_begin = MTRACE_BEGIN;
+word_t mtrace_end = MTRACE_END;
+uint mringbuf_wptr = 0;
+uint mringbuf_size = 0;
+
+static void mringbuf_write(char op, paddr_t addr, int len, word_t data) {
+  if (addr < mtrace_begin || mtrace_end < addr) {
+    return;
+  }
+
+  mringbuf[mringbuf_wptr].pc = cpu.pc;
+  mringbuf[mringbuf_wptr].op = op;
+  mringbuf[mringbuf_wptr].addr = addr;
+  mringbuf[mringbuf_wptr].len = len;
+  mringbuf[mringbuf_wptr].data = data;
+
+  mringbuf_wptr = (mringbuf_wptr + 1) % MRINGBUF_LEN;
+  if (mringbuf_size < MRINGBUF_LEN) {
+    mringbuf_size += 1;
+  }
+}
+
+void mringbuf_print() {
+  extern FILE *log_fp;
+  if (mringbuf_size) {
+    uint i = mringbuf_size == MRINGBUF_LEN ? mringbuf_wptr : 0;
+    do {
+      extern FILE *log_fp;
+      log_write("0x%08x: %c 0x%08x %d 0x%08x\n", mringbuf[i].pc, mringbuf[i].op, mringbuf[i].addr, mringbuf[i].len, mringbuf[i].data);
+      i = (i + 1) % MRINGBUF_LEN;
+    } while (i != mringbuf_wptr);
+  }
+}
+#endif
+
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
+  IFDEF(CONFIG_MTRACE, mringbuf_write('R', addr, len, ret));
   return ret;
 }
 
 static void pmem_write(paddr_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
+  IFDEF(CONFIG_MTRACE, mringbuf_write('W', addr, len, data));
 }
 
 static void out_of_bound(paddr_t addr) {
@@ -49,21 +96,6 @@ void init_mem() {
   IFDEF(CONFIG_MEM_RANDOM, memset(pmem, rand(), CONFIG_MSIZE));
   Log("physical memory area [" FMT_PADDR ", " FMT_PADDR "]", PMEM_LEFT, PMEM_RIGHT);
 }
-
-#ifdef CONFIG_MTRACE
-extern CPU_state cpu;
-struct {
-  vaddr_t pc;
-  char op;
-  paddr_t addr;
-  int len;
-  word_t data;
-} mringbuf[128];
-word_t mtrace_begin = MTRACE_BEGIN;
-word_t mtrace_end = MTRACE_END;
-uint mringbuf_wptr = 0;
-uint mringbuf_size = 0;
-#endif
 
 word_t paddr_read(paddr_t addr, int len) {
   if (likely(in_pmem(addr))) return pmem_read(addr, len);
