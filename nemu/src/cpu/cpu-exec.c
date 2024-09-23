@@ -34,16 +34,17 @@ void device_update();
 void check_watchpoints();
 
 #define IRINGBUF_LEN 128
-static char iringbuf[IRINGBUF_LEN][128];
-static uint iringbuf_end = 0;
+#define LOGBUF_LEN 128
+static char iringbuf[IRINGBUF_LEN][LOGBUF_LEN];
+static uint iringbuf_wptr = 0;
 static bool iringbuf_full = false;
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) {
-    strcpy(iringbuf[iringbuf_end++], _this->logbuf);
-    iringbuf_end %= IRINGBUF_LEN;
-    iringbuf_full |= iringbuf_end == 0;
+    // strcpy(iringbuf[iringbuf_wptr++], _this->logbuf);
+    iringbuf_wptr %= IRINGBUF_LEN;
+    iringbuf_full |= iringbuf_wptr == 0;
   }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
@@ -57,8 +58,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);
   cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
+  s->logbuf = iringbuf[iringbuf_wptr];
   char *p = s->logbuf;
-  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
+  p += snprintf(p, LOGBUF_LEN, FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
@@ -130,12 +132,12 @@ void cpu_exec(uint64_t n) {
     case NEMU_END: case NEMU_ABORT:
       #ifdef CONFIG_ITRACE_COND
         if (ITRACE_COND) {
-          uint i = iringbuf_full ? iringbuf_end : 0;
+          uint i = iringbuf_full ? iringbuf_wptr : 0;
           do {
             extern FILE *log_fp;
             fprintf(log_fp, "%s\n", iringbuf[i++]);
             i %= IRINGBUF_LEN;
-          } while(i != iringbuf_end);
+          } while(i != iringbuf_wptr);
         }
       #endif
       Log("nemu: %s at pc = " FMT_WORD,
