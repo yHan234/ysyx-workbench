@@ -33,10 +33,13 @@ static bool g_print_step = false;
 void device_update();
 void check_watchpoints();
 
+#define IRINGBUF_LEN 128
+#define LOGBUF_LEN 128
+static char iringbuf[IRINGBUF_LEN][LOGBUF_LEN];
+static uint iringbuf_wptr = 0;
+static uint iringbuf_size = 0;
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
-#ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
-#endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, check_watchpoints());
@@ -48,8 +51,14 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);
   cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
+  s->logbuf = iringbuf[iringbuf_wptr++];
+  iringbuf_wptr %= IRINGBUF_LEN;
+  if (iringbuf_size < IRINGBUF_LEN) {
+    iringbuf_size += 1;
+  }
+
   char *p = s->logbuf;
-  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
+  p += snprintf(p, LOGBUF_LEN, FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
@@ -65,7 +74,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
 #ifndef CONFIG_ISA_loongarch32r
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-  disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
+  disassemble(p, s->logbuf + LOGBUF_LEN - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
 #else
   p[0] = '\0'; // the upstream llvm does not support loongarch32r
@@ -119,6 +128,17 @@ void cpu_exec(uint64_t n) {
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 
     case NEMU_END: case NEMU_ABORT:
+      extern FILE *log_fp;
+#ifdef CONFIG_ITRACE_COND
+      if (ITRACE_COND && iringbuf_size) {
+        uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;
+        do {
+          log_write("%s\n", iringbuf[i++]);
+          i %= IRINGBUF_LEN;
+        } while(i != iringbuf_wptr);
+      }
+#endif
+
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
