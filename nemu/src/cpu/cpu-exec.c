@@ -46,10 +46,6 @@ static struct {
 static uint iringbuf_wptr = 0;
 static uint iringbuf_size = 0;
 
-static void itrace_print(uint pos) {
-  log_write("0x%08x:\t%16s\t%8s\t%s\n", iringbuf[pos].pc, iringbuf[pos].inst_str, iringbuf[pos].mnemonic, iringbuf[pos].op_str);
-}
-
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
   // set itrace pc
@@ -69,10 +65,12 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   disassemble(iringbuf[iringbuf_wptr].mnemonic, IRINGBUF_MNEMONIC_LEN, iringbuf[iringbuf_wptr].op_str, IRINGBUF_OP_STR_LEN,
       MUXDEF(CONFIG_ISA_x86, _this->snpc, _this->pc), (uint8_t *)&_this->isa.inst.val, ilen);
 
+  // print step for tiny program
   if (g_print_step) {
-    itrace_print(iringbuf_wptr);
+    printf("0x%08x:\t%16s\t%8s\t%s\n", iringbuf[iringbuf_wptr].pc, iringbuf[iringbuf_wptr].inst_str, iringbuf[iringbuf_wptr].mnemonic, iringbuf[iringbuf_wptr].op_str);
   }
 
+  // move write pointer
   iringbuf_wptr = (iringbuf_wptr + 1) % IRINGBUF_LEN;
   if (iringbuf_size < IRINGBUF_LEN) {
     iringbuf_size += 1;
@@ -142,8 +140,8 @@ void cpu_exec(uint64_t n) {
       if (ITRACE_COND && iringbuf_size) {
         uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;
         do {
-          itrace_print(i++);
-          i %= IRINGBUF_LEN;
+          log_write("0x%08x:\t%16s\t%8s\t%s\n", iringbuf[i].pc, iringbuf[i].inst_str, iringbuf[i].mnemonic, iringbuf[i].op_str);
+          i = (i + 1) % IRINGBUF_LEN;
         } while(i != iringbuf_wptr);
       }
       log_write("==================== ITRACE ====================\n");
