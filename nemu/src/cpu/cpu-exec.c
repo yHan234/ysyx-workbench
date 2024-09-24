@@ -140,15 +140,15 @@ void cpu_exec(uint64_t n) {
         } while(i != iringbuf_wptr);
       }
       log_write("==================== ITRACE ====================\n");
-#endif
       log_write("\n");
+#endif
 #ifdef CONFIG_MTRACE
       void mringbuf_print();
       log_write("==================== MTRACE ====================\n");
       mringbuf_print();
       log_write("==================== MTRACE ====================\n");
-#endif
       log_write("\n");
+#endif
 
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
