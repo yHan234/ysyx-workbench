@@ -46,6 +46,22 @@ static struct {
 static uint iringbuf_wptr = 0;
 static uint iringbuf_size = 0;
 
+#define iringbuf_print(print_func)                                             \
+  do {                                                                         \
+    if (iringbuf_size) {                                                       \
+      uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;              \
+      do {                                                                     \
+        print_func("0x%08x:", iringbuf[i].pc);                                 \
+        uint8_t *inst = (uint8_t *)&iringbuf[i].inst;                          \
+        for (int j = iringbuf[i].inst_len - 1; j >= 0; j--) {                  \
+          print_func(" %02x", inst[j]);                                        \
+        }                                                                      \
+        print_func("%8s\t%s\n", iringbuf[i].mnemonic, iringbuf[i].op_str);     \
+        i = (i + 1) % IRINGBUF_LEN;                                            \
+      } while (i != iringbuf_wptr);                                            \
+    }                                                                          \
+  } while (0)
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
   iringbuf[iringbuf_wptr].pc = _this->pc;
@@ -58,7 +74,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
   // print step for tiny program
   if (g_print_step) {
-    // printf("0x%08x:\t%16s\t%8s\t%s\n", iringbuf[iringbuf_wptr].pc, iringbuf[iringbuf_wptr].inst_str, iringbuf[iringbuf_wptr].mnemonic, iringbuf[iringbuf_wptr].op_str);
+    iringbuf_print(printf);
   }
 
   // iringbuf move write pointer and update size
@@ -127,21 +143,12 @@ void cpu_exec(uint64_t n) {
       extern FILE *log_fp;
       log_write("\n");
 #ifdef CONFIG_ITRACE_COND
-      log_write("==================== ITRACE ====================\n");
-      if (ITRACE_COND && iringbuf_size) {
-        uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;
-        do {
-          log_write("0x%08x:", iringbuf[i].pc);
-          uint8_t *inst = (uint8_t *)&iringbuf[i].inst;
-          for (int j = iringbuf[i].inst_len - 1; j >= 0; j--) {
-            log_write(" %02x", inst[j]);
-          }
-          log_write("%8s\t%s\n", iringbuf[i].mnemonic, iringbuf[i].op_str);
-          i = (i + 1) % IRINGBUF_LEN;
-        } while(i != iringbuf_wptr);
+      if (ITRACE_COND) {
+        log_write("==================== ITRACE ====================\n");
+        iringbuf_print(log_write);
+        log_write("==================== ITRACE ====================\n");
+        log_write("\n");
       }
-      log_write("==================== ITRACE ====================\n");
-      log_write("\n");
 #endif
 #ifdef CONFIG_MTRACE
       void mringbuf_print();
