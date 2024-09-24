@@ -34,13 +34,50 @@ void device_update();
 void check_watchpoints();
 
 #define IRINGBUF_LEN 128
-#define LOGBUF_LEN 128
-static char iringbuf[IRINGBUF_LEN][LOGBUF_LEN];
+#define IRINGBUF_INST_LEN 32
+#define IRINGBUF_MNEMONIC_LEN 16
+#define IRINGBUF_OP_STR_LEN 64
+static struct {
+  vaddr_t pc;
+  char inst_str[32];
+  char mnemonic[16];
+  char op_str[64];
+} iringbuf[IRINGBUF_LEN];
 static uint iringbuf_wptr = 0;
 static uint iringbuf_size = 0;
 
+static void itrace_print(uint pos) {
+  log_write("0x%08x:\t%16s\t%8s\t%s\n", iringbuf[pos].pc, iringbuf[pos].inst_str, iringbuf[pos].mnemonic, iringbuf[pos].op_str);
+}
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
-  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
+#ifdef CONFIG_ITRACE
+  // set itrace pc
+  iringbuf[iringbuf_wptr].pc = _this->pc;
+
+  // set itrace inst
+  int ilen = _this->snpc - _this->pc;
+  uint8_t *inst = (uint8_t *)&_this->isa.inst.val;
+  char *inst_s = iringbuf[iringbuf_wptr].inst_str;
+  for (int i = ilen - 1; i >= 0; i --) {
+    inst_s += snprintf(inst_s, 4, " %02x", inst[i]);
+  }
+  *inst_s = '\0';
+
+  // set itrace mnemonic op_str
+  void disassemble(char *mnemonic, int size_mnemonic, char *op_str, int size_op_str, uint64_t pc, uint8_t *code, int nbyte);
+  disassemble(iringbuf[iringbuf_wptr].mnemonic, IRINGBUF_MNEMONIC_LEN, iringbuf[iringbuf_wptr].op_str, IRINGBUF_OP_STR_LEN,
+      MUXDEF(CONFIG_ISA_x86, _this->snpc, _this->pc), (uint8_t *)&_this->isa.inst.val, ilen);
+
+  if (g_print_step) {
+    itrace_print(iringbuf_wptr);
+  }
+
+  iringbuf_wptr = (iringbuf_wptr + 1) % IRINGBUF_LEN;
+  if (iringbuf_size < IRINGBUF_LEN) {
+    iringbuf_size += 1;
+  }
+#endif
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, check_watchpoints());
 }
@@ -50,32 +87,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
-#ifdef CONFIG_ITRACE
-  s->logbuf = iringbuf[iringbuf_wptr++];
-  iringbuf_wptr %= IRINGBUF_LEN;
-  if (iringbuf_size < IRINGBUF_LEN) {
-    iringbuf_size += 1;
-  }
-
-  char *p = s->logbuf;
-  p += snprintf(p, LOGBUF_LEN, FMT_WORD ":", s->pc);
-  int ilen = s->snpc - s->pc;
-  int i;
-  uint8_t *inst = (uint8_t *)&s->isa.inst.val;
-  for (i = ilen - 1; i >= 0; i --) {
-    p += snprintf(p, 4, " %02x", inst[i]);
-  }
-  int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
-  int space_len = ilen_max - ilen;
-  if (space_len < 0) space_len = 0;
-  space_len = space_len * 3 + 1;
-  memset(p, ' ', space_len);
-  p += space_len;
-
-  void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-  disassemble(p, s->logbuf + LOGBUF_LEN - p,
-      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
-#endif
 }
 
 static void execute(uint64_t n) {
@@ -131,7 +142,7 @@ void cpu_exec(uint64_t n) {
       if (ITRACE_COND && iringbuf_size) {
         uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;
         do {
-          log_write("%s\n", iringbuf[i++]);
+          itrace_print(i++);
           i %= IRINGBUF_LEN;
         } while(i != iringbuf_wptr);
       }
