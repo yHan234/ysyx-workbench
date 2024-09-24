@@ -34,13 +34,54 @@ void device_update();
 void check_watchpoints();
 
 #define IRINGBUF_LEN 128
-#define LOGBUF_LEN 128
-static char iringbuf[IRINGBUF_LEN][LOGBUF_LEN];
+#define IRINGBUF_MNEMONIC_LEN 8
+#define IRINGBUF_OP_STR_LEN 64
+static struct {
+  vaddr_t pc;
+  int inst_len;
+  uint32_t inst;
+  char mnemonic[IRINGBUF_MNEMONIC_LEN];
+  char op_str[IRINGBUF_OP_STR_LEN];
+} iringbuf[IRINGBUF_LEN];
 static uint iringbuf_wptr = 0;
 static uint iringbuf_size = 0;
 
+#define iringbuf_print(printf)                                                 \
+  do {                                                                         \
+    if (iringbuf_size) {                                                       \
+      uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;              \
+      do {                                                                     \
+        printf("0x%08x:", iringbuf[i].pc);                                     \
+        uint8_t *inst = (uint8_t *)&iringbuf[i].inst;                          \
+        for (int j = iringbuf[i].inst_len - 1; j >= 0; j--) {                  \
+          printf(" %02x", inst[j]);                                            \
+        }                                                                      \
+        printf("%*s\t%s\n", IRINGBUF_MNEMONIC_LEN, iringbuf[i].mnemonic,       \
+               iringbuf[i].op_str);                                            \
+        i = (i + 1) % IRINGBUF_LEN;                                            \
+      } while (i != iringbuf_wptr);                                            \
+    }                                                                          \
+  } while (0)
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
-  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
+#ifdef CONFIG_ITRACE
+  iringbuf[iringbuf_wptr].pc = _this->pc;
+  iringbuf[iringbuf_wptr].inst_len = _this->snpc - _this->pc;
+  iringbuf[iringbuf_wptr].inst = _this->isa.inst.val;
+
+  void disassemble(char *mnemonic, int size_mnemonic, char *op_str, int size_op_str, uint64_t pc, uint8_t *code, int nbyte);
+  disassemble(iringbuf[iringbuf_wptr].mnemonic, IRINGBUF_MNEMONIC_LEN, iringbuf[iringbuf_wptr].op_str, IRINGBUF_OP_STR_LEN,
+      MUXDEF(CONFIG_ISA_x86, _this->snpc, _this->pc), (uint8_t *)&_this->isa.inst.val, iringbuf[iringbuf_wptr].inst_len);
+
+  if (g_print_step) {
+    iringbuf_print(printf);
+  }
+
+  iringbuf_wptr = (iringbuf_wptr + 1) % IRINGBUF_LEN;
+  if (iringbuf_size < IRINGBUF_LEN) {
+    iringbuf_size += 1;
+  }
+#endif
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, check_watchpoints());
 }
@@ -50,32 +91,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
-#ifdef CONFIG_ITRACE
-  s->logbuf = iringbuf[iringbuf_wptr++];
-  iringbuf_wptr %= IRINGBUF_LEN;
-  if (iringbuf_size < IRINGBUF_LEN) {
-    iringbuf_size += 1;
-  }
-
-  char *p = s->logbuf;
-  p += snprintf(p, LOGBUF_LEN, FMT_WORD ":", s->pc);
-  int ilen = s->snpc - s->pc;
-  int i;
-  uint8_t *inst = (uint8_t *)&s->isa.inst.val;
-  for (i = ilen - 1; i >= 0; i --) {
-    p += snprintf(p, 4, " %02x", inst[i]);
-  }
-  int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
-  int space_len = ilen_max - ilen;
-  if (space_len < 0) space_len = 0;
-  space_len = space_len * 3 + 1;
-  memset(p, ' ', space_len);
-  p += space_len;
-
-  void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-  disassemble(p, s->logbuf + LOGBUF_LEN - p,
-      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
-#endif
 }
 
 static void execute(uint64_t n) {
@@ -127,16 +142,12 @@ void cpu_exec(uint64_t n) {
       extern FILE *log_fp;
       log_write("\n");
 #ifdef CONFIG_ITRACE_COND
-      log_write("==================== ITRACE ====================\n");
-      if (ITRACE_COND && iringbuf_size) {
-        uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;
-        do {
-          log_write("%s\n", iringbuf[i++]);
-          i %= IRINGBUF_LEN;
-        } while(i != iringbuf_wptr);
+      if (ITRACE_COND) {
+        log_write("==================== ITRACE ====================\n");
+        iringbuf_print(log_write);
+        log_write("==================== ITRACE ====================\n");
+        log_write("\n");
       }
-      log_write("==================== ITRACE ====================\n");
-      log_write("\n");
 #endif
 #ifdef CONFIG_MTRACE
       void mringbuf_print();
