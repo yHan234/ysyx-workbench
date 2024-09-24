@@ -56,7 +56,8 @@ static uint iringbuf_size = 0;
         for (int j = iringbuf[i].inst_len - 1; j >= 0; j--) {                  \
           printf(" %02x", inst[j]);                                            \
         }                                                                      \
-        printf("%8s\t%s\n", iringbuf[i].mnemonic, iringbuf[i].op_str);         \
+        printf("%*s\t%s\n", IRINGBUF_MNEMONIC_LEN, iringbuf[i].mnemonic,       \
+               iringbuf[i].op_str);                                            \
         i = (i + 1) % IRINGBUF_LEN;                                            \
       } while (i != iringbuf_wptr);                                            \
     }                                                                          \
