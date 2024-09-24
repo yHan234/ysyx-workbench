@@ -34,7 +34,7 @@ void device_update();
 void check_watchpoints();
 
 #define IRINGBUF_LEN 128
-#define IRINGBUF_MNEMONIC_LEN 16
+#define IRINGBUF_MNEMONIC_LEN 8
 #define IRINGBUF_OP_STR_LEN 64
 static struct {
   vaddr_t pc;
@@ -46,17 +46,17 @@ static struct {
 static uint iringbuf_wptr = 0;
 static uint iringbuf_size = 0;
 
-#define iringbuf_print(print_func)                                             \
+#define iringbuf_print(printf)                                                 \
   do {                                                                         \
     if (iringbuf_size) {                                                       \
       uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;              \
       do {                                                                     \
-        print_func("0x%08x:", iringbuf[i].pc);                                 \
+        printf("0x%08x:", iringbuf[i].pc);                                     \
         uint8_t *inst = (uint8_t *)&iringbuf[i].inst;                          \
         for (int j = iringbuf[i].inst_len - 1; j >= 0; j--) {                  \
-          print_func(" %02x", inst[j]);                                        \
+          printf(" %02x", inst[j]);                                            \
         }                                                                      \
-        print_func("%8s\t%s\n", iringbuf[i].mnemonic, iringbuf[i].op_str);     \
+        printf("%8s\t%s\n", iringbuf[i].mnemonic, iringbuf[i].op_str);         \
         i = (i + 1) % IRINGBUF_LEN;                                            \
       } while (i != iringbuf_wptr);                                            \
     }                                                                          \
@@ -72,12 +72,10 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   disassemble(iringbuf[iringbuf_wptr].mnemonic, IRINGBUF_MNEMONIC_LEN, iringbuf[iringbuf_wptr].op_str, IRINGBUF_OP_STR_LEN,
       MUXDEF(CONFIG_ISA_x86, _this->snpc, _this->pc), (uint8_t *)&_this->isa.inst.val, iringbuf[iringbuf_wptr].inst_len);
 
-  // print step for tiny program
   if (g_print_step) {
     iringbuf_print(printf);
   }
 
-  // iringbuf move write pointer and update size
   iringbuf_wptr = (iringbuf_wptr + 1) % IRINGBUF_LEN;
   if (iringbuf_size < IRINGBUF_LEN) {
     iringbuf_size += 1;
