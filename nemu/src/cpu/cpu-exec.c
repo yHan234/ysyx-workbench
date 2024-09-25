@@ -82,6 +82,7 @@ extern uint num_functions;
 static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
   fringbuf[fringbuf_wptr].pc = pc;
   fringbuf[fringbuf_wptr].dep = ++fringbuf_dep;
+  printf("%d\n", num_functions);
   for (int i = 0; i < num_functions; ++i) {
     printf("%x %x\n", addr, functions[i].addr);
     if (addr == functions[i].addr) {
