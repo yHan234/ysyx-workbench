@@ -14,18 +14,18 @@ void init_elf(const char *elf_file) {
   int fd = open(elf_file, O_RDONLY);
   Assert(fd >= 0, "Failed to open ELF file");
 
-  Elf64_Ehdr ehdr;
+  Elf32_Ehdr ehdr;
   Assert(read(fd, &ehdr, sizeof(ehdr)) == sizeof(ehdr), "Failed to read ELF header");
   Assert(memcmp(ehdr.e_ident, ELFMAG, SELFMAG) == 0, "Not a valid ELF file");
 
   // 寻找符号表和字符串表的节
-  Elf64_Half shentsize = ehdr.e_shentsize;
-  printf("%d", shentsize);
+  Elf32_Half shentsize = ehdr.e_shentsize;
+  printf("%d\n", shentsize);
   fflush(stdout);
-  Elf64_Shdr *shdr = (Elf64_Shdr *)malloc(shentsize);
+  Elf32_Shdr *shdr = (Elf32_Shdr *)malloc(shentsize);
   lseek(fd, ehdr.e_shoff, SEEK_SET);
-  Elf64_Shdr *symtab_hdr = (Elf64_Shdr *)malloc(shentsize);
-  Elf64_Shdr *strtab_hdr = (Elf64_Shdr *)malloc(shentsize);
+  Elf32_Shdr *symtab_hdr = (Elf32_Shdr *)malloc(shentsize);
+  Elf32_Shdr *strtab_hdr = (Elf32_Shdr *)malloc(shentsize);
 
   for (int i = 0; i < ehdr.e_shnum; i++) {
     Assert(read(fd, shdr, sizeof(shdr)) == sizeof(shdr), "Failed to read section header");
@@ -37,7 +37,7 @@ void init_elf(const char *elf_file) {
     }
   }
 
-  Elf64_Sym *symtab = malloc(symtab_hdr->sh_size);
+  Elf32_Sym *symtab = malloc(symtab_hdr->sh_size);
   lseek(fd, symtab_hdr->sh_offset, SEEK_SET); // 定位到符号表的偏移
   Assert(read(fd, symtab, symtab_hdr->sh_size) > 0, "Failed to read symbol table");
 
@@ -45,14 +45,14 @@ void init_elf(const char *elf_file) {
   lseek(fd, strtab_hdr->sh_offset, SEEK_SET); // 定位到字符串表的偏移
   Assert(read(fd, strtab, strtab_hdr->sh_size) > 0, "Failed to read string table");
 
-  int symcount = symtab_hdr->sh_size / sizeof(Elf64_Sym);
+  int symcount = symtab_hdr->sh_size / sizeof(Elf32_Sym);
   for (int i = 0; i < symcount; i++) {
-    Elf64_Sym sym = symtab[i];
+    Elf32_Sym sym = symtab[i];
     const char *name = &strtab[sym.st_name];
 
     // 判断符号是否为函数
-    if (ELF64_ST_TYPE(sym.st_info) == STT_FUNC) {
-      printf("Function: %s, Address: 0x%lx\n", name, sym.st_value);
+    if (ELF32_ST_TYPE(sym.st_info) == STT_FUNC) {
+      printf("Function: %s, Address: 0x%x\n", name, sym.st_value);
     }
   }
 
