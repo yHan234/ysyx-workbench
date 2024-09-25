@@ -116,7 +116,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
 #ifdef CONFIG_FTRACE
 #ifdef CONFIG_ISA_riscv
-  if (strcmp(iringbuf[iringbuf_wptr - 1].mnemonic, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
+  if (strcmp(iringbuf[(iringbuf_wptr + IRINGBUF_LEN - 1) % IRINGBUF_LEN].mnemonic, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
     fringbuf_call(_this->pc, _this->dnpc);
   }
 #endif
