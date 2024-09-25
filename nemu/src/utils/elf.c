@@ -21,13 +21,10 @@ void init_elf(const char *elf_file) {
   // 寻找符号表和字符串表的节
   Elf32_Half shentsize = ehdr.e_shentsize;
   Elf32_Shdr *shdr = (Elf32_Shdr *)malloc(shentsize);
-  lseek(fd, ehdr.e_shoff, SEEK_SET);
   Elf32_Shdr *symtab_hdr = (Elf32_Shdr *)malloc(shentsize);
   Elf32_Shdr *strtab_hdr = (Elf32_Shdr *)malloc(shentsize);
-  Elf32_Shdr t;
 
-  printf("sizeof Elf32_Shdr = %ld\n", sizeof(t));
-
+  lseek(fd, ehdr.e_shoff, SEEK_SET);
   for (int i = 0; i < ehdr.e_shnum; i++) {
     Assert(read(fd, shdr, sizeof(shdr)) == sizeof(shdr), "Failed to read section header");
 
