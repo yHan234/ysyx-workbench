@@ -105,7 +105,7 @@ static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
 static void fringbuf_ret(vaddr_t pc) {
   fringbuf[fringbuf_wptr].pc = pc;
   fringbuf[fringbuf_wptr].dep = --fringbuf_dep;
-  fringbuf[fringbuf_wptr].op = 2;
+  fringbuf[fringbuf_wptr].op = 0;
   for (int i = 1; i < num_functions; ++i) {
     if (pc < functions[i].addr) {
       fringbuf[fringbuf_wptr].func = &functions[i];
