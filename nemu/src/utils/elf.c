@@ -46,7 +46,7 @@ void init_elf(const char *elf_file) {
   char *strtab = malloc(strtab_hdr->sh_size);
   printf("strtab offset %d size %d\n", strtab_hdr->sh_offset, strtab_hdr->sh_size);
   lseek(fd, strtab_hdr->sh_offset, SEEK_SET);
-  printf("readed %d\n", read(fd, strtab, strtab_hdr->sh_size) == symtab_hdr->sh_size);
+  printf("readed %ld\n", read(fd, strtab, strtab_hdr->sh_size));
   // Assert(read(fd, strtab, strtab_hdr->sh_size) == symtab_hdr->sh_size, "Failed to read string table");
 
   int symcount = symtab_hdr->sh_size / sizeof(Elf32_Sym);
