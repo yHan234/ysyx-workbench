@@ -200,9 +200,9 @@ void cpu_exec(uint64_t n) {
       if (fringbuf_size) {
         uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_size : 0;
         do {
-          printf("0x%08x:", fringbuf[i].pc);
+          log_write("0x%08x:", fringbuf[i].pc);
           if (fringbuf[i].func) {
-            printf("%*s call [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
+            log_write("%*s call [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
           }
           i = (i + 1) % FRINGBUF_LEN;
         } while (i != fringbuf_wptr);
