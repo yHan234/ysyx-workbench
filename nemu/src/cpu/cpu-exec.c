@@ -108,7 +108,7 @@ static void fringbuf_ret(vaddr_t pc) {
   fringbuf[fringbuf_wptr].op = 0;
   for (int i = 1; i < num_functions; ++i) {
     if (pc < functions[i].addr) {
-      fringbuf[fringbuf_wptr].func = &functions[i];
+      fringbuf[fringbuf_wptr].func = &functions[i - 1];
       break;
     }
   }
