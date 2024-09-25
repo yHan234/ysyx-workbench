@@ -71,7 +71,7 @@ void init_elf(const char *elf_file) {
     if (ELF32_ST_TYPE(sym.st_info) == STT_FUNC) {
       functions[func_idx].name = &strtab[sym.st_name];
       functions[func_idx].addr = sym.st_value;
-      printf("function %s %x", functions[func_idx].name, functions[func_idx].addr);
+      printf("function %s %x\n", functions[func_idx].name, functions[func_idx].addr);
       func_idx += 1;
     }
   }
