@@ -195,6 +195,21 @@ void cpu_exec(uint64_t n) {
       log_write("==================== MTRACE ====================\n");
       log_write("\n");
 #endif
+#ifdef CONFIG_FTRACE
+      log_write("==================== FTRACE ====================\n");
+      if (fringbuf_size) {
+        uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_size : 0;
+        do {
+          printf("0x%08x:", fringbuf[i].pc);
+          if (fringbuf[i].func) {
+            printf("%*s call [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
+          }
+          i = (i + 1) % FRINGBUF_LEN;
+        } while (i != fringbuf_wptr);
+      }
+      log_write("==================== FTRACE ====================\n");
+      log_write("\n");
+#endif
 
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
