@@ -29,6 +29,7 @@ void init_elf(const char *elf_file) {
     Assert(read(fd, shdr, sizeof(shdr)) == sizeof(shdr), "Failed to read section header");
 
     if (shdr->sh_type == SHT_SYMTAB) {
+      printf("symtab_hdr->sh_size = %d\n", shdr->sh_type);
       memcpy(symtab_hdr, shdr, shentsize);
     } else if (shdr->sh_type == SHT_STRTAB && i == ehdr.e_shstrndx) {
       memcpy(strtab_hdr, shdr, shentsize);
