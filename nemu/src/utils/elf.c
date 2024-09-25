@@ -54,7 +54,6 @@ void init_elf(const char *elf_file) {
 
   Assert(strtab_hdr, "Failed to find string table");
   strtab = malloc(strtab_hdr->sh_size);
-  printf("strtab offset %d size %d\n", strtab_hdr->sh_offset, strtab_hdr->sh_size);
   lseek(fd, strtab_hdr->sh_offset, SEEK_SET);
   Assert(read(fd, strtab, strtab_hdr->sh_size) == strtab_hdr->sh_size, "Failed to read string table");
 
@@ -71,12 +70,10 @@ void init_elf(const char *elf_file) {
 
     if (ELF32_ST_TYPE(sym.st_info) == STT_FUNC) {
       functions[func_idx].name = &strtab[sym.st_name];
-      functions[func_idx].addr = sym.st_info;
+      functions[func_idx].addr = sym.st_value;
       func_idx += 1;
     }
   }
-
-  printf("num_functions %d\n", num_functions);
 
   free(shdr);
   free(symtab_hdr);
