@@ -76,6 +76,8 @@ void init_elf(const char *elf_file) {
     }
   }
 
+  printf("num_functions %d\n", num_functions);
+
   free(shdr);
   free(symtab_hdr);
   free(strtab_hdr);
