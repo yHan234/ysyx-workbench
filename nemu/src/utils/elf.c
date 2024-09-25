@@ -19,29 +19,31 @@ void init_elf(const char *elf_file) {
   Assert(memcmp(ehdr.e_ident, ELFMAG, SELFMAG) == 0, "Not a valid ELF file");
 
   // 寻找符号表和字符串表的节
-  Elf64_Shdr shdr;
-  lseek(fd, ehdr.e_shoff, SEEK_SET); // 定位到节头部表偏移
-  Elf64_Shdr symtab_hdr, strtab_hdr;
+  Elf64_Half shentsize = ehdr.e_shentsize;
+  Elf64_Shdr *shdr = (Elf64_Shdr *)malloc(shentsize);
+  lseek(fd, ehdr.e_shoff, SEEK_SET);
+  Elf64_Shdr *symtab_hdr = (Elf64_Shdr *)malloc(shentsize);
+  Elf64_Shdr *strtab_hdr = (Elf64_Shdr *)malloc(shentsize);
 
   for (int i = 0; i < ehdr.e_shnum; i++) {
-    Assert(read(fd, &shdr, sizeof(shdr)) == sizeof(shdr), "Failed to read section header");
+    Assert(read(fd, shdr, sizeof(shdr)) == sizeof(shdr), "Failed to read section header");
 
-    if (shdr.sh_type == SHT_SYMTAB) {
-      symtab_hdr = shdr; // 符号表
-    } else if (shdr.sh_type == SHT_STRTAB && i == ehdr.e_shstrndx) {
-      strtab_hdr = shdr; // 字符串表
+    if (shdr->sh_type == SHT_SYMTAB) {
+      memcpy(symtab_hdr, shdr, shentsize);
+    } else if (shdr->sh_type == SHT_STRTAB && i == ehdr.e_shstrndx) {
+      memcpy(strtab_hdr, shdr, shentsize);
     }
   }
 
-  Elf64_Sym *symtab = malloc(symtab_hdr.sh_size);
-  lseek(fd, symtab_hdr.sh_offset, SEEK_SET); // 定位到符号表的偏移
-  Assert(read(fd, symtab, symtab_hdr.sh_size) > 0, "Failed to read symbol table");
+  Elf64_Sym *symtab = malloc(symtab_hdr->sh_size);
+  lseek(fd, symtab_hdr->sh_offset, SEEK_SET); // 定位到符号表的偏移
+  Assert(read(fd, symtab, symtab_hdr->sh_size) > 0, "Failed to read symbol table");
 
-  char *strtab = malloc(strtab_hdr.sh_size);
-  lseek(fd, strtab_hdr.sh_offset, SEEK_SET); // 定位到字符串表的偏移
-  Assert(read(fd, strtab, strtab_hdr.sh_size) > 0, "Failed to read string table");
+  char *strtab = malloc(strtab_hdr->sh_size);
+  lseek(fd, strtab_hdr->sh_offset, SEEK_SET); // 定位到字符串表的偏移
+  Assert(read(fd, strtab, strtab_hdr->sh_size) > 0, "Failed to read string table");
 
-  int symcount = symtab_hdr.sh_size / sizeof(Elf64_Sym);
+  int symcount = symtab_hdr->sh_size / sizeof(Elf64_Sym);
   for (int i = 0; i < symcount; i++) {
     Elf64_Sym sym = symtab[i];
     const char *name = &strtab[sym.st_name];
