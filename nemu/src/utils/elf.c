@@ -26,7 +26,7 @@ void init_elf(const char *elf_file) {
   Elf32_Shdr *strtab_hdr = (Elf32_Shdr *)malloc(shentsize);
 
   for (int i = 0; i < ehdr.e_shnum; i++) {
-    Assert(read(fd, shdr, sizeof(shdr)) == sizeof(shdr), "Failed to read section header");
+    Assert(read(fd, shdr, sizeof(shdr) * i) == sizeof(shdr), "Failed to read section header");
 
     if (shdr->sh_type == SHT_SYMTAB) {
       memcpy(symtab_hdr, shdr, shentsize);
