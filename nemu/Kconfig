@@ -166,6 +166,11 @@ config MTRACE_END
   string "Where memory trace end"
   default "0xFFFFFFFF"
 
+config FTRACE
+  depends on TRACE
+  bool "Enable function tracer"
+  default y
+
 
 config DIFFTEST
   depends on TARGET_NATIVE_ELF

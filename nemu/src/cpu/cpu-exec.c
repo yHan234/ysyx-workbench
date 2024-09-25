@@ -33,6 +33,8 @@ static bool g_print_step = false;
 void device_update();
 void check_watchpoints();
 
+// ITRACE
+
 #define IRINGBUF_LEN 128
 #define IRINGBUF_MNEMONIC_LEN 8
 #define IRINGBUF_OP_STR_LEN 64
@@ -63,6 +65,65 @@ static uint iringbuf_size = 0;
     }                                                                          \
   } while (0)
 
+// FTRACE
+
+#define FRINGBUF_LEN 128
+typedef struct {
+  vaddr_t addr;
+  char *name;
+} Function;
+extern Function *functions;
+static struct {
+  vaddr_t pc;
+  Function *func;
+  int op; // 0: ret, 1: call
+  int dep;
+} fringbuf[FRINGBUF_LEN];
+static uint fringbuf_dep = 0;
+static uint fringbuf_wptr = 0;
+static uint fringbuf_size = 0;
+extern uint num_functions;
+
+static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
+  fringbuf[fringbuf_wptr].pc = pc;
+  fringbuf[fringbuf_wptr].dep = fringbuf_dep++;
+  fringbuf[fringbuf_wptr].op = 1;
+  // TODO: 可优化为二分查找
+  for (int i = 0; i < num_functions; ++i) {
+    if (addr == functions[i].addr) {
+      fringbuf[fringbuf_wptr].func = &functions[i];
+      break;
+    }
+  }
+  Assert(fringbuf[fringbuf_wptr].func, "FTRACE: function at %x not found in elf file", addr);
+
+  fringbuf_wptr = (fringbuf_wptr + 1) % FRINGBUF_LEN;
+  if (fringbuf_size < FRINGBUF_LEN) {
+    fringbuf_size += 1;
+  }
+}
+
+static void fringbuf_ret(vaddr_t pc) {
+  fringbuf[fringbuf_wptr].pc = pc;
+  fringbuf[fringbuf_wptr].dep = --fringbuf_dep;
+  fringbuf[fringbuf_wptr].op = 0;
+  // TODO: 可优化为二分查找
+  for (int i = 1; i < num_functions; ++i) {
+    if (pc < functions[i].addr) {
+      fringbuf[fringbuf_wptr].func = &functions[i - 1];
+      break;
+    }
+  }
+  if (fringbuf[fringbuf_wptr].func == NULL) {
+    fringbuf[fringbuf_wptr].func = &functions[num_functions - 1];
+  }
+
+  fringbuf_wptr = (fringbuf_wptr + 1) % FRINGBUF_LEN;
+  if (fringbuf_size < FRINGBUF_LEN) {
+    fringbuf_size += 1;
+  }
+}
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
   iringbuf[iringbuf_wptr].pc = _this->pc;
@@ -81,6 +142,21 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (iringbuf_size < IRINGBUF_LEN) {
     iringbuf_size += 1;
   }
+#endif
+
+#ifdef CONFIG_FTRACE
+#ifdef CONFIG_ISA_riscv
+  char *last_inst = iringbuf[(iringbuf_wptr + IRINGBUF_LEN - 1) % IRINGBUF_LEN].mnemonic;
+  if (strcmp(last_inst, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
+    fringbuf_call(_this->pc, _this->dnpc);
+  }
+  if (strcmp(last_inst, "jalr") == 0 && cpu.gpr[1] == _this->snpc) {
+    fringbuf_call(_this->pc, _this->dnpc);
+  }
+  if (strcmp(last_inst, "ret") == 0) {
+    fringbuf_ret(_this->pc);
+  }
+#endif
 #endif
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, check_watchpoints());
@@ -154,6 +230,23 @@ void cpu_exec(uint64_t n) {
       log_write("==================== MTRACE ====================\n");
       mringbuf_print();
       log_write("==================== MTRACE ====================\n");
+      log_write("\n");
+#endif
+#ifdef CONFIG_FTRACE
+      log_write("==================== FTRACE ====================\n");
+      if (fringbuf_size) {
+        uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_wptr : 0;
+        do {
+          log_write("0x%08x: ", fringbuf[i].pc);
+          if (fringbuf[i].op) {
+            log_write("%*scall [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
+          } else {
+            log_write("%*sret  [%s]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name);
+          }
+          i = (i + 1) % FRINGBUF_LEN;
+        } while (i != fringbuf_wptr);
+      }
+      log_write("==================== FTRACE ====================\n");
       log_write("\n");
 #endif
 
