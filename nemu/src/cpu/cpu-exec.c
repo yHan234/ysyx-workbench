@@ -102,7 +102,7 @@ static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
 
 static void fringbuf_ret(vaddr_t pc) {
   fringbuf[fringbuf_wptr].pc = pc;
-  fringbuf[fringbuf_wptr].dep = fringbuf_dep--;
+  fringbuf[fringbuf_wptr].dep = --fringbuf_dep;
 
   fringbuf_wptr = (fringbuf_wptr + 1) % FRINGBUF_LEN;
   if (fringbuf_size < FRINGBUF_LEN) {
