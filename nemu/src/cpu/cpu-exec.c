@@ -75,7 +75,8 @@ typedef struct {
 extern Function *functions;
 static struct {
   vaddr_t pc;
-  Function *func; // func == NULL means ret
+  Function *func;
+  int op; // 0: ret, 1: call
   int dep;
 } fringbuf[FRINGBUF_LEN];
 static uint fringbuf_dep = 0;
@@ -86,6 +87,7 @@ extern uint num_functions;
 static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
   fringbuf[fringbuf_wptr].pc = pc;
   fringbuf[fringbuf_wptr].dep = fringbuf_dep++;
+  fringbuf[fringbuf_wptr].op = 1;
   for (int i = 0; i < num_functions; ++i) {
     if (addr == functions[i].addr) {
       fringbuf[fringbuf_wptr].func = &functions[i];
@@ -103,6 +105,16 @@ static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
 static void fringbuf_ret(vaddr_t pc) {
   fringbuf[fringbuf_wptr].pc = pc;
   fringbuf[fringbuf_wptr].dep = --fringbuf_dep;
+  fringbuf[fringbuf_wptr].op = 2;
+  for (int i = 1; i < num_functions; ++i) {
+    if (pc < functions[i].addr) {
+      fringbuf[fringbuf_wptr].func = &functions[i];
+      break;
+    }
+  }
+  if (fringbuf[fringbuf_wptr].func == NULL) {
+    fringbuf[fringbuf_wptr].func = &functions[num_functions - 1];
+  }
 
   fringbuf_wptr = (fringbuf_wptr + 1) % FRINGBUF_LEN;
   if (fringbuf_size < FRINGBUF_LEN) {
@@ -221,10 +233,10 @@ void cpu_exec(uint64_t n) {
         uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_wptr : 0;
         do {
           log_write("0x%08x: ", fringbuf[i].pc);
-          if (fringbuf[i].func) {
+          if (fringbuf[i].op) {
             log_write("%*scall [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
           } else {
-            log_write("%*sret\n", fringbuf[i].dep * 2, "");
+            log_write("%*sret [%s]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name);
           }
           i = (i + 1) % FRINGBUF_LEN;
         } while (i != fringbuf_wptr);
