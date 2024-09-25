@@ -81,10 +81,6 @@ void init_elf(const char *elf_file) {
 
   qsort(functions, num_functions, sizeof(Function), function_addr_cmp);
 
-  for (int i = 0; i < num_functions; ++i) {
-    printf("function %s %x\n", functions[i].name, functions[i].addr);
-  }
-
   free(shdr);
   free(symtab_hdr);
   free(strtab_hdr);

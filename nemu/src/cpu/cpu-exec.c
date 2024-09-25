@@ -148,6 +148,9 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (strcmp(last_inst, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
     fringbuf_call(_this->pc, _this->dnpc);
   }
+  if (strcmp(last_inst, "jalr") == 0 && cpu.gpr[1] == _this->snpc) {
+    fringbuf_call(_this->pc, _this->dnpc);
+  }
   if (strcmp(last_inst, "ret") == 0) {
     fringbuf_ret(_this->pc);
   }
