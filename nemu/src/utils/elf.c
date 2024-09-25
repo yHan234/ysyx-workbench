@@ -20,8 +20,6 @@ void init_elf(const char *elf_file) {
 
   // 寻找符号表和字符串表的节
   Elf32_Half shentsize = ehdr.e_shentsize;
-  printf("%d\n", shentsize);
-  fflush(stdout);
   Elf32_Shdr *shdr = (Elf32_Shdr *)malloc(shentsize);
   lseek(fd, ehdr.e_shoff, SEEK_SET);
   Elf32_Shdr *symtab_hdr = (Elf32_Shdr *)malloc(shentsize);
@@ -37,6 +35,7 @@ void init_elf(const char *elf_file) {
     }
   }
 
+  printf("symtab_hdr->sh_size = %d\n", symtab_hdr->sh_size);
   Elf32_Sym *symtab = malloc(symtab_hdr->sh_size);
   lseek(fd, symtab_hdr->sh_offset, SEEK_SET); // 定位到符号表的偏移
   Assert(read(fd, symtab, symtab_hdr->sh_size) > 0, "Failed to read symbol table");
