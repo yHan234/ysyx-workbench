@@ -236,7 +236,7 @@ void cpu_exec(uint64_t n) {
           if (fringbuf[i].op) {
             log_write("%*scall [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
           } else {
-            log_write("%*sret [%s]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name);
+            log_write("%*sret  [%s]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name);
           }
           i = (i + 1) % FRINGBUF_LEN;
         } while (i != fringbuf_wptr);
