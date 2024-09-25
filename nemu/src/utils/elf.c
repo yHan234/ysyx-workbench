@@ -20,6 +20,7 @@ void init_elf(const char *elf_file) {
 
   // 寻找符号表和字符串表的节
   Elf64_Half shentsize = ehdr.e_shentsize;
+  printf("%d", shentsize);
   Elf64_Shdr *shdr = (Elf64_Shdr *)malloc(shentsize);
   lseek(fd, ehdr.e_shoff, SEEK_SET);
   Elf64_Shdr *symtab_hdr = (Elf64_Shdr *)malloc(shentsize);
