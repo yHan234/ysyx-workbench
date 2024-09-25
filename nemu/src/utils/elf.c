@@ -37,8 +37,8 @@ void init_elf(const char *elf_file) {
     }
   }
 
-  printf("symtab_hdr->sh_size = %d\n", symtab_hdr->sh_size);
   Assert(symtab_hdr, "Failed to find symbol table");
+  printf("symtab_hdr->sh_size = %d\n", symtab_hdr->sh_size);
   Elf32_Sym *symtab = malloc(symtab_hdr->sh_size);
   lseek(fd, symtab_hdr->sh_offset, SEEK_SET); // 定位到符号表的偏移
   Assert(read(fd, symtab, symtab_hdr->sh_size) >= 0, "Failed to read symbol table");
