@@ -83,6 +83,7 @@ static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
   fringbuf[fringbuf_wptr].pc = pc;
   fringbuf[fringbuf_wptr].dep = ++fringbuf_dep;
   for (int i = 0; i < num_functions; ++i) {
+    printf("%x %x\n", addr, functions[i].addr);
     if (addr == functions[i].addr) {
       fringbuf[fringbuf_wptr].func = &functions[i];
     }
@@ -200,11 +201,11 @@ void cpu_exec(uint64_t n) {
       if (fringbuf_size) {
         uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_size : 0;
         do {
-          log_write("0x%08x:", fringbuf[i].pc);
+          log_write("0x%08x: ", fringbuf[i].pc);
           if (fringbuf[i].func) {
-            log_write("%*s call [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
+            log_write("%*scall [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
           } else {
-            log_write("ret\n");
+            log_write("%*sret\n", fringbuf[i].dep * 2, "");
           }
           i = (i + 1) % FRINGBUF_LEN;
         } while (i != fringbuf_wptr);
