@@ -88,6 +88,7 @@ static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
   fringbuf[fringbuf_wptr].pc = pc;
   fringbuf[fringbuf_wptr].dep = fringbuf_dep++;
   fringbuf[fringbuf_wptr].op = 1;
+  // TODO: 可优化为二分查找
   for (int i = 0; i < num_functions; ++i) {
     if (addr == functions[i].addr) {
       fringbuf[fringbuf_wptr].func = &functions[i];
@@ -106,6 +107,7 @@ static void fringbuf_ret(vaddr_t pc) {
   fringbuf[fringbuf_wptr].pc = pc;
   fringbuf[fringbuf_wptr].dep = --fringbuf_dep;
   fringbuf[fringbuf_wptr].op = 0;
+  // TODO: 可优化为二分查找
   for (int i = 1; i < num_functions; ++i) {
     if (pc < functions[i].addr) {
       fringbuf[fringbuf_wptr].func = &functions[i - 1];
