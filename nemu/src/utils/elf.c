@@ -28,6 +28,10 @@ void init_elf(const char *elf_file) {
   for (int i = 0; i < ehdr.e_shnum; i++) {
     Assert(read(fd, shdr, shentsize) == shentsize, "Failed to read section header");
 
+    if (shdr->sh_type == SHT_STRTAB) {
+      printf("find strtab %d", i);
+    }
+
     if (shdr->sh_type == SHT_SYMTAB) {
       symtab_hdr = malloc(shentsize);
       memcpy(symtab_hdr, shdr, shentsize);
