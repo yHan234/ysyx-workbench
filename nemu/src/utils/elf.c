@@ -38,11 +38,11 @@ void init_elf(const char *elf_file) {
   printf("symtab_hdr->sh_size = %d\n", symtab_hdr->sh_size);
   Elf32_Sym *symtab = malloc(symtab_hdr->sh_size);
   lseek(fd, symtab_hdr->sh_offset, SEEK_SET); // 定位到符号表的偏移
-  Assert(read(fd, symtab, symtab_hdr->sh_size) > 0, "Failed to read symbol table");
+  Assert(read(fd, symtab, symtab_hdr->sh_size) >= 0, "Failed to read symbol table");
 
   char *strtab = malloc(strtab_hdr->sh_size);
   lseek(fd, strtab_hdr->sh_offset, SEEK_SET); // 定位到字符串表的偏移
-  Assert(read(fd, strtab, strtab_hdr->sh_size) > 0, "Failed to read string table");
+  Assert(read(fd, strtab, strtab_hdr->sh_size) >= 0, "Failed to read string table");
 
   int symcount = symtab_hdr->sh_size / sizeof(Elf32_Sym);
   for (int i = 0; i < symcount; i++) {
