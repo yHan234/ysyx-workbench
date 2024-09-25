@@ -13,6 +13,7 @@ typedef struct {
   vaddr_t addr;
   char *name;
 } Function;
+uint num_functions;
 Function *functions;
 
 void init_elf(const char *elf_file) {
@@ -59,19 +60,19 @@ void init_elf(const char *elf_file) {
 
   // 寻找符号表中的函数
   int sym_cnt = symtab_hdr->sh_size / sizeof(Elf32_Sym);
-  int func_cnt = 0;
+  num_functions = 0;
   for (int i = 0; i < sym_cnt; i++) {
-    func_cnt += ELF32_ST_TYPE(symtab[i].st_info) == STT_FUNC;
+    num_functions += ELF32_ST_TYPE(symtab[i].st_info) == STT_FUNC;
   }
 
-  functions = malloc(sizeof(Function) * func_cnt);
-  func_cnt = 0;
-  for (int i = 0; i < sym_cnt; i++) {
+  functions = malloc(sizeof(Function) * num_functions);
+  for (int i = 0, func_idx = 0; i < sym_cnt; i++) {
     Elf32_Sym sym = symtab[i];
 
     if (ELF32_ST_TYPE(sym.st_info) == STT_FUNC) {
-      functions[func_cnt].name = &strtab[sym.st_name];
-      functions[func_cnt].addr = sym.st_info;
+      functions[func_idx].name = &strtab[sym.st_name];
+      functions[func_idx].addr = sym.st_info;
+      func_idx += 1;
     }
   }
 

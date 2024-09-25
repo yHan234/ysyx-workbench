@@ -63,15 +63,36 @@ static uint iringbuf_size = 0;
     }                                                                          \
   } while (0)
 
-// #define FRINGBUF_LEN 128
-// typedef struct Function Function;
-// static struct {
-//   vaddr_t pc;
-//   Function *func; // func == NULL means ret
-//   int dep;
-// } fringbuf[FRINGBUF_LEN];
-// static uint fringbuf_wptr = 0;
-// static uint fringbuf_size = 0;
+#define FRINGBUF_LEN 128
+typedef struct {
+  vaddr_t addr;
+  char *name;
+} Function;
+extern Function *functions;
+static struct {
+  vaddr_t pc;
+  Function *func; // func == NULL means ret
+  int dep;
+} fringbuf[FRINGBUF_LEN];
+static uint fringbuf_dep = 0;
+static uint fringbuf_wptr = 0;
+static uint fringbuf_size = 0;
+extern uint num_functions;
+
+static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
+  fringbuf[fringbuf_wptr].pc = pc;
+  fringbuf[fringbuf_wptr].dep = ++fringbuf_dep;
+  for (int i = 0; i < num_functions; ++i) {
+    if (addr == functions[i].addr) {
+      fringbuf[fringbuf_wptr].func = &functions[i];
+    }
+  }
+
+  fringbuf_wptr = (fringbuf_wptr + 1) % FRINGBUF_LEN;
+  if (fringbuf_size < FRINGBUF_LEN) {
+    fringbuf_size += 1;
+  }
+}
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
@@ -95,7 +116,9 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
 #ifdef CONFIG_FTRACE
 #ifdef CONFIG_ISA_riscv
-
+  if (strcmp(iringbuf[iringbuf_wptr - 1].mnemonic, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
+    fringbuf_call(_this->pc, _this->dnpc);
+  }
 #endif
 #endif
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
