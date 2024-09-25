@@ -28,10 +28,6 @@ void init_elf(const char *elf_file) {
   for (int i = 0; i < ehdr.e_shnum; i++) {
     Assert(read(fd, shdr, shentsize) == shentsize, "Failed to read section header");
 
-    if (shdr->sh_type == SHT_STRTAB) {
-      printf("find strtab %d", i);
-    }
-
     if (shdr->sh_type == SHT_SYMTAB) {
       symtab_hdr = malloc(shentsize);
       memcpy(symtab_hdr, shdr, shentsize);
@@ -48,6 +44,7 @@ void init_elf(const char *elf_file) {
 
   Assert(strtab_hdr, "Failed to find string table");
   char *strtab = malloc(strtab_hdr->sh_size);
+  printf("strtab offset %d size %d\n", strtab_hdr->sh_offset, strtab_hdr->sh_size);
   lseek(fd, strtab_hdr->sh_offset, SEEK_SET);
   Assert(read(fd, strtab, strtab_hdr->sh_size) == symtab_hdr->sh_size, "Failed to read string table");
 
