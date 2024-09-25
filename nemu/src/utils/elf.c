@@ -16,6 +16,10 @@ typedef struct {
 uint num_functions;
 Function *functions;
 
+int function_addr_cmp(const void *func1, const void *func2) {
+  return ((Function *)func1)->addr - ((Function *)func2)->addr;
+}
+
 void init_elf(const char *elf_file) {
   if (elf_file == NULL) {
     return;
@@ -71,9 +75,14 @@ void init_elf(const char *elf_file) {
     if (ELF32_ST_TYPE(sym.st_info) == STT_FUNC) {
       functions[func_idx].name = &strtab[sym.st_name];
       functions[func_idx].addr = sym.st_value;
-      printf("function %s %x\n", functions[func_idx].name, functions[func_idx].addr);
       func_idx += 1;
     }
+  }
+
+  qsort(functions, num_functions, sizeof(Function), function_addr_cmp);
+
+  for (int i = 0; i < num_functions; ++i) {
+    printf("function %s %x\n", functions[i].name, functions[i].addr);
   }
 
   free(shdr);
