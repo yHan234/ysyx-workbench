@@ -113,7 +113,7 @@ void init_monitor(int argc, char *argv[]) {
   init_log(log_file);
 
   /* Initialize ELF. */
-  printf("init elf");
+  printf("elf_file %s\n", elf_file);
   init_elf(elf_file);
 
   /* Initialize memory. */
