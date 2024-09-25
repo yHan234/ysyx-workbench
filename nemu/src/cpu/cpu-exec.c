@@ -33,6 +33,8 @@ static bool g_print_step = false;
 void device_update();
 void check_watchpoints();
 
+// ITRACE
+
 #define IRINGBUF_LEN 128
 #define IRINGBUF_MNEMONIC_LEN 8
 #define IRINGBUF_OP_STR_LEN 64
@@ -63,6 +65,8 @@ static uint iringbuf_size = 0;
     }                                                                          \
   } while (0)
 
+// FTRACE
+
 #define FRINGBUF_LEN 128
 typedef struct {
   vaddr_t addr;
@@ -85,8 +89,20 @@ static void fringbuf_call(vaddr_t pc, vaddr_t addr) {
   for (int i = 0; i < num_functions; ++i) {
     if (addr == functions[i].addr) {
       fringbuf[fringbuf_wptr].func = &functions[i];
+      break;
     }
   }
+  Assert(fringbuf[fringbuf_wptr].func, "FTRACE: function at %x not found in elf file", addr);
+
+  fringbuf_wptr = (fringbuf_wptr + 1) % FRINGBUF_LEN;
+  if (fringbuf_size < FRINGBUF_LEN) {
+    fringbuf_size += 1;
+  }
+}
+
+static void fringbuf_ret(vaddr_t pc) {
+  fringbuf[fringbuf_wptr].pc = pc;
+  fringbuf[fringbuf_wptr].dep = --fringbuf_dep;
 
   fringbuf_wptr = (fringbuf_wptr + 1) % FRINGBUF_LEN;
   if (fringbuf_size < FRINGBUF_LEN) {
@@ -116,8 +132,12 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
 #ifdef CONFIG_FTRACE
 #ifdef CONFIG_ISA_riscv
-  if (strcmp(iringbuf[(iringbuf_wptr + IRINGBUF_LEN - 1) % IRINGBUF_LEN].mnemonic, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
+  char *last_inst = iringbuf[(iringbuf_wptr + IRINGBUF_LEN - 1) % IRINGBUF_LEN].mnemonic;
+  if (strcmp(last_inst, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
     fringbuf_call(_this->pc, _this->dnpc);
+  }
+  if (strcmp(last_inst, "ret") == 0) {
+    fringbuf_ret(_this->pc);
   }
 #endif
 #endif
