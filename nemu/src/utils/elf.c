@@ -26,7 +26,7 @@ void init_elf(const char *elf_file) {
 
   lseek(fd, ehdr.e_shoff, SEEK_SET);
   for (int i = 0; i < ehdr.e_shnum; i++) {
-    Assert(read(fd, shdr, shentsize) == sizeof(shdr), "Failed to read section header");
+    Assert(read(fd, shdr, shentsize) == shentsize, "Failed to read section header");
 
     if (shdr->sh_type == SHT_SYMTAB) {
       symtab_hdr = malloc(shentsize);
