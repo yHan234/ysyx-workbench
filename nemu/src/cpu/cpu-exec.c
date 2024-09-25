@@ -63,6 +63,16 @@ static uint iringbuf_size = 0;
     }                                                                          \
   } while (0)
 
+// #define FRINGBUF_LEN 128
+// typedef struct Function Function;
+// static struct {
+//   vaddr_t pc;
+//   Function *func; // func == NULL means ret
+//   int dep;
+// } fringbuf[FRINGBUF_LEN];
+// static uint fringbuf_wptr = 0;
+// static uint fringbuf_size = 0;
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
   iringbuf[iringbuf_wptr].pc = _this->pc;
@@ -81,6 +91,12 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   if (iringbuf_size < IRINGBUF_LEN) {
     iringbuf_size += 1;
   }
+#endif
+
+#ifdef CONFIG_FTRACE
+#ifdef CONFIG_ISA_riscv
+
+#endif
 #endif
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
   IFDEF(CONFIG_WATCHPOINT, check_watchpoints());
