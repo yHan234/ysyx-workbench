@@ -220,6 +220,7 @@ void cpu_exec(uint64_t n) {
       if (fringbuf_size) {
         uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_size : 0;
         do {
+          printf("i = %d\n", i);
           log_write("0x%08x: ", fringbuf[i].pc);
           if (fringbuf[i].func) {
             log_write("%*scall [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
