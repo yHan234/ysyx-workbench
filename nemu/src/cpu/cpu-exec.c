@@ -51,8 +51,7 @@ static uint iringbuf_size = 0;
 #define iringbuf_print(printf)                                                 \
   do {                                                                         \
     if (iringbuf_size) {                                                       \
-      uint i =                                                                 \
-          iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr % IRINGBUF_LEN : 0;    \
+      uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;              \
       do {                                                                     \
         printf("0x%08x:", iringbuf[i].pc);                                     \
         uint8_t *inst = (uint8_t *)&iringbuf[i].inst;                          \
@@ -219,7 +218,7 @@ void cpu_exec(uint64_t n) {
 #ifdef CONFIG_FTRACE
       log_write("==================== FTRACE ====================\n");
       if (fringbuf_size) {
-        uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_size % FRINGBUF_LEN : 0;
+        uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_wptr : 0;
         do {
           printf("i = %d size = %d wptr = %d\n", i, fringbuf_size, fringbuf_wptr);
           log_write("0x%08x: ", fringbuf[i].pc);
