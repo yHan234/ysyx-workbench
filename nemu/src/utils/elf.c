@@ -31,7 +31,7 @@ void init_elf(const char *elf_file) {
     if (shdr->sh_type == SHT_SYMTAB) {
       symtab_hdr = malloc(shentsize);
       memcpy(symtab_hdr, shdr, shentsize);
-    } else if (shdr->sh_type == SHT_STRTAB && i == ehdr.e_shstrndx) {
+    } else if (shdr->sh_type == SHT_STRTAB && i != ehdr.e_shstrndx) {
       strtab_hdr = malloc(shentsize);
       memcpy(strtab_hdr, shdr, shentsize);
     }
@@ -39,12 +39,13 @@ void init_elf(const char *elf_file) {
 
   Assert(symtab_hdr, "Failed to find symbol table");
   Elf32_Sym *symtab = malloc(symtab_hdr->sh_size);
-  lseek(fd, symtab_hdr->sh_offset, SEEK_SET); // 定位到符号表的偏移
-  Assert(read(fd, symtab, symtab_hdr->sh_size) >= 0, "Failed to read symbol table");
+  lseek(fd, symtab_hdr->sh_offset, SEEK_SET);
+  Assert(read(fd, symtab, symtab_hdr->sh_size) == symtab_hdr->sh_size, "Failed to read symbol table");
 
+  Assert(strtab_hdr, "Failed to find string table");
   char *strtab = malloc(strtab_hdr->sh_size);
-  lseek(fd, strtab_hdr->sh_offset, SEEK_SET); // 定位到字符串表的偏移
-  Assert(read(fd, strtab, strtab_hdr->sh_size) >= 0, "Failed to read string table");
+  lseek(fd, strtab_hdr->sh_offset, SEEK_SET);
+  Assert(read(fd, strtab, strtab_hdr->sh_size) == symtab_hdr->sh_size, "Failed to read string table");
 
   int symcount = symtab_hdr->sh_size / sizeof(Elf32_Sym);
   for (int i = 0; i < symcount; i++) {
@@ -57,6 +58,9 @@ void init_elf(const char *elf_file) {
     }
   }
 
+  free(shdr);
+  free(symtab_hdr);
+  free(strtab_hdr);
   free(symtab);
   free(strtab);
   close(fd);
