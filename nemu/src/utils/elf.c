@@ -11,7 +11,7 @@ void init_elf(const char *elf_file) {
     return;
   }
 
-  int fd = open("your_program.elf", O_RDONLY);
+  int fd = open(elf_file, O_RDONLY);
   Assert(fd >= 0, "Failed to open ELF file");
 
   Elf64_Ehdr ehdr;
