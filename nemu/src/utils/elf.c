@@ -26,13 +26,13 @@ void init_elf(const char *elf_file) {
 
   lseek(fd, ehdr.e_shoff, SEEK_SET);
   for (int i = 0; i < ehdr.e_shnum; i++) {
-    Assert(read(fd, shdr, sizeof(shdr)) == sizeof(shdr), "Failed to read section header");
+    Assert(read(fd, shdr, shentsize) == sizeof(shdr), "Failed to read section header");
 
     if (shdr->sh_type == SHT_SYMTAB) {
-      symtab_hdr = (Elf32_Shdr *)malloc(shentsize);
+      symtab_hdr = malloc(shentsize);
       memcpy(symtab_hdr, shdr, shentsize);
     } else if (shdr->sh_type == SHT_STRTAB && i == ehdr.e_shstrndx) {
-      strtab_hdr = (Elf32_Shdr *)malloc(shentsize);
+      strtab_hdr = malloc(shentsize);
       memcpy(strtab_hdr, shdr, shentsize);
     }
   }
