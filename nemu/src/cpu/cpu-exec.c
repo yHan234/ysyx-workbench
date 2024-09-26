@@ -147,10 +147,10 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_FTRACE
 #ifdef CONFIG_ISA_riscv
   char *last_inst = iringbuf[(iringbuf_wptr + IRINGBUF_LEN - 1) % IRINGBUF_LEN].mnemonic;
-  if (strcmp(last_inst, "jal") == 0) {
+  if (strcmp(last_inst, "jal") == 0 && cpu.gpr[1] == _this->snpc) {
     fringbuf_call(_this->pc, _this->dnpc);
   }
-  if (strcmp(last_inst, "jalr") == 0) {
+  if (strcmp(last_inst, "jalr") == 0 && cpu.gpr[1] == _this->snpc) {
     fringbuf_call(_this->pc, _this->dnpc);
   }
   if (strcmp(last_inst, "ret") == 0) {
