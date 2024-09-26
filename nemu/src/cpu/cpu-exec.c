@@ -35,6 +35,7 @@ void check_watchpoints();
 
 // ITRACE
 
+#ifdef CONFIG_ITRACE
 #define IRINGBUF_LEN 128
 #define IRINGBUF_MNEMONIC_LEN 8
 #define IRINGBUF_OP_STR_LEN 64
@@ -64,9 +65,11 @@ static uint iringbuf_size = 0;
       } while (i != iringbuf_wptr);                                            \
     }                                                                          \
   } while (0)
+#endif
 
 // FTRACE
 
+#ifdef CONFIG_FTRACE
 #define FRINGBUF_LEN 128
 typedef struct {
   vaddr_t addr;
@@ -123,6 +126,7 @@ static void fringbuf_ret(vaddr_t pc) {
     fringbuf_size += 1;
   }
 }
+#endif
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
