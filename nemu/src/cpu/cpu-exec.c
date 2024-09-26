@@ -35,6 +35,7 @@ void check_watchpoints();
 
 // ITRACE
 
+#ifdef CONFIG_ITRACE
 #define IRINGBUF_LEN 128
 #define IRINGBUF_MNEMONIC_LEN 8
 #define IRINGBUF_OP_STR_LEN 64
@@ -64,6 +65,7 @@ static uint iringbuf_size = 0;
       } while (i != iringbuf_wptr);                                            \
     }                                                                          \
   } while (0)
+#endif
 
 // FTRACE
 
