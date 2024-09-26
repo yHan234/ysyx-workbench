@@ -67,6 +67,7 @@ static uint iringbuf_size = 0;
 
 // FTRACE
 
+#ifdef CONFIG_FTRACE
 #define FRINGBUF_LEN 128
 typedef struct {
   vaddr_t addr;
@@ -123,6 +124,7 @@ static void fringbuf_ret(vaddr_t pc) {
     fringbuf_size += 1;
   }
 }
+#endif
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
