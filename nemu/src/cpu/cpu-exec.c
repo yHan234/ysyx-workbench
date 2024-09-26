@@ -171,6 +171,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
+  printf("nemu_state.state = %d\n", nemu_state.state);
 }
 
 static void execute(uint64_t n) {
