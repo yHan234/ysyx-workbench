@@ -45,7 +45,7 @@ all: default
 
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	@$^
+	$(BIN) $(IMG)
 
 clean:
 	rm -rf $(BUILD_DIR)
