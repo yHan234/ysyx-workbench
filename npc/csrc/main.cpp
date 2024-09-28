@@ -1,35 +1,33 @@
-#include <Vtop.h>
+#include "CPU/CPU.hpp"
+#include "Memory/Memory.hpp"
+#include <ctime>
+#include <iostream>
 
-static Vtop dut;
+constexpr size_t MEM_SIZE = 0x80000000;
+constexpr size_t MEM_BASE = 0x80000000;
+Memory mem(MEM_SIZE, MEM_BASE);
 
-static void single_cycle() {
-  printf("\n\n===== clk => 0 =====\n");
+CPU cpu;
 
-  dut.clk = 0;
-  dut.eval();
+char *img_file;
+size_t img_size;
 
-  printf("\n\n===== clk => 1 =====\n");
-
-  dut.clk = 1;
-  dut.eval();
+void parse_args(int argc, char *argv[]) {
+  img_file = argv[1];
 }
 
-static void reset(int n) {
-  dut.rst = 1;
-  while (n-- > 0) {
-    single_cycle();
-  }
-  dut.rst = 0;
-}
+int main(int argc, char *argv[]) {
+  parse_args(argc, argv);
 
-void load_img(char *img_file);
+  std::srand(time(nullptr));
 
-int main() {
-  load_img("tests/addi.bin");
+  try {
+    img_size = mem.LoadImage(img_file);
 
-  reset(10);
-
-  while (true) {
-    single_cycle();
+    cpu.Reset(10);
+    cpu.Exec(-1);
+  } catch (std::string msg) {
+    std::cerr << msg << std::endl;
+    return 1;
   }
 }
