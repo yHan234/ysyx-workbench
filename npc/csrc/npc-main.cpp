@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
     img_size = mem.LoadImage(img_file);
   } catch (std::string msg) {
     std::cerr << msg << std::endl;
+    return 1;
   }
 
   CPU cpu;
