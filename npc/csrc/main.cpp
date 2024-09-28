@@ -5,7 +5,7 @@
 
 constexpr size_t MEM_SIZE = 0x80000000;
 constexpr size_t MEM_BASE = 0x80000000;
-Memory mem(MEM_SIZE, MEM_BASE);
+Memory<MEM_SIZE, MEM_BASE> mem;
 
 CPU cpu;
 

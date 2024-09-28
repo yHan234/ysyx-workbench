@@ -4,26 +4,71 @@
 #include <fstream>
 #include <memory>
 
+template <size_t Size, size_t Base>
 class Memory {
 public:
-  Memory(size_t size, size_t base);
+  Memory() : pmem(new byte[Size]) {}
 
-  size_t LoadImage(char *path);
+  size_t LoadImage(char *path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file.is_open()) {
+      throw string_format("Failed to open image file: %s", path);
+    }
 
-  word_t ReadPMem(paddr_t addr, int len);
+    std::streampos img_size = file.tellg();
+    if (img_size > Size) {
+      throw std::string("Image file is too big.");
+    }
 
-  void WritePMem(paddr_t addr, int len, word_t data);
+    file.seekg(0, std::ios::beg);
+    file.read(reinterpret_cast<char *>(pmem.get()), img_size);
+    file.close();
+
+    return img_size;
+  }
+
+  word_t ReadPMem(paddr_t addr, int len) {
+    return ReadHost(GuestToHost(addr), len);
+  }
+
+  void WritePMem(paddr_t addr, int len, word_t data) {
+    WriteHost(GuestToHost(addr), len, data);
+  }
 
 private:
-  uint8_t *GuestToHost(paddr_t paddr);
-  paddr_t HostToGuest(uint8_t *haddr);
+  byte *GuestToHost(paddr_t paddr) { return pmem.get() + paddr - Base; }
+  paddr_t HostToGuest(byte *haddr) { return haddr - pmem.get() + Base; }
 
-  word_t ReadHost(void *addr, int len);
+  word_t ReadHost(void *addr, int len) {
+    switch (len) {
+    case 1:
+      return *(uint8_t *)addr;
+    case 2:
+      return *(uint16_t *)addr;
+    case 4:
+      return *(uint32_t *)addr;
+    default:
+      throw "Read Host: bad len";
+      return -1;
+    }
+  }
 
-  void WriteHost(void *addr, int len, word_t data);
+  void WriteHost(void *addr, int len, word_t data) {
+    switch (len) {
+    case 1:
+      *(uint8_t *)addr = data;
+      return;
+    case 2:
+      *(uint16_t *)addr = data;
+      return;
+    case 4:
+      *(uint32_t *)addr = data;
+      return;
+    default:
+      throw "Write Host: bad len";
+    }
+  }
 
 private:
-  size_t size;
-  size_t base;
-  std::unique_ptr<uint8_t[]> pmem;
+  std::unique_ptr<byte[]> pmem;
 };
