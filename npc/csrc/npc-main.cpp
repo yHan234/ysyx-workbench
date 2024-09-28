@@ -25,13 +25,17 @@ extern "C" void pmem_read(u_int32_t pc, u_int32_t *instr) {
 int main(int argc, char *argv[]) {
   std::srand(time(nullptr));
 
-  img_size = mem.LoadImage(img_file);
+  try {
+    img_size = mem.LoadImage(img_file);
+  } catch (std::string msg) {
+    std::cerr << msg << std::endl;
+  }
 
   CPU cpu;
   cpu.Reset(10);
   try {
     cpu.Exec(-1);
   } catch (std::string msg) {
-    std::cout << msg << std::endl;
+    std::cerr << msg << std::endl;
   }
 }
