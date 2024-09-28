@@ -23,8 +23,7 @@ size_t Memory::LoadImage(char *path) {
 }
 
 word_t Memory::ReadPMem(paddr_t addr, int len) {
-  word_t ret = ReadHost(GuestToHost(addr), len);
-  return ret;
+  return ReadHost(GuestToHost(addr), len);
 }
 
 void Memory::WritePMem(paddr_t addr, int len, word_t data) {
