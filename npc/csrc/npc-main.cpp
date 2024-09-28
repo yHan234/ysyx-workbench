@@ -32,6 +32,6 @@ int main(int argc, char *argv[]) {
   try {
     cpu.Exec(-1);
   } catch (std::string msg) {
-    std::cerr << msg << std::endl;
+    std::cout << msg << std::endl;
   }
 }
