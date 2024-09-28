@@ -1,6 +1,7 @@
 #include "CPU/CPU.hpp"
 #include "Memory/Memory.hpp"
 #include <ctime>
+#include <iostream>
 
 constexpr size_t MEM_SIZE = 0x80000000;
 constexpr size_t MEM_BASE = 0x80000000;
@@ -28,5 +29,9 @@ int main(int argc, char *argv[]) {
 
   CPU cpu;
   cpu.Reset(10);
-  cpu.Exec(-1);
+  try {
+    cpu.Exec(-1);
+  } catch (std::string msg) {
+    std::cerr << msg << std::endl;
+  }
 }

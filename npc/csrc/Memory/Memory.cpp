@@ -7,12 +7,12 @@ Memory::Memory(size_t size, size_t base)
 size_t Memory::LoadImage(char *path) {
   std::ifstream file("example.bin", std::ios::binary | std::ios::ate);
   if (!file.is_open()) {
-    throw "Failed to open image file.";
+    throw std::string("Failed to open image file.");
   }
 
   std::streampos img_size = file.tellg();
   if (img_size > size) {
-    throw "Image file is too big.";
+    throw std::string("Image file is too big.");
   }
 
   file.seekg(0, std::ios::beg);

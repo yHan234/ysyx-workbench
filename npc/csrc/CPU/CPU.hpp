@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Memory/Memory.hpp"
-#include <Vtop.h>
+#include "Vtop.h"
 
 class CPU {
 
