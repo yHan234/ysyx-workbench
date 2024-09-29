@@ -14,16 +14,6 @@ module CSG(
         output reg [3:0] ALUctr     // 选择ALU执行的操作，具体见ALU代码。
     );
 
-    // ExtOp: I 000, U 001, S 010, B 011, J 100
-    // MuxKeyWithDefault #(1, 7, 3) mux_extop (
-    //                       .out(ExtOP),
-    //                       .key(op),
-    //                       .default_out(3'b111),
-    //                       .lut({
-    //                                7'b0010011, 3'b000
-    //                            })
-    //                   );
-
     always @(*) begin
         ExtOP = 0;
         RegWr = 0;
