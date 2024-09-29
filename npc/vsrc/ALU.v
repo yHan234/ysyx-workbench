@@ -1,6 +1,5 @@
 /*
 ALUctr[3]	ALUctr[2:0] 	ALU操作
-
 0	        000	            选择加法器输出，做加法
 1	        000	            选择加法器输出，做减法
 ×	        001	            选择移位器输出，左移
@@ -14,7 +13,6 @@ ALUctr[3]	ALUctr[2:0] 	ALU操作
 ×	        111	            选择逻辑与输出
 */
 
-
 module ALU(
         input [31:0] A,
         input [31:0] B,
@@ -22,11 +20,9 @@ module ALU(
         output [31:0] out
     );
 
-
-
-    wire [31:0] add_sub;
-    MuxKey #(2, 1, 32) mux_add_sub (
-        .out(add_sub),
+    wire [31:0] adder;
+    MuxKey #(2, 1, 32) mux_adder (
+        .out(adder),
         .key(ctr[3]),
         .lut({
             1'b0, A + B,
@@ -38,7 +34,7 @@ module ALU(
         .out(out),
         .key(ctr[2:0]),
         .lut({
-                3'b000, add_sub,
+                3'b000, adder,
                 3'b001, 32'd0,
                 3'b010, 32'd0,
                 3'b011, B,

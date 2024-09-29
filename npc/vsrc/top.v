@@ -13,7 +13,15 @@ module top(
             .dout ( pc     ),
             .wen  ( 1'b1   )
         );
-    assign NextPC = pc + 4;
+    MuxKey #(3, 3, 32) mux_next_pc (
+        .out(NextPC),
+        .key(Branch),
+        .lut({
+            3'b000, pc + 4,
+            3'b001, pc + imm,
+            3'b010, reg_src1 + imm
+        })
+    );
 
     // GPR
 
