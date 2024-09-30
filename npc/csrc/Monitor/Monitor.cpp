@@ -1,13 +1,5 @@
-// #include <cstdlib>
-// #include <ctime>
+// #include "Monitor.hpp"
 
-// class Monitor {
-// public:
-//   Monitor() {
-//   }
-
-// private:
-
-// private:
-//   Memory memory;
-// };
+// Monitor::Monitor(CPU &cpu, Memory &mem)
+//     : cpu(cpu), mem(mem) {
+// }

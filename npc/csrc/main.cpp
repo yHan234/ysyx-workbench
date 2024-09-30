@@ -1,4 +1,5 @@
 #include "CPU/CPU.hpp"
+#include "Debugger/Debugger.hpp"
 #include "Memory/Memory.hpp"
 #include <ctime>
 #include <iostream>
@@ -17,15 +18,13 @@ void parse_args(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+  std::srand(time(nullptr));
   parse_args(argc, argv);
 
-  std::srand(time(nullptr));
+  Debugger dbg(cpu);
 
   try {
-    img_size = mem.LoadImage(img_file);
-
-    cpu.Reset(10);
-    cpu.Exec(-1);
+    dbg.MainLoop();
   } catch (std::string msg) {
     std::cerr << msg << std::endl;
     return 1;

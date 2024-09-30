@@ -1,5 +1,19 @@
 // #pragma once
 
-// #include <>
+// #include <CPU.hpp>
+// #include <Memory.hpp>
 
-// using paddr_t = 
+// // template <bool ITrace>
+// class Monitor {
+// public:
+//   Monitor(CPU &cpu, Memory &mem);
+
+// private:
+//   // SDB
+
+//   void InitSDB();
+
+// private:
+//   CPU &cpu;
+//   Memory &mem;
+// };

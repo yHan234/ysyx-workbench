@@ -11,7 +11,7 @@ void CPU::SingleCycle() {
   dut.clk = 1;
   dut.eval();
 
-  sleep(0.5);
+  sleep(1);
 }
 
 void CPU::Reset(int n) {
