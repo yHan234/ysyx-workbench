@@ -1,11 +1,28 @@
 #include "Debugger.hpp"
 
-Debugger::Debugger(CPU &cpu, bool batch_mode)
-    : cpu(cpu), batch_mode(batch_mode) {
+#define TRY_STRING_TO_UL(str, res, name)        \
+  do {                                          \
+    try {                                       \
+      res = std::stoul(str, nullptr, 0);        \
+    } catch (std::invalid_argument const &ex) { \
+      std::cout << "invalid " name << '\n';     \
+      return 0;                                 \
+    } catch (std::out_of_range const &ex) {     \
+      std::cout << "too big " name << '\n';     \
+      return 0;                                 \
+    }                                           \
+  } while (0)
+
+Debugger::Debugger(CPU &cpu, Memory &mem, Monitor &monitor, bool batch_mode)
+    : cpu(cpu), mem(mem), monitor(monitor), batch_mode(batch_mode) {
   cmd_table.emplace_back(Command{"help", "Display information about all supported commands", &Debugger::CMD_help});
   cmd_table.emplace_back(Command{"c", "Continue the execution of the program", &Debugger::CMD_c});
   cmd_table.emplace_back(Command{"q", "Exit", &Debugger::CMD_q});
-  // {"si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si},
+  cmd_table.emplace_back(Command{"si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", &Debugger::CMD_si});
+  cmd_table.emplace_back(Command{"info", "Print register information. Usage: info r", &Debugger::CMD_info});
+  cmd_table.emplace_back(Command{"x", "Scan N*4 bytes from address. Usage: x N ADDR", &Debugger::CMD_x});
+
+  // TODO:
   // {"info", "Print register or watchpoint information. Usage: info r/w", cmd_info},
   // {"x", "Scan N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x},
   // {"p", "Print value. Usage: p EXPR", cmd_p},
@@ -26,7 +43,7 @@ void Debugger::MainLoop() {
 
   std::string input;
   while (true) {
-    std::cout << "(npc) ";
+    std::cout << "> ";
     std::getline(std::cin, input);
     if (input.empty()) {
       continue; // 若输入为空则继续
@@ -87,5 +104,57 @@ int Debugger::CMD_c(std::string &args) {
 }
 
 int Debugger::CMD_q(std::string &args) {
+  monitor.state = Monitor::State::QUIT;
   return -1;
+}
+
+int Debugger::CMD_si(std::string &args) {
+  std::istringstream iss(args);
+  std::string arg;
+  iss >> arg;
+
+  unsigned long num_steps = 1;
+  if (!arg.empty()) {
+    TRY_STRING_TO_UL(arg, num_steps, "N");
+  }
+
+  cpu.Exec(num_steps);
+
+  return 0;
+}
+
+int Debugger::CMD_info(std::string &args) {
+  std::istringstream iss(args);
+  std::string arg;
+  iss >> arg;
+
+  if (arg == "r") {
+    std::cout << cpu.GetRegs().to_string() << std::endl;
+  } else {
+    std::cout << "Usage: info r" << std::endl;
+  }
+
+  return 0;
+}
+
+int Debugger::CMD_x(std::string &args) {
+  std::istringstream iss(args);
+  std::string n_s, base_s;
+  iss >> n_s >> base_s;
+
+  unsigned long n, base;
+  TRY_STRING_TO_UL(n_s, n, "N");
+  TRY_STRING_TO_UL(base_s, base, "ADDR");
+
+  for (unsigned long i = 0; i < n; ++i) {
+    vaddr_t addr = base + i * 4;
+    try {
+      std::cout << string_format("0x%08x\t\t0x%08x", addr, mem.VRead(addr, 4)) << std::endl;
+    } catch (std::string &msg) {
+      std::cout << msg << std::endl;
+      return 0;
+    }
+  }
+
+  return 0;
 }

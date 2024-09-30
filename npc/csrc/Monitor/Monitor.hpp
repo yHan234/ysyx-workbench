@@ -1,19 +1,19 @@
-// #pragma once
+#pragma once
 
-// #include <CPU.hpp>
-// #include <Memory.hpp>
+// template <bool ITrace>
+class Monitor {
+public:
+  Monitor()
+      : state(State::STOP) {}
 
-// // template <bool ITrace>
-// class Monitor {
-// public:
-//   Monitor(CPU &cpu, Memory &mem);
+  enum class State {
+    RUNNING,
+    STOP,
+    END,
+    ABORT,
+    QUIT,
+  };
 
-// private:
-//   // SDB
-
-//   void InitSDB();
-
-// private:
-//   CPU &cpu;
-//   Memory &mem;
-// };
+  State state;
+  int ret; // valid when state == END
+};

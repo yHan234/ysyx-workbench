@@ -1,17 +1,26 @@
 #pragma once
 
-#include "Memory/Memory.hpp"
+#include "Monitor/Monitor.hpp"
 #include "Vtop.h"
+#include "Vtop___024root.h"
+#include <iostream>
 
 class CPU {
-
 public:
-  void SingleCycle();
+  using Regs = VlUnpacked<IData /*31:0*/, 32>;
 
-  void Reset(int n);
+  CPU(Monitor &monitor);
+
+  void Reset(uint64_t n);
 
   void Exec(uint64_t n);
 
+  Regs &GetRegs();
+
 private:
+  void SingleCycle();
+
+private:
+  Monitor &monitor;
   Vtop dut;
 };

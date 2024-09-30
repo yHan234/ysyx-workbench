@@ -1,14 +1,15 @@
 #pragma once
 
 #include "CPU/CPU.hpp"
-#include "ExprToken.hpp"
+#include "Memory/Memory.hpp"
+#include "Monitor/Monitor.hpp"
 #include <iostream>
 #include <regex>
 #include <vector>
 
 class Debugger {
 public:
-  Debugger(CPU &cpu, bool batch_mode = false);
+  Debugger(CPU &cpu, Memory &mem, Monitor &monitor, bool batch_mode = false);
   void SetBatchMode();
   void MainLoop();
 
@@ -16,6 +17,9 @@ private:
   int CMD_help(std::string &args);
   int CMD_c(std::string &args);
   int CMD_q(std::string &args);
+  int CMD_si(std::string &args);
+  int CMD_info(std::string &args);
+  int CMD_x(std::string &args);
 
 private:
   struct Command {
@@ -26,5 +30,7 @@ private:
   std::vector<Command> cmd_table;
 
   CPU &cpu;
+  Memory &mem;
+  Monitor &monitor;
   bool batch_mode;
 };
