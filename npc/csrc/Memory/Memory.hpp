@@ -5,9 +5,9 @@
 #include <memory>
 
 template <size_t Size, size_t Base>
-class Memory {
+class BaseMemory {
 public:
-  Memory() : pmem(new byte[Size]) {}
+  BaseMemory() : pmem(new byte[Size]) {}
 
   size_t LoadImage(char *path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
@@ -27,12 +27,28 @@ public:
     return img_size;
   }
 
-  word_t ReadPMem(paddr_t addr, int len) {
-    return ReadHost(GuestToHost(addr), len);
+  word_t PRead(paddr_t addr, int len) {
+    if (!IsInPMem(addr)) {
+      throw string_format("PRead: addr %#lx out of bound", addr);
+    }
+
+    return ReadPMem(addr, len);
   }
 
-  void WritePMem(paddr_t addr, int len, word_t data) {
-    WriteHost(GuestToHost(addr), len, data);
+  void PWrite(paddr_t addr, int len, word_t data) {
+    if (!IsInPMem(addr)) {
+      throw string_format("PWrite: addr %#lx out of bound", addr);
+    }
+
+    WritePMem(addr, len, data);
+  }
+
+  word_t VRead(paddr_t addr, int len) {
+    return PRead(addr, len);
+  }
+
+  word_t VWrite(paddr_t addr, int len) {
+    return PWrite(addr, len);
   }
 
 private:
@@ -69,6 +85,20 @@ private:
     }
   }
 
+  bool IsInPMem(paddr_t addr) {
+    return addr - Base < Size;
+  }
+
+  word_t ReadPMem(paddr_t addr, int len) {
+    return ReadHost(GuestToHost(addr), len);
+  }
+
+  void WritePMem(paddr_t addr, int len, word_t data) {
+    WriteHost(GuestToHost(addr), len, data);
+  }
+
 private:
   std::unique_ptr<byte[]> pmem;
 };
+
+using Memory = BaseMemory<MEM_SIZE, MEM_BASE>;
