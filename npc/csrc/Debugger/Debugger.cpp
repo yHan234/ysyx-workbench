@@ -4,7 +4,7 @@ Debugger::Debugger(CPU &cpu, bool batch_mode)
     : cpu(cpu), batch_mode(batch_mode) {
   cmd_table.emplace_back(Command{"help", "Display information about all supported commands", &Debugger::CMD_help});
   cmd_table.emplace_back(Command{"c", "Continue the execution of the program", &Debugger::CMD_c});
-  // {"q", "Exit NEMU", cmd_q},
+  cmd_table.emplace_back(Command{"q", "Exit", &Debugger::CMD_q});
   // {"si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", cmd_si},
   // {"info", "Print register or watchpoint information. Usage: info r/w", cmd_info},
   // {"x", "Scan N*4 bytes from address EXPR. Usage: x N EXPR", cmd_x},
@@ -26,7 +26,7 @@ void Debugger::MainLoop() {
 
   std::string input;
   while (true) {
-    std::cout << "sdb)";
+    std::cout << "(npc) ";
     std::getline(std::cin, input);
     if (input.empty()) {
       continue; // 若输入为空则继续
@@ -67,12 +67,12 @@ int Debugger::CMD_help(std::string &args) {
   if (arg.empty()) {
     /* no argument given */
     for (const auto &command : cmd_table) {
-      std::cout << command.name << "-" << command.description << std::endl;
+      std::cout << command.name << "\t-\t" << command.description << std::endl;
     }
   } else {
     for (const auto &command : cmd_table) {
       if (arg == command.name) {
-        std::cout << command.name << "-" << command.description << std::endl;
+        std::cout << command.name << "\t-\t" << command.description << std::endl;
         return 0;
       }
     }
@@ -84,4 +84,8 @@ int Debugger::CMD_help(std::string &args) {
 int Debugger::CMD_c(std::string &args) {
   cpu.Exec(-1);
   return 0;
+}
+
+int Debugger::CMD_q(std::string &args) {
+  return -1;
 }

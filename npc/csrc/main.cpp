@@ -21,6 +21,9 @@ int main(int argc, char *argv[]) {
   std::srand(time(nullptr));
   parse_args(argc, argv);
 
+  mem.LoadImage(img_file);
+  cpu.Reset(10);
+
   Debugger dbg(cpu);
 
   try {

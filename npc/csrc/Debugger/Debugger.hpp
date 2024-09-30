@@ -15,6 +15,7 @@ public:
 private:
   int CMD_help(std::string &args);
   int CMD_c(std::string &args);
+  int CMD_q(std::string &args);
 
 private:
   struct Command {
