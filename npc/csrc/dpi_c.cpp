@@ -1,9 +1,10 @@
+#include "CPU/CPU.hpp"
 #include "Memory/Memory.hpp"
 #include "Monitor/Monitor.hpp"
 
-extern Memory mem;
-
 extern Monitor monitor;
+extern Memory mem;
+extern CPU cpu;
 
 extern "C" void pmem_read(u_int32_t pc, u_int32_t *instr) {
   if (pc == 0) {
@@ -15,4 +16,5 @@ extern "C" void pmem_read(u_int32_t pc, u_int32_t *instr) {
 
 extern "C" void ebreak() {
   monitor.state = Monitor::State::END;
+  monitor.ret = cpu.GetRegs()[10]; // $a0
 }

@@ -47,9 +47,11 @@ void CPU::Exec(uint64_t n) {
   case State::RUNNING:
     monitor.state = State::STOP;
     break;
+  case State::END:
+    std::cout << (monitor.ret == 0 ? "HIT GOOD TRAP" : "HIT BAD TRAP") << std::endl;
   }
 }
 
-CPU::Regs CPU::GetRegs() {
+const CPU::Regs &CPU::GetRegs() {
   return dut.rootp->top__DOT__gpr__DOT__gpr;
 }

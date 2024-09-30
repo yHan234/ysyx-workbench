@@ -15,4 +15,5 @@ public:
   };
 
   State state;
+  int ret; // valid when state == END
 };

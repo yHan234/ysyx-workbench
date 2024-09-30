@@ -15,7 +15,7 @@ public:
 
   void Exec(uint64_t n);
 
-  Regs GetRegs();
+  const Regs &GetRegs();
 
 private:
   void SingleCycle();
