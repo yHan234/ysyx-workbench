@@ -26,6 +26,10 @@ private:
     const char *name;
     const char *description;
     int (Debugger::*handler)(std::string &);
+
+    Command(const char *name,
+            const char *description,
+            int (Debugger::*handler)(std::string &));
   };
   std::vector<Command> cmd_table;
 

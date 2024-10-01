@@ -13,14 +13,19 @@
     }                                           \
   } while (0)
 
+Debugger::Command::Command(const char *name,
+        const char *description,
+        int (Debugger::*handler)(std::string &))
+    : name(name), description(description), handler(handler) {}
+
 Debugger::Debugger(CPU &cpu, Memory &mem, Monitor &monitor, bool batch_mode)
     : cpu(cpu), mem(mem), monitor(monitor), batch_mode(batch_mode) {
-  cmd_table.emplace_back(Command{"help", "Display information about all supported commands", &Debugger::CMD_help});
-  cmd_table.emplace_back(Command{"c", "Continue the execution of the program", &Debugger::CMD_c});
-  cmd_table.emplace_back(Command{"q", "Exit", &Debugger::CMD_q});
-  cmd_table.emplace_back(Command{"si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", &Debugger::CMD_si});
-  cmd_table.emplace_back(Command{"info", "Print register information. Usage: info r", &Debugger::CMD_info});
-  cmd_table.emplace_back(Command{"x", "Scan N*4 bytes from address. Usage: x N ADDR", &Debugger::CMD_x});
+  cmd_table.emplace_back("help", "Display information about all supported commands", &Debugger::CMD_help);
+  cmd_table.emplace_back("c", "Continue the execution of the program", &Debugger::CMD_c);
+  cmd_table.emplace_back("q", "Exit", &Debugger::CMD_q);
+  cmd_table.emplace_back("si", "Step instruction. Usage: si [N](dec/oct/hex)(uint 64)(default N=1)", &Debugger::CMD_si);
+  cmd_table.emplace_back("info", "Print register information. Usage: info r", &Debugger::CMD_info);
+  cmd_table.emplace_back("x", "Scan N*4 bytes from address. Usage: x N ADDR", &Debugger::CMD_x);
 
   // TODO:
   // {"info", "Print register or watchpoint information. Usage: info r/w", cmd_info},
