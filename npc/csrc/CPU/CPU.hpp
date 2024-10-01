@@ -17,6 +17,8 @@ public:
 
   const Regs &GetRegs();
 
+  vaddr_t GetPC();
+
 private:
   void SingleCycle();
 

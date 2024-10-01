@@ -6,12 +6,17 @@ extern Monitor monitor;
 extern Memory mem;
 extern CPU cpu;
 
-extern "C" void pmem_read(u_int32_t pc, u_int32_t *instr) {
+extern "C" void get_inst(u_int32_t *inst) {
+  vaddr_t pc = cpu.GetPC();
+
   if (pc == 0) {
-    *instr = 0;
+    *inst = 0;
     return;
   }
-  *instr = mem.PRead(pc, 4);
+
+  *inst = mem.PRead(pc, 4);
+
+  monitor.ITrace(pc, *inst);
 }
 
 extern "C" void ebreak() {

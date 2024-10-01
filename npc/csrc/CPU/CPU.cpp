@@ -48,10 +48,16 @@ void CPU::Exec(uint64_t n) {
     monitor.state = State::STOP;
     break;
   case State::END:
+  case State::ABORT:
+    monitor.PrintITrace();
     std::cout << (monitor.ret == 0 ? "HIT GOOD TRAP" : "HIT BAD TRAP") << std::endl;
   }
 }
 
 const CPU::Regs &CPU::GetRegs() {
   return dut.rootp->top__DOT__gpr__DOT__gpr;
+}
+
+vaddr_t CPU::GetPC() {
+  return dut.rootp->top__DOT__pc;
 }
