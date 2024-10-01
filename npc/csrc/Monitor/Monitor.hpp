@@ -1,11 +1,12 @@
 #pragma once
 
+#include "CPU/CPU.hpp"
+#include "Memory/Memory.hpp"
 #include "Utils/CircularBuffer.hpp"
 #include "Utils/disasm.hpp"
 #include <iostream>
-#include <type_traits>
 
-#define BUF_SIZE 128
+#define BUF_SIZE 32
 #define ITRACE
 
 struct InstInfo {
@@ -18,10 +19,7 @@ struct InstInfo {
 
 class Monitor {
 public:
-  Monitor()
-      : state(State::STOP) {
-    init_disasm("riscv32");
-  }
+  Monitor(CPU &cpu, Memory &mem);
 
   // State
   enum class State {
@@ -35,13 +33,13 @@ public:
   State state;
   int ret; // valid when state == END
 
-  // Instruction Trace
-public:
-  void ITrace(vaddr_t pc, uint32_t inst);
-
-  void PrintITrace();
-
 private:
+  CPU &cpu;
+  Memory &mem;
+
+  // Instruction Trace
+  void ITrace();
+  void PrintITrace();
 #ifdef ITRACE
   WriteOnlyCircularBuffer<InstInfo, BUF_SIZE> ibuf;
 #endif

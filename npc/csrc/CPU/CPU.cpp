@@ -1,16 +1,8 @@
 #include "CPU.hpp"
 
-CPU::CPU(Monitor &monitor)
-    : monitor(monitor) {}
-
 void CPU::SingleCycle() {
-  printf("\n\n===== clk => 0 =====\n");
-
   dut.clk = 0;
   dut.eval();
-
-  printf("\n\n===== clk => 1 =====\n");
-
   dut.clk = 1;
   dut.eval();
 }
@@ -24,34 +16,19 @@ void CPU::Reset(uint64_t n) {
 }
 
 void CPU::Exec(uint64_t n) {
-  using State = Monitor::State;
-
-  switch (monitor.state) {
-  case State::END:
-  case State::ABORT:
-    std::cout << "Program execution has ended. To restart the program, exit NEMU and run again." << std::endl;
+  if (before_exec() != 0) {
     return;
-  default:
-    monitor.state = State::RUNNING;
   }
 
   while (n--) {
     SingleCycle();
 
-    if (monitor.state != State::RUNNING) {
+    if (after_step() != 0) {
       break;
     }
   }
 
-  switch (monitor.state) {
-  case State::RUNNING:
-    monitor.state = State::STOP;
-    break;
-  case State::END:
-  case State::ABORT:
-    monitor.PrintITrace();
-    std::cout << (monitor.ret == 0 ? "HIT GOOD TRAP" : "HIT BAD TRAP") << std::endl;
-  }
+  after_exec();
 }
 
 const CPU::Regs &CPU::GetRegs() {
@@ -60,4 +37,8 @@ const CPU::Regs &CPU::GetRegs() {
 
 vaddr_t CPU::GetPC() {
   return dut.rootp->top__DOT__pc;
+}
+
+word_t CPU::GetInst() {
+  return dut.rootp->top__DOT__inst;
 }

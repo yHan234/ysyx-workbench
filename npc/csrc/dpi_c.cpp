@@ -15,8 +15,6 @@ extern "C" void get_inst(u_int32_t *inst) {
   }
 
   *inst = mem.PRead(pc, 4);
-
-  monitor.ITrace(pc, *inst);
 }
 
 extern "C" void ebreak() {

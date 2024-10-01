@@ -1,15 +1,12 @@
 #pragma once
 
-#include "Monitor/Monitor.hpp"
 #include "Vtop.h"
 #include "Vtop___024root.h"
-#include <iostream>
+#include "common.hpp"
 
 class CPU {
 public:
   using Regs = VlUnpacked<IData /*31:0*/, 32>;
-
-  CPU(Monitor &monitor);
 
   void Reset(uint64_t n);
 
@@ -19,10 +16,15 @@ public:
 
   vaddr_t GetPC();
 
+  word_t GetInst();
+
+  std::function<int()> before_exec;
+  std::function<int()> after_step;
+  std::function<void()> after_exec;
+
 private:
   void SingleCycle();
 
 private:
-  Monitor &monitor;
   Vtop dut;
 };
