@@ -22,6 +22,7 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
 
   cpu.after_step = [&]() -> int {
     ITrace();
+    DiffTestStep();
     return state == State::RUNNING ? 0 : 1;
   };
 
@@ -59,6 +60,55 @@ void Monitor::PrintITrace() {
   std::cout << "ITRACE:" << std::endl;
   for (auto &inst : ibuf) {
     std::cout << inst.ToString() << std::endl;
+  }
+#endif
+}
+
+void Monitor::LoadDiffTestRef(const std::string &file) {
+#ifdef DIFFTEST
+  void *handle;
+  handle = dlopen(file.c_str(), RTLD_LAZY);
+  if (!handle) {
+    throw("Failed to open DiffTest ref so file.");
+  }
+
+  void (*DTRefInit)(int) = (void (*)(int))dlsym(handle, "difftest_init");
+  DTRefMemCpy = (void (*)(paddr_t addr, void *buf, size_t n, bool direction))dlsym(handle, "difftest_memcpy");
+  DTRefRegCpy = (void (*)(void *dut, bool direction))dlsym(handle, "difftest_regcpy");
+  DTRefExec = (void (*)(uint64_t n))dlsym(handle, "difftest_exec");
+  DTRefRaiseIntr = (void (*)(uint64_t NO))dlsym(handle, "difftest_raise_intr");
+  if (!DTRefInit || !DTRefMemCpy || !DTRefRegCpy || !DTRefExec || !DTRefRaiseIntr) {
+    throw("Failed to load DiffTest ref so file.");
+  }
+
+  DTRefInit(0);
+  DTRefMemCpy(INITIAL_PC, mem.GuestToHost(INITIAL_PC), mem.img_size, DT_TO_REF);
+  DTRefRegCpy(const_cast<CPU::Regs *>(&cpu.GetRegs()), DT_TO_REF);
+#else
+  if (file) {
+    std::cerr << "DiffTest is not enabled" << std::endl;
+  }
+#endif
+}
+
+void Monitor::DiffTestStep() {
+#ifdef DIFFTEST
+  static word_t ref_regs[33];
+  static word_t &ref_pc = ref_regs[32];
+
+  auto dut_regs = cpu.GetRegs();
+  auto dut_pc = cpu.GetPC();
+
+  DTRefRegCpy(ref_regs, DT_TO_DUT);
+  if (cpu.GetPC() != ref_pc) {
+    state = State::ABORT;
+    std::cerr << string_format("DiffTest Failed: PC DUT=%#08x Ref=%#08x", dut_pc, ref_pc) << std::endl;
+  }
+  for (int i = 0; i < 32; ++i) {
+    if (dut_regs[i] != ref_regs[i]) {
+      state = State::ABORT;
+      std::cerr << string_format("DiffTest Failed: Reg[%d] DUT=%d Ref=%d", dut_regs[i], ref_regs[i]) << std::endl;
+    }
   }
 #endif
 }

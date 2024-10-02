@@ -35,7 +35,9 @@ __EXPORT void difftest_regcpy(void *dut, bool direction) {
       cpu.gpr[i] = ((word_t *)dut)[i];
     }
   } else {
-    assert(0);
+    for (int i = 0; i < sizeof(cpu.gpr) / sizeof(word_t); i++) {
+      ((word_t *)dut)[i] = cpu.gpr[i];
+    }
   }
 }
 

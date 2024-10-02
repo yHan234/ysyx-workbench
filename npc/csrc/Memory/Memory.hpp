@@ -6,19 +6,22 @@
 
 constexpr size_t MEM_BASE = 0x80000000;
 constexpr size_t MEM_SIZE = 0x80000000;
+constexpr size_t INITIAL_PC = 0x80000000;
 
 template <size_t Size, size_t Base>
 class BaseMemory {
 public:
+  size_t img_size;
+
   BaseMemory() : pmem(new byte[Size]) {}
 
-  size_t LoadImage(char *path) {
+  void LoadImage(const std::string &path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
       throw string_format("Failed to open image file: %s", path);
     }
 
-    std::streampos img_size = file.tellg();
+    img_size = file.tellg();
     if (img_size > Size) {
       throw std::string("Image file is too big.");
     }
@@ -26,9 +29,10 @@ public:
     file.seekg(0, std::ios::beg);
     file.read(reinterpret_cast<char *>(pmem.get()), img_size);
     file.close();
-
-    return img_size;
   }
+
+  byte *GuestToHost(paddr_t paddr) { return pmem.get() + paddr - Base; }
+  paddr_t HostToGuest(byte *haddr) { return haddr - pmem.get() + Base; }
 
   word_t PRead(paddr_t addr, int len) {
     if (!IsInPMem(addr)) {
@@ -55,9 +59,6 @@ public:
   }
 
 private:
-  byte *GuestToHost(paddr_t paddr) { return pmem.get() + paddr - Base; }
-  paddr_t HostToGuest(byte *haddr) { return haddr - pmem.get() + Base; }
-
   word_t ReadHost(void *addr, int len) {
     switch (len) {
     case 1:
