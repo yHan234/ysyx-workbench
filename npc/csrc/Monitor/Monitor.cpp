@@ -99,10 +99,11 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
 void Monitor::DiffTestStep() {
 #ifdef DIFFTEST
   static word_t ref_regs[33];
-  static word_t &ref_pc = ref_regs[32];
-  // static word_t dut_regs[32];
+  static word_t ref_pc = 0x80000000;
   auto &dut_regs = cpu.GetRegs();
   auto dut_pc = cpu.GetPC();
+  DTRefRegCpy(ref_regs, REF_TO_DUT);
+  ref_pc = ref_regs[32];
 
   if (dut_pc != ref_pc) {
     state = State::ABORT;
@@ -116,6 +117,5 @@ void Monitor::DiffTestStep() {
   }
 
   DTRefExec(1);
-  DTRefRegCpy(ref_regs, REF_TO_DUT);
 #endif
 }
