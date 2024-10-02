@@ -1,59 +1,35 @@
+# 生成可执行文件名
+BINNAME = npc
+# Verilog 顶层模块名
 TOPNAME = top
-NXDC_FILES = constr/top.nxdc
-INC_PATH ?=
 
-VERILATOR = verilator
-VERILATOR_CFLAGS += -MMD --build -cc  \
-				-O3 --x-assign fast --x-initial fast --noassert
+# Verilog 源代码和 C++ 源代码
+VSRC_DIR = $(abspath ./vsrc)
+CSRC_DIR = $(abspath ./csrc)
+VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
+CSRCS = $(shell find $(abspath ./csrc) -name "*.cpp")
 
+# 构建目录及目标文件
 BUILD_DIR = ./build
-OBJ_DIR = $(BUILD_DIR)/obj_dir
-BIN = $(BUILD_DIR)/$(TOPNAME)
-
-default: $(BIN)
-
+BIN = $(BUILD_DIR)/$(BINNAME)
 $(shell mkdir -p $(BUILD_DIR))
 
-# constraint file
-SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
-$(SRC_AUTO_BIND): $(NXDC_FILES)
-	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
+# Varilator 相关
+VERILATOR = verilator
+VOBJ_DIR = $(BUILD_DIR)/v_obj
 
-# project source
-VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
-CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
-# CSRCS += $(SRC_AUTO_BIND)
+# C++ 相关
+INC_PATH += $(CSRC_DIR)
+INC_PATH += $(VOBJ_DIR)
+INC_PATH += $(VERILATOR_ROOT)/include
+INC_PATH += $(VERILATOR_ROOT)/include/vltstd
+INCFLAGS = $(addprefix -I, $(INC_PATH))
 
-# add csrc include path
-INC_PATH += $(abspath ./csrc)
+COBJ_DIR = $(BUILD_DIR)/c_obj
+COBJS = $(patsubst $(CSRC_DIR)/%.cpp,$(COBJ_DIR)/%.o,$(CSRCS))
 
-# Include all filelist.mk to merge file lists
+# Include other makefiles
 FILELIST_MK = $(shell find -L ./csrc -name "filelist.mk")
 include $(FILELIST_MK)
-
-# rules for NVBoard
-include $(NVBOARD_HOME)/scripts/nvboard.mk
-
-# rules for verilator
-INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -g
-
-$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
-	@rm -rf $(OBJ_DIR)
-	$(VERILATOR) $(VERILATOR_CFLAGS) \
-		--top-module $(TOPNAME) $^ \
-		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
-		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
-
-all: default
-
-sim: $(BIN)
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	$(BIN) $(IMG)
-
-clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: default all clean sim
-
+include build.mk
 include ../Makefile

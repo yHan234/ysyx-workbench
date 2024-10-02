@@ -1,2 +1,1 @@
-CXXFLAGS += -fPIE
-LDFLAGS += $(shell llvm-config --libs) -lxml2 -lz -lcurses
+LDFLAGS +=  -O2 $(shell llvm-config --libs) -lxml2 -lz -lcurses
