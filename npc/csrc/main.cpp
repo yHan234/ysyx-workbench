@@ -27,13 +27,13 @@ int main(int argc, char *argv[]) {
     return 1;
   };
 
-  // Initialize
-  std::srand(time(nullptr));
-  cpu.Reset(10);
-  mem.LoadImage(args.get("img"));
-  monitor.LoadDiffTestRef(args.get("-d"));
-
   try {
+    // Initialize
+    std::srand(time(nullptr));
+    cpu.Reset(10);
+    mem.LoadImage(args.get("img"));
+    monitor.LoadDiffTestRef(args.get("-d"));
+    // Start
     dbg.MainLoop();
   } catch (std::string msg) {
     std::cerr << msg << std::endl;

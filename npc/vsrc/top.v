@@ -6,7 +6,7 @@ module top(
     // PC
 
     wire [31:0] NextPC, pc;
-    Reg #(32, 32'h80000000) pc_r(
+    Reg #(32, 32'h80000000 - 4) pc_r(
             .clk  ( clk    ),
             .rst  ( rst    ),
             .din  ( NextPC ),

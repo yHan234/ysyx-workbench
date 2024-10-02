@@ -86,11 +86,11 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   DTRefInit(0);
   DTRefMemCpy(INITIAL_PC, mem.GuestToHost(INITIAL_PC), mem.img_size, DUT_TO_REF);
 
-  memcpy(regs_pc, &cpu.GetRegs(), sizeof(CPU::Regs));
-  regs_pc[32] = cpu.GetPC();
+  memset(regs_pc, 0, sizeof(CPU::Regs));
+  regs_pc[32] = 0x80000000;
   DTRefRegCpy(regs_pc, DUT_TO_REF);
 #else
-  if (file) {
+  if (!file.empty()) {
     std::cerr << "DiffTest is not enabled" << std::endl;
   }
 #endif
@@ -100,23 +100,22 @@ void Monitor::DiffTestStep() {
 #ifdef DIFFTEST
   static word_t ref_regs[33];
   static word_t &ref_pc = ref_regs[32];
-
-  DTRefExec(1);
-  DTRefRegCpy(ref_regs, REF_TO_DUT);
-
-  auto dut_regs = cpu.GetRegs();
+  // static word_t dut_regs[32];
+  auto &dut_regs = cpu.GetRegs();
   auto dut_pc = cpu.GetPC();
 
-  if (cpu.GetPC() != ref_pc) {
+  if (dut_pc != ref_pc) {
     state = State::ABORT;
-    std::cerr << string_format("DiffTest Failed: PC DUT=%#08x Ref=%#08x", dut_pc, ref_pc) << std::endl;
+    std::cerr << string_format("Diff: PC DUT=%#08x Ref=%#08x", dut_pc, ref_pc) << std::endl;
   }
   for (int i = 0; i < 32; ++i) {
     if (dut_regs[i] != ref_regs[i]) {
-      std::cerr << ref_regs[i] << std::endl;
       state = State::ABORT;
-      std::cerr << string_format("DiffTest Failed: Reg[%d] DUT=%d Ref=%d", dut_regs[i], ref_regs[i]) << std::endl;
+      std::cerr << string_format("Diff: Reg[%d] DUT=%d Ref=%d", i, dut_regs[i], ref_regs[i]) << std::endl;
     }
   }
+
+  DTRefExec(1);
+  DTRefRegCpy(ref_regs, REF_TO_DUT);
 #endif
 }

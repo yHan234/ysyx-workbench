@@ -48,11 +48,11 @@ private:
   WriteOnlyCircularBuffer<InstInfo, BUF_SIZE> ibuf;
 #endif
 
-// Differential Test
+  // Differential Test
+  void DiffTestStep();
 #ifdef DIFFTEST
   enum { REF_TO_DUT,
          DUT_TO_REF };
-  void DiffTestStep();
   void (*DTRefMemCpy)(paddr_t addr, void *buf, size_t n, bool direction) = NULL;
   void (*DTRefRegCpy)(void *dut, bool direction) = NULL;
   void (*DTRefExec)(uint64_t n) = NULL;
