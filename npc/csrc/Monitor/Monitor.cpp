@@ -113,6 +113,7 @@ void Monitor::DiffTestStep() {
   }
   for (int i = 0; i < 32; ++i) {
     if (dut_regs[i] != ref_regs[i]) {
+      std::cerr << ref_regs[i] << std::endl;
       state = State::ABORT;
       std::cerr << string_format("DiffTest Failed: Reg[%d] DUT=%d Ref=%d", dut_regs[i], ref_regs[i]) << std::endl;
     }
