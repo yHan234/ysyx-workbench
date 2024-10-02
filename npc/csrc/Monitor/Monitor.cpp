@@ -6,7 +6,7 @@ std::string InstInfo::ToString() {
 
 Monitor::Monitor(CPU &cpu, Memory &mem)
     : cpu(cpu), mem(mem), state(State::STOP) {
-  init_disasm("riscv32");
+  // init_disasm("riscv32");
 
   cpu.before_exec = [&]() -> int {
     switch (state) {
@@ -49,7 +49,7 @@ void Monitor::ITrace() {
   InstInfo info;
   info.pc = cpu.GetPC();
   info.inst = cpu.GetInst();
-  info.disasm = disassemble(info.pc, reinterpret_cast<uint8_t *>(&info.inst), 4);
+  // info.disasm = disassemble(info.pc, reinterpret_cast<uint8_t *>(&info.inst), 4);
   ibuf.Write(std::move(info));
 #endif
 }
