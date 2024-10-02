@@ -66,6 +66,8 @@ void Monitor::PrintITrace() {
 
 void Monitor::LoadDiffTestRef(const std::string &file) {
 #ifdef DIFFTEST
+  static word_t regs_pc[33];
+
   void *handle;
   handle = dlopen(file.c_str(), RTLD_LAZY);
   if (!handle) {
@@ -82,8 +84,11 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   }
 
   DTRefInit(0);
-  DTRefMemCpy(INITIAL_PC, mem.GuestToHost(INITIAL_PC), mem.img_size, DT_TO_REF);
-  DTRefRegCpy(const_cast<CPU::Regs *>(&cpu.GetRegs()), DT_TO_REF);
+  DTRefMemCpy(INITIAL_PC, mem.GuestToHost(INITIAL_PC), mem.img_size, DUT_TO_REF);
+
+  memcpy(regs_pc, &cpu.GetRegs(), sizeof(CPU::Regs));
+  regs_pc[32] = cpu.GetPC();
+  DTRefRegCpy(regs_pc, DUT_TO_REF);
 #else
   if (file) {
     std::cerr << "DiffTest is not enabled" << std::endl;
@@ -96,10 +101,12 @@ void Monitor::DiffTestStep() {
   static word_t ref_regs[33];
   static word_t &ref_pc = ref_regs[32];
 
+  DTRefExec(1);
+  DTRefRegCpy(ref_regs, REF_TO_DUT);
+
   auto dut_regs = cpu.GetRegs();
   auto dut_pc = cpu.GetPC();
 
-  DTRefRegCpy(ref_regs, DT_TO_DUT);
   if (cpu.GetPC() != ref_pc) {
     state = State::ABORT;
     std::cerr << string_format("DiffTest Failed: PC DUT=%#08x Ref=%#08x", dut_pc, ref_pc) << std::endl;

@@ -50,8 +50,8 @@ private:
 
 // Differential Test
 #ifdef DIFFTEST
-  enum { DT_TO_DUT,
-         DT_TO_REF };
+  enum { REF_TO_DUT,
+         DUT_TO_REF };
   void DiffTestStep();
   void (*DTRefMemCpy)(paddr_t addr, void *buf, size_t n, bool direction) = NULL;
   void (*DTRefRegCpy)(void *dut, bool direction) = NULL;
