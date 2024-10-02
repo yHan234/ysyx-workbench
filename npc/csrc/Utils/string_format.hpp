@@ -1,4 +1,5 @@
 // https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
+#pragma once
 
 #include <memory>
 #include <stdexcept>

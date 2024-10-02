@@ -41,11 +41,11 @@ module top(
 
     // Instruction Memory
 
-    wire [31:0] instr;
+    wire [31:0] inst;
 
     InstrMem instr_mem(
                  .pc    ( pc     ),
-                 .instr ( instr  )
+                 .inst ( inst  )
              );
 
     // Instruction Decode
@@ -61,7 +61,7 @@ module top(
     wire [31:0] 	imm;
 
     IDU idu(
-            .instr 	( instr  ),
+            .inst 	( inst  ),
             .ExtOP  ( ExtOP  ),
             .op    	( op     ),
             .func3 	( func3  ),

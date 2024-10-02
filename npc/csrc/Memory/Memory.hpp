@@ -4,6 +4,9 @@
 #include <fstream>
 #include <memory>
 
+constexpr size_t MEM_BASE = 0x80000000;
+constexpr size_t MEM_SIZE = 0x80000000;
+
 template <size_t Size, size_t Base>
 class BaseMemory {
 public:

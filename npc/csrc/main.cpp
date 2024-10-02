@@ -5,9 +5,9 @@
 #include <ctime>
 #include <iostream>
 
-Monitor monitor;
 Memory mem;
-CPU cpu(monitor);
+CPU cpu;
+Monitor monitor(cpu, mem);
 Debugger dbg(cpu, mem, monitor);
 
 char *img_file;

@@ -1,6 +1,6 @@
 // Instruction Decode Unit
 module IDU(
-        input [31:0] instr,
+        input [31:0] inst,
         input [2:0] ExtOP,
         output [6:0] op,
         output [2:0] func3,
@@ -11,19 +11,19 @@ module IDU(
         output [31:0] imm
     );
 
-    assign op    = instr[6:0];
-    assign func3 = instr[14:12];
-    assign func7 = instr[31:25];
-    assign rd    = instr[11:7];
-    assign rs1   = instr[19:15];
-    assign rs2   = instr[24:20];
+    assign op    = inst[6:0];
+    assign func3 = inst[14:12];
+    assign func7 = inst[31:25];
+    assign rd    = inst[11:7];
+    assign rs1   = inst[19:15];
+    assign rs2   = inst[24:20];
 
     wire [31:0] immI, immU, immS, immB, immJ;
-    assign immI = {{20{instr[31]}}, instr[31:20]};
-    assign immU = {instr[31:12], 12'b0};
-    assign immS = {{20{instr[31]}}, instr[31:25], instr[11:7]};
-    assign immB = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
-    assign immJ = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
+    assign immI = {{20{inst[31]}}, inst[31:20]};
+    assign immU = {inst[31:12], 12'b0};
+    assign immS = {{20{inst[31]}}, inst[31:25], inst[11:7]};
+    assign immB = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0};
+    assign immJ = {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0};
 
     MuxKey #(5, 3, 32) mux_imm (
                .out(imm),
