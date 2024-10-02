@@ -1,1 +1,1 @@
-LDFLAGS +=  -O2 $(shell llvm-config --libs) -lxml2 -lz -lcurses
+# LIBS +=  -O2 $(shell llvm-config --libs) -lxml2 -lz -lcurses
