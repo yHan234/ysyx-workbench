@@ -100,6 +100,8 @@ void Monitor::DiffTestStep() {
 #ifdef DIFFTEST
   static word_t ref_regs[33];
   static word_t ref_pc;
+
+  DTRefExec(1);
   DTRefRegCpy(ref_regs, REF_TO_DUT);
   ref_pc = ref_regs[32];
   auto &dut_regs = cpu.GetRegs();
@@ -116,6 +118,5 @@ void Monitor::DiffTestStep() {
     }
   }
 
-  DTRefExec(1);
 #endif
 }
