@@ -36,7 +36,8 @@ include $(NVBOARD_HOME)/scripts/nvboard.mk
 
 # rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -g
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -g -fsanitize=address
+LDFLAGS += -lasan
 
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 	@rm -rf $(OBJ_DIR)
@@ -49,7 +50,7 @@ all: default
 
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	$(BIN) $(IMG)
+	$(BIN) $(IMG) -d $(REF)
 
 clean:
 	rm -rf $(BUILD_DIR)

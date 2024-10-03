@@ -4,10 +4,12 @@
 #include "Memory/Memory.hpp"
 #include "Utils/CircularBuffer.hpp"
 #include "Utils/disasm.hpp"
+#include <dlfcn.h>
 #include <iostream>
 
 #define BUF_SIZE 32
 #define ITRACE
+#define DIFFTEST
 
 struct InstInfo {
   vaddr_t pc;
@@ -33,6 +35,8 @@ public:
   State state;
   int ret; // valid when state == END
 
+  void LoadDiffTestRef(const std::string &file);
+
 private:
   CPU &cpu;
   Memory &mem;
@@ -42,5 +46,16 @@ private:
   void PrintITrace();
 #ifdef ITRACE
   WriteOnlyCircularBuffer<InstInfo, BUF_SIZE> ibuf;
+#endif
+
+  // Differential Test
+  void DiffTestStep();
+#ifdef DIFFTEST
+  enum { REF_TO_DUT,
+         DUT_TO_REF };
+  void (*DTRefMemCpy)(paddr_t addr, void *buf, size_t n, bool direction) = NULL;
+  void (*DTRefRegCpy)(void *dut, bool direction) = NULL;
+  void (*DTRefExec)(uint64_t n) = NULL;
+  void (*DTRefRaiseIntr)(uint64_t NO) = NULL;
 #endif
 };

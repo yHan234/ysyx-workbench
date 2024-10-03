@@ -44,8 +44,9 @@ module top(
     wire [31:0] inst;
 
     InstrMem instr_mem(
-                 .pc    ( pc     ),
-                 .inst ( inst  )
+                .rst  ( rst   ),
+                .pc   ( pc    ),
+                .inst ( inst  )
              );
 
     // Instruction Decode
