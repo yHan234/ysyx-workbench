@@ -37,7 +37,11 @@ int main(int argc, char *argv[]) {
     if (args["-b"] == true) {
       dbg.SetBatchMode();
     }
+
+    monitor.state = Monitor::State::RESETTING;
     cpu.Reset(10);
+    monitor.state = Monitor::State::STOP;
+
     mem.LoadImage(args.get("img"));
     monitor.LoadDiffTestRef(args.get("-d"));
     // Start

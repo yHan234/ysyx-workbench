@@ -36,6 +36,7 @@ public:
 
   // State
   enum class State {
+    RESETTING,
     RUNNING,
     STOP,
     END,
