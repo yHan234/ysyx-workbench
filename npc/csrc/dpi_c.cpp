@@ -13,7 +13,6 @@ extern "C" int pmem_read(u_int32_t addr) {
   try {
     return mem.PRead(addr & ~0x3u, 4);
   } catch (std::string &msg) {
-    std::cerr << msg << std::endl;
     return 0;
   }
 }
