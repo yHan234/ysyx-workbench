@@ -32,7 +32,7 @@ module top(
             .WrClk ( clk                        ),
             .RegWr ( RegWr                      ),
             .Rw    ( rd                         ),
-            .busW  ( MemtoReg ? 32'b0 : ALUout  ),
+            .busW  ( MemToReg ? 32'b0 : ALUout  ),
             .Ra    ( rs1                        ),
             .busA  ( reg_src1                   ),
             .Rb    ( rs2                        ),
@@ -62,7 +62,7 @@ module top(
     wire [31:0] 	imm;
 
     IDU idu(
-            .inst 	( inst  ),
+            .inst 	( inst   ),
             .ExtOP  ( ExtOP  ),
             .op    	( op     ),
             .func3 	( func3  ),
@@ -81,7 +81,7 @@ module top(
     wire [1:0]  ALUBsrc;
     wire [3:0]  ALUctr;
     wire [2:0]  Branch;
-    wire        MemtoReg;
+    wire        MemToReg;
     wire        MemWr;
     wire [2:0]  MemOP;
 
@@ -95,7 +95,7 @@ module top(
             .ALUBsrc    ( ALUBsrc  ),
             .ALUctr     ( ALUctr   ),
             .Branch     ( Branch   ),
-            .MemtoReg   ( MemtoReg ),
+            .MemToReg   ( MemToReg ),
             .MemWr      ( MemWr    ),
             .MemOP      ( MemOP    )
         );
@@ -104,6 +104,7 @@ module top(
     // ALU
 
     wire [31:0] ALUout;
+    wire Less, Zero;
 
     ALU alu(
             .A      ( ALUAsrc ? pc : reg_src1 ),
@@ -113,7 +114,9 @@ module top(
                       0
                     ),
             .ctr    ( ALUctr  ),
-            .out    ( ALUout  )
+            .out    ( ALUout  ),
+            .Less   ( Less    ),
+            .Zero   ( Zero    )
         );
 
 endmodule
