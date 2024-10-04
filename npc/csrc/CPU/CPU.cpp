@@ -17,11 +17,9 @@ void CPU::Reset(uint64_t n) {
 
 void CPU::Exec(uint64_t n) {
 #define CALLBACK(func, if_err) \
-  do {                         \
-    if (func() != 0) {         \
-      if_err;                  \
-    }                          \
-  } while (0)
+  if (func() != 0) {           \
+    if_err;                    \
+  }
 
   CALLBACK(before_exec, return);
   while (n--) {
