@@ -23,7 +23,7 @@ module ALU(
     );
 
     assign Less = ctr[3] == 0 ? A < B : $signed(A) < $signed(B);
-    assign Zero = out == 0;
+    assign Zero = A == B;
 
     wire [31:0] adder_out;
     MuxKey #(2, 1, 32) mux_adder (
