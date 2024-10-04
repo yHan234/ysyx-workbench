@@ -150,7 +150,7 @@ void Monitor::DiffTestStep() {
   auto &dut_regs = cpu.GetRegs();
   auto dut_pc = cpu.GetPC();
 
-  std::cout << pc << '\n';
+  std::cout << std::hex << pc << '\n';
   for (int i = 0; i < 32; ++i)
     std::cout << ref_regs[i] << ' ';
   std::cout << '\n';
