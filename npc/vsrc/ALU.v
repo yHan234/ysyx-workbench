@@ -44,13 +44,13 @@ module ALU(
         .out(shifter_out)
     );
 
-    MuxKey #(7, 3, 32) mux_top (
+    MuxKey #(8, 3, 32) mux_top (
         .out(out),
         .key(ctr[2:0]),
         .lut({
                 3'b000, adder_out,
                 3'b001, shifter_out,
-                // 3'b010, 32'd0,
+                3'b010, {31'b0, Less},
                 3'b011, B,
                 3'b100, A ^ B,
                 3'b101, shifter_out,
