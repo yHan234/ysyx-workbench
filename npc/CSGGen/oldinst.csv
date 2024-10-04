@@ -1,4 +1,4 @@
-﻿name,op[6:2],func3,func7[5],ExtOP,RegWr,Branch,MemToReg,MemWr,MemOP,ALUAsrc,ALUBsrc,ALUctr,ALUAction
+﻿name,op[6:2],func3,func7[5],ExtOP,RegWr,Branch,MemToReg,MemWr,MemOp,ALUAsrc,ALUBsrc,ALUctr,ALUAction
 lui,1101,,,1,1,0,0,0,,,1,11,load imm
 auipc,101,,,1,1,0,0,0,,1,1,0,PC + imm
 addi,100,0,,0,1,0,0,0,,0,1,0,rs1 + imm

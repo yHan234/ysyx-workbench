@@ -83,7 +83,7 @@ module top(
     wire [2:0]  Branch;
     wire        MemToReg;
     wire        MemWr;
-    wire [2:0]  MemOP;
+    wire [2:0]  MemOp;
 
     CSG csg(
             .op         ( op       ),
@@ -97,7 +97,7 @@ module top(
             .Branch     ( Branch   ),
             .MemToReg   ( MemToReg ),
             .MemWr      ( MemWr    ),
-            .MemOP      ( MemOP    )
+            .MemOp      ( MemOp    )
         );
 
 

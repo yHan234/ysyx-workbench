@@ -12,7 +12,7 @@ class Inst:
         self.Branch = None
         self.MemToReg = None
         self.MemWr = None
-        self.MemOP = None
+        self.MemOp = None
         self.ALUAsrc = None
         self.ALUBsrc = None
         self.ALUctr = None
@@ -23,7 +23,7 @@ class Inst:
             self.ALUctr
             + self.ALUBsrc
             + self.ALUAsrc
-            + self.MemOP
+            + self.MemOp
             + self.MemWr
             + self.MemToReg
             + self.Branch
@@ -50,7 +50,7 @@ def load_insts_from_csv(path: str, encoding: str):
                 "Branch",
                 "MemToReg",
                 "MemWr",
-                "MemOP",
+                "MemOp",
                 "ALUAsrc",
                 "ALUBsrc",
                 "ALUctr",

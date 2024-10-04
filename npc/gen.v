@@ -4,7 +4,7 @@
 // output [2:0] Branch,    // 说明分支和跳转的种类，用于生成最终的分支控制信号，具体见代码。
 // output MemtoReg,        // 选择寄存器rd写回数据来源，为0时选择ALU输出，为1时选择数据存储器输出。
 // output MemWr,           // 控制是否对数据存储器进行写入，为1时写回存储器。
-// output [2:0] MemOP,     // 控制数据存储器读写格式，为010时为4字节读写，为001时为2字节读写带符号扩展，为000时为1字节读写带符号扩展，为101时为2字节读写无符号扩展，为100时为1字节读写无符号扩展。
+// output [2:0] MemOp,     // 控制数据存储器读写格式，为010时为4字节读写，为001时为2字节读写带符号扩展，为000时为1字节读写带符号扩展，为101时为2字节读写无符号扩展，为100时为1字节读写无符号扩展。
 // output ALUAsrc,         // 选择ALU输入端A的来源。为0时选择rs1，为1时选择PC。
 // output [1:0] ALUBsrc,   // 选择ALU输入端B的来源。为00时选择rs2，为01时选择imm(当是立即数移位指令时，只有低5位有效)，为10时选择常数4（用于跳转时计算返回地址PC+4）。
 // output [3:0] ALUctr     // 选择ALU执行的操作，具体见ALU代码。
@@ -18,7 +18,7 @@ module CSG(
 	output [2:0] Branch,
 	output [0:0] MemToReg,
 	output [0:0] MemWr,
-	output [2:0] MemOP,
+	output [2:0] MemOp,
 	output [0:0] ALUAsrc,
 	output [1:0] ALUBsrc,
 	output [3:0] ALUctr
@@ -28,7 +28,7 @@ assign RegWr = mux_op_out[15:15];
 assign Branch = mux_op_out[14:12];
 assign MemToReg = mux_op_out[11:11];
 assign MemWr = mux_op_out[10:10];
-assign MemOP = mux_op_out[9:7];
+assign MemOp = mux_op_out[9:7];
 assign ALUAsrc = mux_op_out[6:6];
 assign ALUBsrc = mux_op_out[5:4];
 assign ALUctr = mux_op_out[3:0];

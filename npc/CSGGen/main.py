@@ -27,7 +27,7 @@ if __name__ == "__main__":
         "Branch": mux_op.out[14:12],
         "MemToReg": mux_op.out[11],
         "MemWr": mux_op.out[10],
-        "MemOP": mux_op.out[9:7],
+        "MemOp": mux_op.out[9:7],
         "ALUAsrc": mux_op.out[6],
         "ALUBsrc": mux_op.out[5:4],
         "ALUctr": mux_op.out[3:0],
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 // output [2:0] Branch,    // 说明分支和跳转的种类，用于生成最终的分支控制信号，具体见代码。
 // output MemtoReg,        // 选择寄存器rd写回数据来源，为0时选择ALU输出，为1时选择数据存储器输出。
 // output MemWr,           // 控制是否对数据存储器进行写入，为1时写回存储器。
-// output [2:0] MemOP,     // 控制数据存储器读写格式，为010时为4字节读写，为001时为2字节读写带符号扩展，为000时为1字节读写带符号扩展，为101时为2字节读写无符号扩展，为100时为1字节读写无符号扩展。
+// output [2:0] MemOp,     // 控制数据存储器读写格式，为010时为4字节读写，为001时为2字节读写带符号扩展，为000时为1字节读写带符号扩展，为101时为2字节读写无符号扩展，为100时为1字节读写无符号扩展。
 """
     )
     print(csg.dump_verilog())
