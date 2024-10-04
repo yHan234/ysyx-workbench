@@ -174,7 +174,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
   printf("ref reg: ");
   for (int i = 0; i < 32; ++i) {
-    printf("%d ", cpu.gpr[i]);
+    printf("%u ", cpu.gpr[i]);
   }
   printf("\n");
 }
