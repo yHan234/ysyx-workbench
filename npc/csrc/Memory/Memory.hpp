@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include <fstream>
 #include <memory>
+#include <iostream>
 
 constexpr size_t MEM_BASE = 0x80000000;
 constexpr size_t MEM_SIZE = 0x80000000;
@@ -104,6 +105,7 @@ private:
 
   void WritePMem(paddr_t addr, int len, word_t data) {
     trace_pwrite(addr, len, data);
+    std::cout << std::hex << addr << ' ' << len << ' ' << data << std::endl;
     WriteHost(GuestToHost(addr), len, data);
   }
 

@@ -33,7 +33,7 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     inst = cpu.GetInst(); // 本次执行的 inst
     ITrace();
     DiffTestStep();
-    std::cout << std::hex << mem.PRead(0x80000173, 4) << std::endl;
+    // std::cout << std::hex << mem.PRead(0x80000173, 4) << std::endl;
     return state == State::RUNNING ? 0 : 1;
   };
 
