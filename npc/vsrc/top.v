@@ -21,22 +21,23 @@ module top(
             .dout ( pc     ),
             .wen  ( 1'b1   )
         );
-    assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : reg_src1);
+    assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
 
     // GPR
 
-    wire [31:0] reg_src1, reg_src2;
+    wire [31:0] rbus1, rbus2;
 
     GPR gpr(
-            .rst   ( rst                        ),
-            .WrClk ( clk                        ),
-            .RegWr ( RegWr                      ),
-            .Rw    ( rd                         ),
-            .busW  ( MemToReg ? 32'b0 : ALUout  ),
-            .Ra    ( rs1                        ),
-            .busA  ( reg_src1                   ),
-            .Rb    ( rs2                        ),
-            .busB  ( reg_src2                   )
+            .rst   ( rst               ),
+            .WrClk ( clk               ),
+            .RegWr ( RegWr             ),
+            .Rw    ( rd                ),
+            .busW  ( MemToReg ? MemOut
+                              : ALUout ),
+            .Ra    ( rs1               ),
+            .busA  ( rbus1             ),
+            .Rb    ( rs2               ),
+            .busB  ( rbus2             )
         );
 
     // Instruction Memory
@@ -107,8 +108,8 @@ module top(
     wire Less, Zero;
 
     ALU alu(
-            .A      ( ALUAsrc ? pc : reg_src1 ),
-            .B      ( ALUBsrc == 2'b00 ? reg_src2 :
+            .A      ( ALUAsrc ? pc : rbus1 ),
+            .B      ( ALUBsrc == 2'b00 ? rbus2 :
                       ALUBsrc == 2'b01 ? imm :
                       ALUBsrc == 2'b10 ? 4 :
                       0
@@ -118,5 +119,17 @@ module top(
             .Less   ( Less    ),
             .Zero   ( Zero    )
         );
+
+    // Data Memory
+    wire [31:0] MemOut;
+    DataMem data_mem(
+        .addr  ( ALUout  ),
+        .RdClk ( clk     ),
+        .out   ( MemOut  ),
+        .WrClk ( clk     ),
+        .MemWr ( MemWr   ),
+        .MemOp ( MemOp   ),
+        .in    ( rbus2   )
+    );
 
 endmodule
