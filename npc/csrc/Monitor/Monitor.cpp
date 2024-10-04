@@ -161,7 +161,7 @@ void Monitor::DiffTestStep() {
   for (int i = 1; i < 32; ++i) { // 不比较 reg0
     if (dut_regs[i] != ref_regs[i]) {
       state = State::ABORT;
-      std::cerr << string_format("Diff: Reg[%d] DUT=%d Ref=%d", i, dut_regs[i], ref_regs[i]) << std::endl;
+      std::cerr << string_format("Diff: Reg[%d] DUT=%x Ref=%x", i, dut_regs[i], ref_regs[i]) << std::endl;
     }
   }
 
