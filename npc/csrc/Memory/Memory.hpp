@@ -89,7 +89,7 @@ private:
       *(uint32_t *)addr = data;
       return;
     default:
-      throw "Write Host: bad len";
+      throw std::string("Write Host: bad len");
     }
   }
 
@@ -105,8 +105,11 @@ private:
 
   void WritePMem(paddr_t addr, int len, word_t data) {
     trace_pwrite(addr, len, data);
-    std::cout << std::hex << addr << ' ' << len << ' ' << data << std::endl;
     WriteHost(GuestToHost(addr), len, data);
+    if (addr == 0x80000173) {
+      std::cout << std::hex << addr << ' ' << len << ' ' << data << std::endl;
+      std::cout << (*(uint8_t *)GuestToHost(addr)) << std::endl;
+    }
   }
 
 private:
