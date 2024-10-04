@@ -52,7 +52,6 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
       } else {
         std::cout << "HIT BAD TRAP" << std::endl;
       }
-      DTRefExec(-1);
     }
     return 0;
   };
