@@ -21,7 +21,7 @@ extern "C" void pmem_write(u_int32_t addr, u_int32_t data, char mask) {
     if (((mask >> (3 - i)) & 1) == 0) {
       continue;
     }
-    mem.PWrite(addr + i, 1, data >> (i * 8));
+    mem.PWrite(addr + i, 1, data >> ((3 - i) * 8));
   }
 }
 

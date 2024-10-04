@@ -78,7 +78,7 @@ MuxKey #(3, 3, 40) mux_mem_write(
     .lut({
         3'b000, {write_byte1, write_mask1}, // 1字节写
         3'b001, {write_byte2, write_mask2}, // 2字节写
-        3'b010, {in, 8'b1111}             // 4字节写
+        3'b010, {in, 8'b1111}               // 4字节写
     })
 );
 MuxKey #(4, 2, 40) mux_mem_write_byte1(
