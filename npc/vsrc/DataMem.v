@@ -77,26 +77,26 @@ MuxKey #(3, 3, 40) mux_mem_write(
     .lut({
         3'b000, {write_byte1, write_mask1}, // 1字节写
         3'b001, {write_byte2, write_mask2}, // 2字节写
-        3'b010, {read, 8'b1111}             // 4字节写
+        3'b010, {in, 8'b1111}             // 4字节写
     })
 );
 MuxKey #(4, 2, 40) mux_mem_write_byte1(
     .key(align_offset),
     .out({write_byte1, write_mask1}),
     .lut({
-        2'b00, {{read[7:0], 24'b0}, 8'b1000},
-        2'b01, {{8'b0, read[7:0], 16'b0}, 8'b0100},
-        2'b10, {{16'b0, read[7:0], 8'b0}, 8'b0010},
-        2'b11, {{24'b0, read[7:0]}, 8'b0001}
+        2'b00, {{in[7:0], 24'b0}, 8'b1000},
+        2'b01, {{8'b0, in[7:0], 16'b0}, 8'b0100},
+        2'b10, {{16'b0, in[7:0], 8'b0}, 8'b0010},
+        2'b11, {{24'b0, in[7:0]}, 8'b0001}
     })
 );
 MuxKey #(3, 2, 40) mux_mem_write_byte2(
     .key(align_offset),
     .out({write_byte2, write_mask2}),
     .lut({
-        2'b00, {{read[15:0], 16'b0}, 8'b1100},
-        2'b01, {{8'b0, read[15:0], 8'b0}, 8'b0110},
-        2'b10, {{16'b0, read[15:0]}, 8'b0011}
+        2'b00, {{in[15:0], 16'b0}, 8'b1100},
+        2'b01, {{8'b0, in[15:0], 8'b0}, 8'b0110},
+        2'b10, {{16'b0, in[15:0]}, 8'b0011}
     })
 );
 
