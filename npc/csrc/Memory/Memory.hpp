@@ -3,7 +3,6 @@
 #include "common.hpp"
 #include <fstream>
 #include <memory>
-#include <iostream>
 
 constexpr size_t MEM_BASE = 0x80000000;
 constexpr size_t MEM_SIZE = 0x80000000;
