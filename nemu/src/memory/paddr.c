@@ -43,6 +43,9 @@ static void mringbuf_write(char op, paddr_t addr, int len, word_t data) {
   if (addr < mtrace_begin || mtrace_end < addr) {
     return;
   }
+  if (cpu.pc == addr) {
+    return;
+  }
 
   mringbuf[mringbuf_wptr].pc = cpu.pc;
   mringbuf[mringbuf_wptr].op = op;
