@@ -7,9 +7,6 @@ extern Memory mem;
 extern CPU cpu;
 
 extern "C" int pmem_read(u_int32_t addr) {
-  if (monitor.state == Monitor::State::RESETTING) {
-    return 0;
-  }
   try {
     return mem.PRead(addr & ~0x3u, 4);
   } catch (std::string &msg) {
@@ -19,12 +16,12 @@ extern "C" int pmem_read(u_int32_t addr) {
 
 extern "C" void pmem_write(u_int32_t addr, u_int32_t data, char mask) {
   addr &= ~0x3u;
-  if (mask == 0b1)
-    mem.PWrite(addr + 3, 1, data << 24);
-  else if (mask == 0b11)
-    mem.PWrite(addr + 2, 2, data << 16);
-  else if (mask == 0b1111)
-    mem.PWrite(addr, 4, data);
+  for (int i = 0; i < 4; ++i) {
+    if (((mask >> (3 - i)) & 1) == 0) {
+      continue;
+    }
+    mem.PWrite(addr + i, 1, data << (i * 8));
+  }
 }
 
 extern "C" int get_inst() {
