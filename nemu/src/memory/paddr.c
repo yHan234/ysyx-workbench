@@ -26,7 +26,7 @@ static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 
 #ifdef CONFIG_MTRACE
 extern CPU_state cpu;
-#define MRINGBUF_LEN 1024
+#define MRINGBUF_LEN 128
 struct {
   vaddr_t pc;
   char op;
