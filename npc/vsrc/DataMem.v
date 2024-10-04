@@ -30,18 +30,17 @@ always @(posedge RdClk) begin
     read = pmem_read(addr);
     case (MemOp)
         3'b000: // 1字节读，带符号扩展
-            out = {{24{read[7]}}, read[7:0]};
+            out = {{24{read[31]}}, read[31:24]};
         3'b001: // 2字节读，带符号扩展
-            out = {{16{read[7]}}, read[15:0]};
+            out = {{16{read[31]}}, read[31:16]};
         3'b010: // 4字节读
             out = read;
         3'b100: // 1字节读，无符号扩展
-            out = {24'b0, read[7:0]};
+            out = {24'b0, read[31:24]};
         3'b101: // 2字节读，无符号扩展
-            out = {16'b0, read[15:0]};
+            out = {16'b0, read[31:16]};
         default:;
     endcase
-    $display(out);
 end
 
 always @(posedge WrClk) begin
