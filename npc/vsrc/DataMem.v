@@ -28,6 +28,7 @@ reg [31:0] read;
 
 always @(posedge RdClk) begin
     read = pmem_read(addr);
+    $display(addr);
     case (MemOp)
         3'b000: // 1字节读，带符号扩展
             out = {{24{read[31]}}, read[31:24]};
@@ -44,6 +45,7 @@ always @(posedge RdClk) begin
 end
 
 always @(posedge WrClk) begin
+    $display(addr);
     if (MemWr) begin
         case (MemOp)
             3'b000: // 1字节写
