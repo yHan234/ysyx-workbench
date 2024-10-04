@@ -106,10 +106,6 @@ private:
   void WritePMem(paddr_t addr, int len, word_t data) {
     trace_pwrite(addr, len, data);
     WriteHost(GuestToHost(addr), len, data);
-    if (addr == 0x80000173) {
-      std::cout << std::hex << addr << ' ' << len << ' ' << data << std::endl;
-      std::cout << (int)*((uint8_t *)GuestToHost(addr)) << std::endl;
-    }
   }
 
 private:

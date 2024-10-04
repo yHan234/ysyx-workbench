@@ -106,6 +106,8 @@ always @(*) begin
         read = pmem_read(aligned_addr);
     else
         read = 0;
+    
+    $display(read);
 
     if (MemWr) begin
         pmem_write(aligned_addr, write, write_mask);
