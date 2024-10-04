@@ -94,6 +94,9 @@ void Monitor::MTrace(bool op, vaddr_t addr, int len, word_t data) {
   if (op == 0 && addr == pc) { // 取指令不记录
     return;
   }
+  if (op == 0) { // 读取不记录，因为设计的电路中每个周期都会读取一次，不论是否有用
+    return;
+  }
   mbuf.Write({op, pc, addr, len, data});
 #endif
 }
