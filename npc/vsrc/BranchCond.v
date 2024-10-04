@@ -8,8 +8,8 @@ module BranchCond(
     output PCAsrc,
     output PCBsrc
 );
-    wire [1:0] zero_ctr = Branch[0] ^ Zero ? 2'b00 : 2'b10;
-    wire [1:0] less_ctr = Branch[0] ^ Less ? 2'b00 : 2'b10;
+    wire [1:0] zero_ctr = Branch[0] ^ Zero ? 2'b10 : 2'b00;
+    wire [1:0] less_ctr = Branch[0] ^ Less ? 2'b10 : 2'b00;
     always @(*) $display(Branch, ", ", Zero, ", ", Branch[0] ^ Zero, ", ", PCAsrc, PCBsrc);
     always @(*) $display(Branch, ", ", Less, ", ", Branch[0] ^ Less, ", ", PCAsrc, PCBsrc);
     MuxKey #(7, 3, 2) mux_br(
