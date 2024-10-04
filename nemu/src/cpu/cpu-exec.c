@@ -172,10 +172,8 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);
   cpu.pc = s->dnpc;
 
-  printf("ref reg: ");
-  for (int i = 0; i < 32; ++i) {
-    printf("%u ", cpu.gpr[i]);
-  }
+  printf("ref reg a0: ");
+  printf("%u", cpu.gpr[10]);
   printf("\n");
 }
 
