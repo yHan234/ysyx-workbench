@@ -57,11 +57,11 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
   };
 
   mem.trace_pread = [&](paddr_t addr, int len, word_t data) {
-    MTRACE(0, addr, len, data);
+    MTrace(0, addr, len, data);
   };
 
   mem.trace_pwrite = [&](paddr_t addr, int len, word_t data) {
-    MTRACE(1, addr, len, data);
+    MTrace(1, addr, len, data);
   };
 }
 
