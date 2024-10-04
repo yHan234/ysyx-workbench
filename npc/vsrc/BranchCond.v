@@ -1,3 +1,6 @@
+// PCAsrc控制PC加法器输入A的信号，为0时选择常数4，为1时选择imm
+// PCBsrc控制PC加法器输入B的信号，为0时选择本周期PC，为1时选择寄存器rs1
+
 module BranchCond(
     input [2:0] Branch,
     input Less,

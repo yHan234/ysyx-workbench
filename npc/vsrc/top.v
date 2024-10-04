@@ -6,6 +6,14 @@ module top(
     // PC
 
     wire [31:0] NextPC, pc /* verilator public */;
+    wire PCAsrc, PCBsrc;
+    BranchCond bc (
+        .Branch ( Branch  ),
+        .Less   ( Less    ),
+        .Zero   ( Zero    ),
+        .PCAsrc ( PCAsrc  ),
+        .PCBsrc ( PCBsrc  )
+    );
     Reg #(32, 32'h80000000) pc_r(
             .clk  ( clk    ),
             .rst  ( rst    ),
@@ -13,15 +21,7 @@ module top(
             .dout ( pc     ),
             .wen  ( 1'b1   )
         );
-    MuxKey #(3, 3, 32) mux_next_pc (
-        .out(NextPC),
-        .key(Branch),
-        .lut({
-            3'b000, pc + 4,
-            3'b001, pc + imm,
-            3'b010, reg_src1 + imm
-        })
-    );
+    assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : reg_src1);
 
     // GPR
 
