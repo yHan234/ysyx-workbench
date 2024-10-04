@@ -41,6 +41,7 @@ always @(posedge RdClk) begin
             out = {16'b0, read[15:0]};
         default:;
     endcase
+    $display(out);
 end
 
 always @(posedge WrClk) begin
