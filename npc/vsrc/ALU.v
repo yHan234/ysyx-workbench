@@ -22,7 +22,7 @@ module ALU(
         output Zero
     );
 
-    assign Less = ctr[3] == 0 ? A < B : $signed(A) < $signed(B);
+    assign Less = ctr[3] ? A < B : $signed(A) < $signed(B);
     assign Zero = A == B;
 
     wire [31:0] adder_out;
