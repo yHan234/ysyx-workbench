@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     monitor.LoadDiffTestRef(args.get("-d"));
     // Start
     dbg.MainLoop();
-  } catch (std::string msg) {
+  } catch (std::string &msg) {
     std::cerr << msg << std::endl;
     return 1;
   }
