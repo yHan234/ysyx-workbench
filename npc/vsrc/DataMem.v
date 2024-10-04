@@ -10,6 +10,8 @@ MemOp:
 101  2字节读，无符号扩展
 */
 
+//! 均使用小端序
+
 module DataMem (
     input [31:0] addr,
 
@@ -49,19 +51,19 @@ MuxKey #(4, 2, 8) mux_mem_read_byte1(
     .key(align_offset),
     .out(r_byte1),
     .lut({
-        2'b00, read[31:24],
-        2'b01, read[23:16],
-        2'b10, read[15:8],
-        2'b11, read[7:0]
+        2'b00, read[7:0],
+        2'b01, read[15:8],
+        2'b10, read[23:16],
+        2'b11, read[31:24]
     })
 );
 MuxKey #(3, 2, 16) mux_mem_read_byte2(
     .key(align_offset),
     .out(r_byte2),
     .lut({
-        2'b00, read[31:16],
+        2'b00, read[15:0],
         2'b01, read[23:8],
-        2'b10, read[15:0]
+        2'b10, read[31:16]
     })
 );
 
@@ -71,8 +73,8 @@ wire [31:0] write;
 wire [7:0]  write_mask;
 wire [31:0] write_byte1; // 如果是写一个字节，这就是要写的内容的扩展，由 mux_mem_write_byte1 给出
 wire [31:0] write_byte2; // 如果是写两个字节，这就是要写的内容的扩展，由 mux_mem_write_byte2 给出
-wire [7:0] write_mask1;  // 如果是写一个字节，这就是要写的内容的 mask，由 mux_mem_write_byte1 给出
-wire [7:0] write_mask2;  // 如果是写两个字节，这就是要写的内容的 mask，由 mux_mem_write_byte2 给出
+wire [7:0] write_mask1;  // 如果是写一个字节，这就是要写的内容的 mask，由 mux_mem_write_mask1 给出
+wire [7:0] write_mask2;  // 如果是写两个字节，这就是要写的内容的 mask，由 mux_mem_write_mask2 给出
 MuxKey #(3, 3, 40) mux_mem_write(
     .key(MemOp),
     .out({write, write_mask}),
@@ -86,27 +88,25 @@ MuxKey #(4, 2, 40) mux_mem_write_byte1(
     .key(align_offset),
     .out({write_byte1, write_mask1}),
     .lut({
-        2'b00, {{in[7:0], 24'b0}, 8'b1000},
-        2'b01, {{8'b0, in[7:0], 16'b0}, 8'b0100},
-        2'b10, {{16'b0, in[7:0], 8'b0}, 8'b0010},
-        2'b11, {{24'b0, in[7:0]}, 8'b0001}
+        2'b00, {{8'b0   , 8'b0   , 8'b0   , in[7:0]}, 8'b0001},
+        2'b01, {{8'b0   , 8'b0   , in[7:0], 8'b0   }, 8'b0010},
+        2'b10, {{8'b0   , in[7:0], 8'b0   , 8'b0   }, 8'b0100},
+        2'b11, {{in[7:0], 8'b0   , 8'b0   , 8'b0   }, 8'b1000}
     })
 );
 MuxKey #(3, 2, 40) mux_mem_write_byte2(
     .key(align_offset),
     .out({write_byte2, write_mask2}),
     .lut({
-        2'b00, {{in[15:0], 16'b0}, 8'b1100},
-        2'b01, {{8'b0, in[15:0], 8'b0}, 8'b0110},
-        2'b10, {{16'b0, in[15:0]}, 8'b0011}
+        2'b00, {{8'b0    , 8'b0    , in[15:0]}, 8'b0011},
+        2'b01, {{8'b0    , in[15:0], 8'b0    }, 8'b0110},
+        2'b10, {{in[15:0], 8'b0    , 8'b0    }, 8'b1100}
     })
 );
 
 always @(*) begin
     if (MemRd) begin
         read = pmem_read(aligned_addr);
-        // 内存中保存的数据（小端序），被作为数字取出时，会变为大端序。需要将其反转。
-        read = {read[7:0], read[15:8], read[23:16], read[31:24]};
     end else begin
         read = 0;
     end
