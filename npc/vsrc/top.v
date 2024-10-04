@@ -5,7 +5,15 @@ module top(
 
     // PC
 
-    wire [31:0] NextPC, pc;
+    wire [31:0] NextPC, pc /* verilator public */;
+    wire PCAsrc, PCBsrc;
+    BranchCond bc (
+        .Branch ( Branch  ),
+        .Less   ( Less    ),
+        .Zero   ( Zero    ),
+        .PCAsrc ( PCAsrc  ),
+        .PCBsrc ( PCBsrc  )
+    );
     Reg #(32, 32'h80000000) pc_r(
             .clk  ( clk    ),
             .rst  ( rst    ),
@@ -13,37 +21,30 @@ module top(
             .dout ( pc     ),
             .wen  ( 1'b1   )
         );
-    MuxKey #(3, 3, 32) mux_next_pc (
-        .out(NextPC),
-        .key(Branch),
-        .lut({
-            3'b000, pc + 4,
-            3'b001, pc + imm,
-            3'b010, reg_src1 + imm
-        })
-    );
+    assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
 
     // GPR
 
-    wire [31:0] reg_src1, reg_src2;
+    wire [31:0] rbus1, rbus2;
 
     GPR gpr(
-            .rst   ( rst                        ),
-            .WrClk ( clk                        ),
-            .RegWr ( RegWr                      ),
-            .Rw    ( rd                         ),
-            .busW  ( MemtoReg ? 32'b0 : ALUout  ),
-            .Ra    ( rs1                        ),
-            .busA  ( reg_src1                   ),
-            .Rb    ( rs2                        ),
-            .busB  ( reg_src2                   )
+            .rst   ( rst               ),
+            .WrClk ( clk               ),
+            .RegWr ( RegWr             ),
+            .Rw    ( rd                ),
+            .busW  ( MemToReg ? MemOut
+                              : ALUout ),
+            .Ra    ( rs1               ),
+            .busA  ( rbus1             ),
+            .Rb    ( rs2               ),
+            .busB  ( rbus2             )
         );
 
     // Instruction Memory
 
-    wire [31:0] inst;
+    wire [31:0] inst /* verilator public */;
 
-    InstrMem instr_mem(
+    InstMem inst_mem(
                 .rst  ( rst   ),
                 .pc   ( pc    ),
                 .inst ( inst  )
@@ -62,7 +63,7 @@ module top(
     wire [31:0] 	imm;
 
     IDU idu(
-            .inst 	( inst  ),
+            .inst 	( inst   ),
             .ExtOP  ( ExtOP  ),
             .op    	( op     ),
             .func3 	( func3  ),
@@ -81,9 +82,10 @@ module top(
     wire [1:0]  ALUBsrc;
     wire [3:0]  ALUctr;
     wire [2:0]  Branch;
-    wire        MemtoReg;
+    wire        MemToReg;
+    wire        MemRd;
     wire        MemWr;
-    wire [2:0]  MemOP;
+    wire [2:0]  MemOp;
 
     CSG csg(
             .op         ( op       ),
@@ -95,25 +97,43 @@ module top(
             .ALUBsrc    ( ALUBsrc  ),
             .ALUctr     ( ALUctr   ),
             .Branch     ( Branch   ),
-            .MemtoReg   ( MemtoReg ),
+            .MemToReg   ( MemToReg ),
+            .MemRd      ( MemRd    ),
             .MemWr      ( MemWr    ),
-            .MemOP      ( MemOP    )
+            .MemOp      ( MemOp    )
         );
 
 
     // ALU
 
     wire [31:0] ALUout;
+    wire Less, Zero;
 
     ALU alu(
-            .A      ( ALUAsrc ? pc : reg_src1 ),
-            .B      ( ALUBsrc == 2'b00 ? reg_src2 :
+            .A      ( ALUAsrc ? pc : rbus1 ),
+            .B      ( ALUBsrc == 2'b00 ? rbus2 :
                       ALUBsrc == 2'b01 ? imm :
                       ALUBsrc == 2'b10 ? 4 :
                       0
                     ),
             .ctr    ( ALUctr  ),
-            .out    ( ALUout  )
+            .out    ( ALUout  ),
+            .Less   ( Less    ),
+            .Zero   ( Zero    )
         );
+
+    // Data Memory
+
+    wire [31:0] MemOut;
+    DataMem data_mem(
+        .addr  ( ALUout  ),
+        .RdClk ( clk     ),
+        .out   ( MemOut  ),
+        .WrClk ( clk     ),
+        .MemRd ( MemRd   ),
+        .MemWr ( MemWr   ),
+        .MemOp ( MemOp   ),
+        .in    ( rbus2   )
+    );
 
 endmodule

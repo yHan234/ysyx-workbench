@@ -1,7 +1,7 @@
-import "DPI-C" function void get_inst(output int inst);
+import "DPI-C" function int get_inst();
 import "DPI-C" function void ebreak();
 
-module InstrMem (
+module InstMem (
     input rst,
     input [31:0] pc,
     output reg [31:0] inst
@@ -9,7 +9,7 @@ module InstrMem (
 
     always @(*) begin
         if (!rst)
-            get_inst(inst);
+            inst = get_inst();
         else
             inst = 0;
 

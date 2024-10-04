@@ -9,12 +9,23 @@
 
 #define BUF_SIZE 32
 #define ITRACE
+#define MTRACE
 #define DIFFTEST
 
 struct InstInfo {
   vaddr_t pc;
   uint32_t inst;
   std::string disasm;
+
+  std::string ToString();
+};
+
+struct MemInfo {
+  bool op; // 0: read, 1: write
+  vaddr_t pc;
+  vaddr_t addr;
+  int len;
+  word_t data;
 
   std::string ToString();
 };
@@ -35,17 +46,28 @@ public:
   State state;
   int ret; // valid when state == END
 
+  bool IsExitStatusBad();
   void LoadDiffTestRef(const std::string &file);
 
 private:
   CPU &cpu;
   Memory &mem;
 
+  paddr_t pc;
+  word_t inst;
+
   // Instruction Trace
   void ITrace();
   void PrintITrace();
 #ifdef ITRACE
   WriteOnlyCircularBuffer<InstInfo, BUF_SIZE> ibuf;
+#endif
+
+  // Memory Trace
+  void MTrace(bool op, vaddr_t addr, int len, word_t data);
+  void PrintMTrace();
+#ifdef MTRACE
+  WriteOnlyCircularBuffer<MemInfo, BUF_SIZE> mbuf;
 #endif
 
   // Differential Test

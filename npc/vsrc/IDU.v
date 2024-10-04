@@ -37,9 +37,4 @@ module IDU(
                     })
            );
 
-    always @(*) begin
-        $display("immI: ", immI);
-        $display("imm: ", imm);
-    end
-
 endmodule

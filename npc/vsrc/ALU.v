@@ -17,12 +17,17 @@ module ALU(
         input [31:0] A,
         input [31:0] B,
         input [3:0] ctr,
-        output [31:0] out
+        output [31:0] out,
+        output Less,
+        output Zero
     );
 
-    wire [31:0] adder;
+    assign Less = ctr[3] ? A < B : $signed(A) < $signed(B);
+    assign Zero = A == B;
+
+    wire [31:0] adder_out;
     MuxKey #(2, 1, 32) mux_adder (
-        .out(adder),
+        .out(adder_out),
         .key(ctr[3]),
         .lut({
             1'b0, A + B,
@@ -30,18 +35,27 @@ module ALU(
         })
     );
 
+    wire [31:0] shifter_out;
+    BarrelShifter shifter(
+        .la(ctr[3]),
+        .lr(ctr[2]),
+        .shamt(B[4:0]),
+        .in(A),
+        .out(shifter_out)
+    );
+
     MuxKey #(8, 3, 32) mux_top (
         .out(out),
         .key(ctr[2:0]),
         .lut({
-                3'b000, adder,
-                3'b001, 32'd0,
-                3'b010, 32'd0,
+                3'b000, adder_out,
+                3'b001, shifter_out,
+                3'b010, {31'b0, Less},
                 3'b011, B,
-                3'b100, 32'd0,
-                3'b101, 32'd0,
-                3'b110, 32'd0,
-                3'b111, 32'd0
+                3'b100, A ^ B,
+                3'b101, shifter_out,
+                3'b110, A | B,
+                3'b111, A & B
         })
     );
 

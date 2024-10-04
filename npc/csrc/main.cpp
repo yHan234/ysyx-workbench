@@ -16,7 +16,11 @@ int main(int argc, char *argv[]) {
   argparse::ArgumentParser args("npc");
   args.add_argument("img")
       .help("Image file to execute.");
+  args.add_argument("-b", "--batch")
+      .flag()
+      .help("run with batch mode");
   args.add_argument("-d", "--diff")
+      .default_value("")
       .help("run DiffTest with reference REF_SO");
 
   try {
@@ -30,13 +34,18 @@ int main(int argc, char *argv[]) {
   try {
     // Initialize
     std::srand(time(nullptr));
+    if (args["-b"] == true) {
+      dbg.SetBatchMode();
+    }
     cpu.Reset(10);
     mem.LoadImage(args.get("img"));
     monitor.LoadDiffTestRef(args.get("-d"));
     // Start
     dbg.MainLoop();
-  } catch (std::string msg) {
+  } catch (std::string &msg) {
     std::cerr << msg << std::endl;
     return 1;
   }
+
+  return monitor.IsExitStatusBad();
 }

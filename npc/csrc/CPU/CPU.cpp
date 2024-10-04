@@ -16,29 +16,30 @@ void CPU::Reset(uint64_t n) {
 }
 
 void CPU::Exec(uint64_t n) {
-  if (before_exec() != 0) {
-    return;
+#define CALLBACK(func, if_err) \
+  if (func() != 0) {           \
+    if_err;                    \
   }
 
+  CALLBACK(before_exec, return);
   while (n--) {
+    CALLBACK(before_step, break);
     SingleCycle();
-
-    if (after_step() != 0) {
-      break;
-    }
+    CALLBACK(after_step, break);
   }
+  CALLBACK(after_exec, return);
 
-  after_exec();
+#undef CALLBACK
 }
 
 const CPU::Regs &CPU::GetRegs() {
-  return dut.rootp->top__DOT__gpr__DOT__gpr;
+  return dut.top->gpr->gpr;
 }
 
 vaddr_t CPU::GetPC() {
-  return dut.rootp->top__DOT__pc;
+  return dut.top->pc;
 }
 
 word_t CPU::GetInst() {
-  return dut.rootp->top__DOT__inst;
+  return dut.top->inst;
 }

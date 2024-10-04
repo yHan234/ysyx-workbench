@@ -13,6 +13,9 @@ class BaseMemory {
 public:
   size_t img_size;
 
+  std::function<void(paddr_t addr, int len, word_t data)> trace_pread;
+  std::function<void(paddr_t addr, int len, word_t data)> trace_pwrite;
+
   BaseMemory() : pmem(new byte[Size]) {}
 
   void LoadImage(const std::string &path) {
@@ -85,7 +88,7 @@ private:
       *(uint32_t *)addr = data;
       return;
     default:
-      throw "Write Host: bad len";
+      throw std::string("Write Host: bad len");
     }
   }
 
@@ -94,10 +97,13 @@ private:
   }
 
   word_t ReadPMem(paddr_t addr, int len) {
-    return ReadHost(GuestToHost(addr), len);
+    word_t data = ReadHost(GuestToHost(addr), len);
+    trace_pread(addr, len, data);
+    return data;
   }
 
   void WritePMem(paddr_t addr, int len, word_t data) {
+    trace_pwrite(addr, len, data);
     WriteHost(GuestToHost(addr), len, data);
   }
 

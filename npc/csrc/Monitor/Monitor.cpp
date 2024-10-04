@@ -4,6 +4,10 @@ std::string InstInfo::ToString() {
   return string_format("0x%08x: %08x %s", pc, inst, disasm.c_str());
 }
 
+std::string MemInfo::ToString() {
+  return string_format("0x%08x: %08x %d %s %08x", pc, addr, len, op ? "<-" : "->", data);
+}
+
 Monitor::Monitor(CPU &cpu, Memory &mem)
     : cpu(cpu), mem(mem), state(State::STOP) {
   // init_disasm("riscv32");
@@ -20,13 +24,19 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     }
   };
 
+  cpu.before_step = [&]() -> int {
+    pc = cpu.GetPC(); // 本次执行的 PC
+    return 0;
+  };
+
   cpu.after_step = [&]() -> int {
+    inst = cpu.GetInst(); // 本次执行的 inst
     ITrace();
     DiffTestStep();
     return state == State::RUNNING ? 0 : 1;
   };
 
-  cpu.after_exec = [&]() {
+  cpu.after_exec = [&]() -> int {
     switch (state) {
     case State::RUNNING:
       state = State::STOP;
@@ -34,6 +44,7 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     case State::END:
     case State::ABORT:
       PrintITrace();
+      PrintMTrace();
       if (state == State::ABORT) {
         std::cout << "ABORT" << std::endl;
       } else if (ret == 0) {
@@ -42,14 +53,28 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
         std::cout << "HIT BAD TRAP" << std::endl;
       }
     }
+    return 0;
   };
+
+  mem.trace_pread = [&](paddr_t addr, int len, word_t data) {
+    MTrace(0, addr, len, data);
+  };
+
+  mem.trace_pwrite = [&](paddr_t addr, int len, word_t data) {
+    MTrace(1, addr, len, data);
+  };
+}
+
+bool Monitor::IsExitStatusBad() {
+  bool good = (state == State::END && ret == 0) || state == State::QUIT;
+  return !good;
 }
 
 void Monitor::ITrace() {
 #ifdef ITRACE
   InstInfo info;
-  info.pc = cpu.GetPC();
-  info.inst = cpu.GetInst();
+  info.pc = pc;
+  info.inst = inst;
   // info.disasm = disassemble(info.pc, reinterpret_cast<uint8_t *>(&info.inst), 4);
   ibuf.Write(std::move(info));
 #endif
@@ -58,8 +83,29 @@ void Monitor::ITrace() {
 void Monitor::PrintITrace() {
 #ifdef ITRACE
   std::cout << "ITRACE:" << std::endl;
-  for (auto &inst : ibuf) {
-    std::cout << inst.ToString() << std::endl;
+  for (auto &info : ibuf) {
+    std::cout << info.ToString() << std::endl;
+  }
+#endif
+}
+
+void Monitor::MTrace(bool op, vaddr_t addr, int len, word_t data) {
+#ifdef MTRACE
+  if (op == 0 && addr == pc) { // 取指令不记录
+    return;
+  }
+  if (op == 0) { // 读取不记录，因为设计的电路中每个周期都会读取一次，不论是否有用
+    return;
+  }
+  mbuf.Write({op, pc, addr, len, data});
+#endif
+}
+
+void Monitor::PrintMTrace() {
+#ifdef MTRACE
+  std::cout << "MTRACE:" << std::endl;
+  for (auto &info : mbuf) {
+    std::cout << info.ToString() << std::endl;
   }
 #endif
 }
@@ -71,7 +117,7 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   void *handle;
   handle = dlopen(file.c_str(), RTLD_LAZY);
   if (!handle) {
-    throw("Failed to open DiffTest ref so file.");
+    throw(std::string("Failed to open DiffTest ref so file."));
   }
 
   void (*DTRefInit)(int) = (void (*)(int))dlsym(handle, "difftest_init");
@@ -80,7 +126,7 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   DTRefExec = (void (*)(uint64_t n))dlsym(handle, "difftest_exec");
   DTRefRaiseIntr = (void (*)(uint64_t NO))dlsym(handle, "difftest_raise_intr");
   if (!DTRefInit || !DTRefMemCpy || !DTRefRegCpy || !DTRefExec || !DTRefRaiseIntr) {
-    throw("Failed to load DiffTest ref so file.");
+    throw(std::string("Failed to load DiffTest ref so file."));
   }
 
   DTRefInit(0);
@@ -111,10 +157,10 @@ void Monitor::DiffTestStep() {
     state = State::ABORT;
     std::cerr << string_format("Diff: PC DUT=%#08x Ref=%#08x", dut_pc, ref_pc) << std::endl;
   }
-  for (int i = 0; i < 32; ++i) {
+  for (int i = 1; i < 32; ++i) { // 不比较 reg0
     if (dut_regs[i] != ref_regs[i]) {
       state = State::ABORT;
-      std::cerr << string_format("Diff: Reg[%d] DUT=%d Ref=%d", i, dut_regs[i], ref_regs[i]) << std::endl;
+      std::cerr << string_format("Diff: Reg[%d] DUT=%x Ref=%x", i, dut_regs[i], ref_regs[i]) << std::endl;
     }
   }
 
