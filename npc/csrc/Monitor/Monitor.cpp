@@ -9,8 +9,6 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
   // init_disasm("riscv32");
 
   cpu.before_exec = [&]() -> int {
-    pc = cpu.GetPC(); // 本次执行的 PC
-
     switch (state) {
     case State::END:
     case State::ABORT:
