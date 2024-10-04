@@ -34,6 +34,9 @@ int main(int argc, char *argv[]) {
   try {
     // Initialize
     std::srand(time(nullptr));
+    if (args["-b"] == true) {
+      dbg.SetBatchMode();
+    }
     cpu.Reset(10);
     mem.LoadImage(args.get("img"));
     monitor.LoadDiffTestRef(args.get("-d"));
