@@ -44,6 +44,7 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     case State::END:
     case State::ABORT:
       PrintITrace();
+      PrintMTrace();
       if (state == State::ABORT) {
         std::cout << "ABORT" << std::endl;
       } else if (ret == 0) {
