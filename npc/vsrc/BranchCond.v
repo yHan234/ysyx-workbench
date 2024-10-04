@@ -11,12 +11,13 @@ module BranchCond(
     wire [1:0] zero_ctr = ^{Branch, Zero} ? 2'b10 : 2'b00;
     wire [1:0] less_ctr = ^{Branch, Less} ? 2'b00 : 2'b10;
     always @(*) $display(Branch, ", ", Zero, ", ", ^{Branch, Zero}, ", ", PCAsrc, PCBsrc);
-    MuxKey #(6, 3, 2) mux_br(
+    MuxKey #(7, 3, 2) mux_br(
         .key(Branch),
         .out({PCAsrc, PCBsrc}),
         .lut({
             3'b000, 2'b00,
             3'b001, 2'b10,
+            3'b010, 2'b11,
             3'b100, zero_ctr,
             3'b101, zero_ctr,
             3'b110, less_ctr,
