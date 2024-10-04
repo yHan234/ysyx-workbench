@@ -91,7 +91,7 @@ void Monitor::PrintITrace() {
 
 void Monitor::MTrace(bool op, vaddr_t addr, int len, word_t data) {
 #ifdef MTRACE
-  if (op == 0 && addr == pc) { // 取址不记录
+  if (op == 0 && addr == pc) { // 取指令不记录
     return;
   }
   mbuf.Write({op, pc, addr, len, data});
@@ -149,6 +149,13 @@ void Monitor::DiffTestStep() {
   ref_pc = ref_regs[32];
   auto &dut_regs = cpu.GetRegs();
   auto dut_pc = cpu.GetPC();
+
+  for (int i = 0; i < 32; ++i)
+    std::cout << ref_regs[i] << ' ';
+  std::cout << '\n';
+  for (int i = 0; i < 32; ++i)
+    std::cout << dut_regs[i] << ' ';
+  std::cout << '\n';
 
   if (dut_pc != ref_pc) {
     state = State::ABORT;
