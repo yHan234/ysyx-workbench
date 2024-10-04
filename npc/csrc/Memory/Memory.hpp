@@ -108,7 +108,7 @@ private:
     WriteHost(GuestToHost(addr), len, data);
     if (addr == 0x80000173) {
       std::cout << std::hex << addr << ' ' << len << ' ' << data << std::endl;
-      std::cout << (*(uint8_t *)GuestToHost(addr)) << std::endl;
+      std::cout << *((uint8_t *)GuestToHost(addr)) << std::endl;
     }
   }
 
