@@ -21,7 +21,7 @@ module top(
             .dout ( pc     ),
             .wen  ( 1'b1   )
         );
-    always @(*) $display("pc imm: ", pc, " ", imm);
+    always @(*) $display("dut: %x %x", pc, imm);
     assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
 
     // GPR
