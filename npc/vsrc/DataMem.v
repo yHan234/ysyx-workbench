@@ -103,11 +103,11 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
 
 always @(posedge RdClk) begin
     read = pmem_read(aligned_addr);
+    $display("read: ", read);
 end
 
 always @(posedge WrClk) begin
     if (MemWr) begin
-        $display(aligned_addr, " ",  write, " ", write_mask);
         pmem_write(aligned_addr, write, write_mask);
     end
 end
