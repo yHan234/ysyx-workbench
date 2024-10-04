@@ -15,6 +15,7 @@ module DataMem (
 
     // read
     input RdClk,
+    input MemRd,
     output reg [31:0] out,
 
     // write
@@ -100,15 +101,12 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
     })
 );
 
+always @(*) begin
+    if (MemRd)
+        read = pmem_read(aligned_addr);
+    else
+        read = 0;
 
-always @(posedge RdClk) begin
-    read = pmem_read(aligned_addr);
-    $display("read: ", read, r_byte1);
-    $display(read[31:24], read[23:16], read[15:8], read[7:0]);
-    $display("out: ", out);
-end
-
-always @(posedge WrClk) begin
     if (MemWr) begin
         pmem_write(aligned_addr, write, write_mask);
     end

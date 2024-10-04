@@ -11,6 +11,7 @@ class Inst:
         self.RegWr = None
         self.Branch = None
         self.MemToReg = None
+        self.MemRd = None
         self.MemWr = None
         self.MemOp = None
         self.ALUAsrc = None
@@ -24,6 +25,7 @@ class Inst:
             + self.RegWr
             + self.Branch
             + self.MemToReg
+            + self.MemRd
             + self.MemWr
             + self.MemOp
             + self.ALUAsrc
@@ -46,6 +48,7 @@ def load_insts_from_csv(path: str):
             "RegWr",
             "Branch",
             "MemToReg",
+            "MemRd",
             "MemWr",
             "MemOp",
             "ALUAsrc",
@@ -63,10 +66,11 @@ def load_insts_from_csv(path: str):
             insts[-1].RegWr = row[5].zfill(1)
             insts[-1].Branch = row[6].zfill(3)
             insts[-1].MemToReg = row[7].zfill(1)
-            insts[-1].MemWr = row[8].zfill(1)
-            insts[-1].MemOp = row[9].zfill(3)
-            insts[-1].ALUAsrc = row[10].zfill(1)
-            insts[-1].ALUBsrc = row[11].zfill(2)
-            insts[-1].ALUctr = row[12].zfill(4)
-            insts[-1].ALUAction = row[13]
+            insts[-1].MemRd = row[8].zfill(1)
+            insts[-1].MemWr = row[9].zfill(1)
+            insts[-1].MemOp = row[10].zfill(3)
+            insts[-1].ALUAsrc = row[11].zfill(1)
+            insts[-1].ALUBsrc = row[12].zfill(2)
+            insts[-1].ALUctr = row[13].zfill(4)
+            insts[-1].ALUAction = row[14]
     return insts

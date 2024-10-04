@@ -83,6 +83,7 @@ module top(
     wire [3:0]  ALUctr;
     wire [2:0]  Branch;
     wire        MemToReg;
+    wire        MemRd;
     wire        MemWr;
     wire [2:0]  MemOp;
 
@@ -97,6 +98,7 @@ module top(
             .ALUctr     ( ALUctr   ),
             .Branch     ( Branch   ),
             .MemToReg   ( MemToReg ),
+            .MemRd      ( MemRd    ),
             .MemWr      ( MemWr    ),
             .MemOp      ( MemOp    )
         );
@@ -127,6 +129,7 @@ module top(
         .RdClk ( clk     ),
         .out   ( MemOut  ),
         .WrClk ( clk     ),
+        .MemRd ( MemRd   ),
         .MemWr ( MemWr   ),
         .MemOp ( MemOp   ),
         .in    ( rbus2   )
