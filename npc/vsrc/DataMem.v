@@ -28,6 +28,7 @@ module DataMem (
 wire [31:0] aligned_addr = addr & ~32'b11; // 地址对齐到 4 字节
 wire [1:0] align_offset = addr[1:0];       // 地址对齐到 4 字节的偏移量
 
+
 // read
 
 reg [31:0] read;
@@ -102,10 +103,12 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
 );
 
 always @(*) begin
-    if (MemRd)
+    if (MemRd) begin
         read = pmem_read(aligned_addr);
-    else
+        read = {read[7:0], read[15:8], read[23:16], read[31:24]};
+    end else begin
         read = 0;
+    end
 
     $display("%x", read);
 
