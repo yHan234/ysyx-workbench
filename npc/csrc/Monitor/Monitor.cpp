@@ -22,15 +22,18 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     }
   };
 
+  cpu.before_step = [&]() -> int {
+    pc = cpu.GetPC(); // 本次执行的 PC
+  };
+
   cpu.after_step = [&]() -> int {
+    inst = cpu.GetInst(); // 本次执行的 inst
     ITrace();
     DiffTestStep();
     return state == State::RUNNING ? 0 : 1;
   };
 
-  cpu.after_exec = [&]() {
-    inst = cpu.GetInst(); // 本次执行的 inst
-
+  cpu.after_exec = [&]() -> int {
     switch (state) {
     case State::RUNNING:
       state = State::STOP;
@@ -46,6 +49,7 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
         std::cout << "HIT BAD TRAP" << std::endl;
       }
     }
+    return 0;
   };
 }
 

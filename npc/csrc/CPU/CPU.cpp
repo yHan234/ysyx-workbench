@@ -16,19 +16,22 @@ void CPU::Reset(uint64_t n) {
 }
 
 void CPU::Exec(uint64_t n) {
-  if (before_exec() != 0) {
-    return;
-  }
+#define CALLBACK(func) \
+  do {                 \
+    if (func() != 0) { \
+      return;          \
+    }                  \
+  } while (0)
 
+  CALLBACK(before_exec);
   while (n--) {
+    CALLBACK(before_step);
     SingleCycle();
-
-    if (after_step() != 0) {
-      break;
-    }
+    CALLBACK(after_step);
   }
+  CALLBACK(after_exec);
 
-  after_exec();
+#undef CALLBACK
 }
 
 const CPU::Regs &CPU::GetRegs() {
