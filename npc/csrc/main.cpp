@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
   args.add_argument("img")
       .help("Image file to execute.");
   args.add_argument("-d", "--diff")
+      .default_value("")
       .help("run DiffTest with reference REF_SO");
 
   try {
