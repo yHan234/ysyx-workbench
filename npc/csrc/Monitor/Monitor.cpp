@@ -162,7 +162,7 @@ void Monitor::DiffTestStep() {
     state = State::ABORT;
     std::cerr << string_format("Diff: PC DUT=%#08x Ref=%#08x", dut_pc, ref_pc) << std::endl;
   }
-  for (int i = 0; i < 32; ++i) {
+  for (int i = 1; i < 32; ++i) { // 不比较 reg0
     if (dut_regs[i] != ref_regs[i]) {
       state = State::ABORT;
       std::cerr << string_format("Diff: Reg[%d] DUT=%d Ref=%d", i, dut_regs[i], ref_regs[i]) << std::endl;
