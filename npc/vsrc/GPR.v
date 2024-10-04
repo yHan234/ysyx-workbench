@@ -16,28 +16,18 @@ module GPR (
         output [31:0] busB
     );
 
-    reg [31:0] gpr [31:0];
+    reg [31:0] gpr [31:0] /* verilator public */;
 
     assign busA = Ra == 0 ? 0 : gpr[Ra];
     assign busB = Rb == 0 ? 0 : gpr[Rb];
 
     always @(posedge WrClk) begin
-        $display("");
-        // $display("regs:");
-        // for (int i = 0; i < 32; i += 4) begin
-        //     $display(i, " = ", gpr[i], " |",
-        //              i+1, " = ", gpr[i+1], " |",
-        //              i+2, " = ", gpr[i+2], " |",
-        //              i+3, " = ", gpr[i+3]);
-        // end
-
         if (rst) begin
             for (int i = 0; i < 32; ++i) begin
                 gpr[i] <= 0;
             end
         end
         else if (RegWr) begin
-            $display("store ", busW, " to register ", Rw, " which contains ", gpr[Rw]);
             gpr[Rw] <= busW;
         end
     end

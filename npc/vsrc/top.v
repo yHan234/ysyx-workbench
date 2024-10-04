@@ -5,7 +5,7 @@ module top(
 
     // PC
 
-    wire [31:0] NextPC, pc;
+    wire [31:0] NextPC, pc /* verilator public */;
     Reg #(32, 32'h80000000) pc_r(
             .clk  ( clk    ),
             .rst  ( rst    ),
@@ -41,7 +41,7 @@ module top(
 
     // Instruction Memory
 
-    wire [31:0] inst;
+    wire [31:0] inst /* verilator public */;
 
     InstrMem instr_mem(
                 .rst  ( rst   ),

@@ -32,13 +32,13 @@ void CPU::Exec(uint64_t n) {
 }
 
 const CPU::Regs &CPU::GetRegs() {
-  return dut.rootp->top__DOT__gpr__DOT__gpr;
+  return dut.top->gpr->gpr;
 }
 
 vaddr_t CPU::GetPC() {
-  return dut.rootp->top__DOT__pc;
+  return dut.top->pc;
 }
 
 word_t CPU::GetInst() {
-  return dut.rootp->top__DOT__inst;
+  return dut.top->inst;
 }
