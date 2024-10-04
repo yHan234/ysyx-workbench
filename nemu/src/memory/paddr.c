@@ -57,11 +57,9 @@ static void mringbuf_write(char op, paddr_t addr, int len, word_t data) {
 }
 
 void mringbuf_print() {
-  extern FILE *log_fp;
   if (mringbuf_size) {
     uint i = mringbuf_size == MRINGBUF_LEN ? mringbuf_wptr : 0;
     do {
-      extern FILE *log_fp;
       log_write("0x%08x: %c 0x%08x %d 0x%08x\n", mringbuf[i].pc, mringbuf[i].op, mringbuf[i].addr, mringbuf[i].len, mringbuf[i].data);
       i = (i + 1) % MRINGBUF_LEN;
     } while (i != mringbuf_wptr);
