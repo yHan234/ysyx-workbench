@@ -80,10 +80,10 @@ private:
   void WriteHost(void *addr, int len, word_t data) {
     switch (len) {
     case 1:
-      *(uint8_t *)addr = data;
+      *(uint8_t *)addr = data >> 24;
       return;
     case 2:
-      *(uint16_t *)addr = data;
+      *(uint16_t *)addr = data >> 16;
       return;
     case 4:
       *(uint32_t *)addr = data;
