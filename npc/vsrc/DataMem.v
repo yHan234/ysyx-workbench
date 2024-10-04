@@ -104,6 +104,7 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
 always @(posedge RdClk) begin
     read = pmem_read(aligned_addr);
     $display("read: ", read, r_byte1);
+    $display(read[31:24], read[23:16], read[15:8], read[7:0]);
     $display("out: ", out);
 end
 
