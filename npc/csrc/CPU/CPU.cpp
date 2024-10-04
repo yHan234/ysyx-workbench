@@ -16,20 +16,20 @@ void CPU::Reset(uint64_t n) {
 }
 
 void CPU::Exec(uint64_t n) {
-#define CALLBACK(func) \
-  do {                 \
-    if (func() != 0) { \
-      return;          \
-    }                  \
+#define CALLBACK(func, if_err) \
+  do {                         \
+    if (func() != 0) {         \
+      if_err;                  \
+    }                          \
   } while (0)
 
-  CALLBACK(before_exec);
+  CALLBACK(before_exec, return);
   while (n--) {
-    CALLBACK(before_step);
+    CALLBACK(before_step, break);
     SingleCycle();
-    CALLBACK(after_step);
+    CALLBACK(after_step, break);
   }
-  CALLBACK(after_exec);
+  CALLBACK(after_exec, return);
 
 #undef CALLBACK
 }
