@@ -22,13 +22,14 @@ module GPR (
     assign busB = Rb == 0 ? 0 : gpr[Rb];
 
     always @(posedge WrClk) begin
-        $display("regs:");
-        for (int i = 0; i < 32; i += 4) begin
-            $display(i, " = ", gpr[i], " |",
-                     i+1, " = ", gpr[i+1], " |",
-                     i+2, " = ", gpr[i+2], " |",
-                     i+3, " = ", gpr[i+3]);
-        end
+        $display("");
+        // $display("regs:");
+        // for (int i = 0; i < 32; i += 4) begin
+        //     $display(i, " = ", gpr[i], " |",
+        //              i+1, " = ", gpr[i+1], " |",
+        //              i+2, " = ", gpr[i+2], " |",
+        //              i+3, " = ", gpr[i+3]);
+        // end
 
         if (rst) begin
             for (int i = 0; i < 32; ++i) begin
