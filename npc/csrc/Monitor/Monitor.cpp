@@ -26,6 +26,7 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
 
   cpu.before_step = [&]() -> int {
     pc = cpu.GetPC(); // 本次执行的 PC
+    std::cout << pc << std::endl;
     return 0;
   };
 
