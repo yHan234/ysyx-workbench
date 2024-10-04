@@ -71,7 +71,7 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   void *handle;
   handle = dlopen(file.c_str(), RTLD_LAZY);
   if (!handle) {
-    throw("Failed to open DiffTest ref so file.");
+    throw(std::string("Failed to open DiffTest ref so file."));
   }
 
   void (*DTRefInit)(int) = (void (*)(int))dlsym(handle, "difftest_init");
@@ -80,7 +80,7 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   DTRefExec = (void (*)(uint64_t n))dlsym(handle, "difftest_exec");
   DTRefRaiseIntr = (void (*)(uint64_t NO))dlsym(handle, "difftest_raise_intr");
   if (!DTRefInit || !DTRefMemCpy || !DTRefRegCpy || !DTRefExec || !DTRefRaiseIntr) {
-    throw("Failed to load DiffTest ref so file.");
+    throw(std::string("Failed to load DiffTest ref so file."));
   }
 
   DTRefInit(0);
