@@ -7,7 +7,7 @@
 #include <dlfcn.h>
 #include <iostream>
 
-#define BUF_SIZE 32
+#define BUF_SIZE 128
 #define ITRACE
 #define MTRACE
 #define DIFFTEST
