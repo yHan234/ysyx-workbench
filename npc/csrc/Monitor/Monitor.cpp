@@ -24,6 +24,7 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
 
   cpu.before_step = [&]() -> int {
     pc = cpu.GetPC(); // 本次执行的 PC
+    return 0;
   };
 
   cpu.after_step = [&]() -> int {
