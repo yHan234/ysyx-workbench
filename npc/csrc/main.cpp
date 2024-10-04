@@ -46,4 +46,6 @@ int main(int argc, char *argv[]) {
     std::cerr << msg << std::endl;
     return 1;
   }
+
+  return monitor.IsExitStatusBad();
 }

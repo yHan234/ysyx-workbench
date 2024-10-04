@@ -45,6 +45,11 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
   };
 }
 
+bool Monitor::IsExitStatusBad() {
+  bool good = (state == State::END && ret == 0) || state == State::QUIT;
+  return !good;
+}
+
 void Monitor::ITrace() {
 #ifdef ITRACE
   InstInfo info;

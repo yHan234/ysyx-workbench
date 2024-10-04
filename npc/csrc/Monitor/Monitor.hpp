@@ -35,6 +35,7 @@ public:
   State state;
   int ret; // valid when state == END
 
+  bool IsExitStatusBad();
   void LoadDiffTestRef(const std::string &file);
 
 private:
