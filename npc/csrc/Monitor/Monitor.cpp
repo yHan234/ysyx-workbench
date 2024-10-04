@@ -91,6 +91,9 @@ void Monitor::PrintITrace() {
 
 void Monitor::MTrace(bool op, vaddr_t addr, int len, word_t data) {
 #ifdef MTRACE
+  if (op == 0 && addr == pc) { // 取址不记录
+    return;
+  }
   mbuf.Write({op, pc, addr, len, data});
 #endif
 }
