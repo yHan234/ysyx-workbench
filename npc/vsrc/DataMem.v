@@ -105,6 +105,7 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
 always @(*) begin
     if (MemRd) begin
         read = pmem_read(aligned_addr);
+        // 内存中保存的数据（小端序），被作为数字取出时，会变为大端序。需要将其反转。
         read = {read[7:0], read[15:8], read[23:16], read[31:24]};
     end else begin
         read = 0;
