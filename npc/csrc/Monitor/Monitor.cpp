@@ -4,6 +4,10 @@ std::string InstInfo::ToString() {
   return string_format("0x%08x: %08x %s", pc, inst, disasm.c_str());
 }
 
+std::string MemInfo::ToString() {
+  return string_format("0x%08x: %08x %d %s %08x", pc, addr, len, op ? "<-" : "->", data);
+}
+
 Monitor::Monitor(CPU &cpu, Memory &mem)
     : cpu(cpu), mem(mem), state(State::STOP) {
   // init_disasm("riscv32");
@@ -50,6 +54,14 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     }
     return 0;
   };
+
+  mem.trace_pread = [&](paddr_t addr, int len, word_t data) {
+    MTRACE(0, addr, len, data);
+  };
+
+  mem.trace_pwrite = [&](paddr_t addr, int len, word_t data) {
+    MTRACE(1, addr, len, data);
+  };
 }
 
 bool Monitor::IsExitStatusBad() {
@@ -70,8 +82,23 @@ void Monitor::ITrace() {
 void Monitor::PrintITrace() {
 #ifdef ITRACE
   std::cout << "ITRACE:" << std::endl;
-  for (auto &inst : ibuf) {
-    std::cout << inst.ToString() << std::endl;
+  for (auto &info : ibuf) {
+    std::cout << info.ToString() << std::endl;
+  }
+#endif
+}
+
+void Monitor::MTrace(bool op, vaddr_t addr, int len, word_t data) {
+#ifdef MTRACE
+  mbuf.Write({op, pc, addr, len, data});
+#endif
+}
+
+void Monitor::PrintMTrace() {
+#ifdef MTRACE
+  std::cout << "MTRACE:" << std::endl;
+  for (auto &info : mbuf) {
+    std::cout << info.ToString() << std::endl;
   }
 #endif
 }
