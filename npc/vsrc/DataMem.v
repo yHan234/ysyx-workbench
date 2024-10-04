@@ -107,6 +107,7 @@ end
 
 always @(posedge WrClk) begin
     if (MemWr) begin
+        $display(aligned_addr, " ",  write, " ", write_mask);
         pmem_write(aligned_addr, write, write_mask);
     end
 end
