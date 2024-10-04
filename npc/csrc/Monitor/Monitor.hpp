@@ -42,6 +42,9 @@ private:
   CPU &cpu;
   Memory &mem;
 
+  paddr_t pc;
+  word_t inst;
+
   // Instruction Trace
   void ITrace();
   void PrintITrace();

@@ -9,6 +9,8 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
   // init_disasm("riscv32");
 
   cpu.before_exec = [&]() -> int {
+    pc = cpu.GetPC(); // 本次执行的 PC
+
     switch (state) {
     case State::END:
     case State::ABORT:
@@ -27,6 +29,8 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
   };
 
   cpu.after_exec = [&]() {
+    inst = cpu.GetInst(); // 本次执行的 inst
+
     switch (state) {
     case State::RUNNING:
       state = State::STOP;
@@ -53,8 +57,8 @@ bool Monitor::IsExitStatusBad() {
 void Monitor::ITrace() {
 #ifdef ITRACE
   InstInfo info;
-  info.pc = cpu.GetPC();
-  info.inst = cpu.GetInst();
+  info.pc = pc;
+  info.inst = inst;
   // info.disasm = disassemble(info.pc, reinterpret_cast<uint8_t *>(&info.inst), 4);
   ibuf.Write(std::move(info));
 #endif
