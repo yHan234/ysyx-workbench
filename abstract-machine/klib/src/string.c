@@ -113,7 +113,7 @@ void *memset(void *s, int c, size_t n) {
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
-  assert(n != 0);
+  panic_on(n == 0, "memmove n == 0");
   size_t i;
 
   if (dst < src) {
