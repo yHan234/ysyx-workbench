@@ -119,8 +119,8 @@ void *memmove(void *dst, const void *src, size_t n) {
     return memcpy(dst, src, n);
   }
 
-  for (i = n - 1; i >= 0; i--)
-    ((char *)dst)[i] = ((char *)src)[i];
+  for (i = n; i > 0; i--)
+    ((char *)dst)[i - 1] = ((char *)src)[i - 1];
 
   return dst;
 }
