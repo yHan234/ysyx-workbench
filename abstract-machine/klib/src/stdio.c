@@ -39,6 +39,26 @@ static int format_d(output_func_t output_func, void *arg, int num) {
   return len;
 }
 
+static int format_u(output_func_t output_func, void *arg, unsigned long long num) {
+  static char temp[16];
+  int i = 0;
+
+  // 将数字转换为字符串，从末尾开始存入 temp
+  do {
+    temp[i++] = (num % 10) + '0';
+    num /= 10;
+  } while (num > 0);
+
+  int len = i;
+
+  // 反转 temp，并存入目标缓冲区
+  while (i > 0) {
+    output_func(temp[--i], arg);
+  }
+
+  return len;
+}
+
 static int format(output_func_t output_func, void *arg, const char *fmt, va_list args) {
   const char *ptr;
   int written = 0;
@@ -56,6 +76,11 @@ static int format(output_func_t output_func, void *arg, const char *fmt, va_list
       }
       case 'd': {
         written += format_d(output_func, arg, va_arg(args, int));
+        break;
+      }
+      case 'u':
+      case 'p': {
+        written += format_u(output_func, arg, va_arg(args, unsigned long long));
         break;
       }
       default: // 不支持的格式符，直接输出原字符
