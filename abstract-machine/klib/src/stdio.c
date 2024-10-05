@@ -66,6 +66,11 @@ static int format(output_func_t output_func, void *arg, const char *fmt, va_list
     if (*ptr == '%' && *(ptr + 1) != '\0') {
       ptr++;
       switch (*ptr) {
+      case 'c': {
+        output_func(va_arg(args, int), arg);
+        written += 1;
+        break;
+      }
       case 's': {
         const char *str = va_arg(args, const char *);
         while (*str != '\0') {

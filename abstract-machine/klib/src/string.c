@@ -113,15 +113,14 @@ void *memset(void *s, int c, size_t n) {
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
-  panic_on(n == 0, "memmove n == 0");
   size_t i;
 
   if (dst < src) {
     return memcpy(dst, src, n);
   }
 
-  for (i = n - 1; i >= 0; i--)
-    ((char *)dst)[i] = ((char *)src)[i];
+  for (i = n; i > 0; i--)
+    ((char *)dst)[i - 1] = ((char *)src)[i - 1];
 
   return dst;
 }
