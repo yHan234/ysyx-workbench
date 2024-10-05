@@ -134,7 +134,7 @@ static void log_trace() {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) {
     log_write("==================== ITRACE ====================\n");
-    iringbuf_print(log_write);
+    iringbuf_print(printf);
     log_write("==================== ITRACE ====================\n");
     log_write("\n");
   }
