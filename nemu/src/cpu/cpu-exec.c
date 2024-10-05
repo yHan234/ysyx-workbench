@@ -134,7 +134,7 @@ static void log_trace() {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) {
     log_write("==================== ITRACE ====================\n");
-    iringbuf_print(printf);
+    iringbuf_print(log_write);
     log_write("==================== ITRACE ====================\n");
     log_write("\n");
   }
@@ -237,8 +237,6 @@ void assert_fail_msg() {
   isa_reg_display();
   statistic();
   log_trace();
-  extern FILE *log_fp;
-  fclose(log_fp);
 }
 
 /* Simulate how the CPU works. */
