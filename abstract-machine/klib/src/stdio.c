@@ -56,6 +56,7 @@ static int format(output_func_t output_func, void *arg, const char *fmt, va_list
       }
       case 'd': {
         written += format_d(output_func, arg, va_arg(args, int));
+        break;
       }
       default: // 不支持的格式符，直接输出原字符
         output_func('%', arg);
