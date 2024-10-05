@@ -21,6 +21,7 @@ int function_addr_cmp(const void *func1, const void *func2) {
 }
 
 void init_elf(const char *elf_file) {
+  printf("%s\n", elf_file);
   if (elf_file == NULL || elf_file[0] == '\0') {
     return;
   }
