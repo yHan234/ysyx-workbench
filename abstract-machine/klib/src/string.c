@@ -113,7 +113,6 @@ void *memset(void *s, int c, size_t n) {
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
-  printf("%p %p %p\n", dst, src, n);
   size_t i;
 
   if (dst < src) {
