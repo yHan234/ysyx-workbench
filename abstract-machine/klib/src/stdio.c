@@ -59,6 +59,32 @@ static int format_u(output_func_t output_func, void *arg, unsigned int num) {
   return len;
 }
 
+static int format_x(output_func_t output_func, void *arg, unsigned int num) {
+  static char temp[16];
+  int i = 0;
+
+  // 将数字转换为十六进制字符串，从末尾开始存入 temp
+  do {
+    int digit = num % 16;
+    if (digit < 10) {
+      temp[i++] = digit + '0';  // 数字部分 '0'-'9'
+    } else {
+      temp[i++] = digit - 10 + 'a';  // 字符部分 'a'-'f'
+    }
+    num /= 16;
+  } while (num > 0);
+
+  int len = i;
+
+  // 反转 temp，并存入目标缓冲区
+  while (i > 0) {
+    output_func(temp[--i], arg);
+  }
+
+  return len;
+}
+
+
 static int format(output_func_t output_func, void *arg, const char *fmt, va_list args) {
   const char *ptr;
   int written = 0;
@@ -85,6 +111,10 @@ static int format(output_func_t output_func, void *arg, const char *fmt, va_list
       }
       case 'u': {
         written += format_u(output_func, arg, va_arg(args, unsigned int));
+        break;
+      }
+      case 'x': {
+        written += format_x(output_func, arg, va_arg(args, unsigned int));
         break;
       }
       default: // 不支持的格式符，直接输出原字符
