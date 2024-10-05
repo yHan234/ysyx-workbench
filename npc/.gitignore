@@ -7,12 +7,6 @@
 !*.v
 !*.cc
 !*.cpp
-!*.hpp
 !.gitignore
 !README.md
 build/
-
-!ArchGraph/*
-!tests/*.py
-
-!CSGGen/*

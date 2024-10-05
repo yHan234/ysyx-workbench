@@ -1,51 +1,29 @@
-#include "CPU/CPU.hpp"
-#include "Debugger/Debugger.hpp"
-#include "Memory/Memory.hpp"
-#include "Monitor/Monitor.hpp"
-#include "Utils/argparse.hpp"
-#include <ctime>
-#include <iostream>
+#include <nvboard.h>
+#include <Vtop.h>
 
-Memory mem;
-CPU cpu;
-Monitor monitor(cpu, mem);
-Debugger dbg(cpu, mem, monitor);
+static Vtop dut;
 
-int main(int argc, char *argv[]) {
-  // Parse Arguments
-  argparse::ArgumentParser args("npc");
-  args.add_argument("img")
-      .help("Image file to execute.");
-  args.add_argument("-b", "--batch")
-      .flag()
-      .help("run with batch mode");
-  args.add_argument("-d", "--diff")
-      .default_value("")
-      .help("run DiffTest with reference REF_SO");
+void nvboard_bind_all_pins(Vtop* top);
 
-  try {
-    args.parse_args(argc, argv);
-  } catch (const std::exception &err) {
-    std::cerr << err.what() << std::endl;
-    std::cerr << args;
-    return 1;
-  };
+static void single_cycle() {
+  dut.clk = 0; dut.eval();
+  dut.clk = 1; dut.eval();
+}
 
-  try {
-    // Initialize
-    std::srand(time(nullptr));
-    if (args["-b"] == true) {
-      dbg.SetBatchMode();
-    }
-    cpu.Reset(10);
-    mem.LoadImage(args.get("img"));
-    monitor.LoadDiffTestRef(args.get("-d"));
-    // Start
-    dbg.MainLoop();
-  } catch (std::string &msg) {
-    std::cerr << msg << std::endl;
-    return 1;
+static void reset(int n) {
+  dut.rst = 1;
+  while (n -- > 0) single_cycle();
+  dut.rst = 0;
+}
+
+int main() {
+  nvboard_bind_all_pins(&dut);
+  nvboard_init();
+
+  reset(10);
+
+  while(1) {
+    nvboard_update();
+    single_cycle();
   }
-
-  return monitor.IsExitStatusBad();
 }
