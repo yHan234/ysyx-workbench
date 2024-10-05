@@ -128,6 +128,43 @@ static void fringbuf_ret(vaddr_t pc) {
 }
 #endif
 
+static void log_trace() {
+  extern FILE *log_fp;
+  log_write("\n");
+#ifdef CONFIG_ITRACE_COND
+  if (ITRACE_COND) {
+    log_write("==================== ITRACE ====================\n");
+    iringbuf_print(log_write);
+    log_write("==================== ITRACE ====================\n");
+    log_write("\n");
+  }
+#endif
+#ifdef CONFIG_MTRACE
+  void mringbuf_print();
+  log_write("==================== MTRACE ====================\n");
+  mringbuf_print();
+  log_write("==================== MTRACE ====================\n");
+  log_write("\n");
+#endif
+#ifdef CONFIG_FTRACE
+  log_write("==================== FTRACE ====================\n");
+  if (fringbuf_size) {
+    uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_wptr : 0;
+    do {
+      log_write("0x%08x: ", fringbuf[i].pc);
+      if (fringbuf[i].op) {
+        log_write("%*scall [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
+      } else {
+        log_write("%*sret  [%s]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name);
+      }
+      i = (i + 1) % FRINGBUF_LEN;
+    } while (i != fringbuf_wptr);
+  }
+  log_write("==================== FTRACE ====================\n");
+  log_write("\n");
+#endif
+}
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
   iringbuf[iringbuf_wptr].pc = _this->pc;
@@ -194,6 +231,7 @@ static void statistic() {
 }
 
 void assert_fail_msg() {
+  log_trace();
   isa_reg_display();
   statistic();
 }
@@ -219,41 +257,7 @@ void cpu_exec(uint64_t n) {
     case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
 
     case NEMU_END: case NEMU_ABORT:
-      extern FILE *log_fp;
-      log_write("\n");
-#ifdef CONFIG_ITRACE_COND
-      if (ITRACE_COND) {
-        log_write("==================== ITRACE ====================\n");
-        iringbuf_print(log_write);
-        log_write("==================== ITRACE ====================\n");
-        log_write("\n");
-      }
-#endif
-#ifdef CONFIG_MTRACE
-      void mringbuf_print();
-      log_write("==================== MTRACE ====================\n");
-      mringbuf_print();
-      log_write("==================== MTRACE ====================\n");
-      log_write("\n");
-#endif
-#ifdef CONFIG_FTRACE
-      log_write("==================== FTRACE ====================\n");
-      if (fringbuf_size) {
-        uint i = fringbuf_size == FRINGBUF_LEN ? fringbuf_wptr : 0;
-        do {
-          log_write("0x%08x: ", fringbuf[i].pc);
-          if (fringbuf[i].op) {
-            log_write("%*scall [%s@%#010x]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name, fringbuf[i].func->addr);
-          } else {
-            log_write("%*sret  [%s]\n", fringbuf[i].dep * 2, "", fringbuf[i].func->name);
-          }
-          i = (i + 1) % FRINGBUF_LEN;
-        } while (i != fringbuf_wptr);
-      }
-      log_write("==================== FTRACE ====================\n");
-      log_write("\n");
-#endif
-
+      log_trace();
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
