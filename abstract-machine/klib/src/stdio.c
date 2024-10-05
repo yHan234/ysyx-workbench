@@ -39,7 +39,7 @@ static int format_d(output_func_t output_func, void *arg, int num) {
   return len;
 }
 
-static int format_u(output_func_t output_func, void *arg, unsigned long long num) {
+static int format_u(output_func_t output_func, void *arg, unsigned int num) {
   static char temp[16];
   int i = 0;
 
@@ -78,9 +78,8 @@ static int format(output_func_t output_func, void *arg, const char *fmt, va_list
         written += format_d(output_func, arg, va_arg(args, int));
         break;
       }
-      case 'u':
-      case 'p': {
-        written += format_u(output_func, arg, va_arg(args, unsigned long long));
+      case 'u': {
+        written += format_u(output_func, arg, va_arg(args, unsigned int));
         break;
       }
       default: // 不支持的格式符，直接输出原字符
