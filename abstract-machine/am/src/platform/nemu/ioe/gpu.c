@@ -29,11 +29,11 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   for (int i = 0; i < ctl->w; ++i) {
     for (int j = 0; j < ctl->h; ++j) {
-      ((uint32_t *)FB_ADDR)[(ctl->x + i) * cfg.height + ctl->y + j] = ((uint32_t *)ctl->pixels)[ctl->x * ctl->w + ctl->y];
+      ((uint32_t *)FB_ADDR)[(ctl->x + i) * cfg.width + ctl->y + j] = ((uint32_t *)ctl->pixels)[ctl->x * ctl->w + ctl->y];
     }
   }
   if (ctl->sync) {
-    // outl(SYNC_ADDR, 1);
+    outl(SYNC_ADDR, 1);
   }
 }
 
