@@ -45,7 +45,6 @@ void device_update() {
 
 #ifndef CONFIG_TARGET_AM
   SDL_Event event;
-  printf("update device\n");
   while (SDL_PollEvent(&event)) {
     printf("sdl event %d\n", event.type);
     switch (event.type) {
