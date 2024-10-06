@@ -38,6 +38,7 @@ static uint32_t *vgactl_port_base = NULL;
 #ifndef CONFIG_TARGET_AM
 #include <SDL2/SDL.h>
 
+// static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 
@@ -54,7 +55,7 @@ static void init_screen() {
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
       SDL_TEXTUREACCESS_STATIC, SCREEN_W, SCREEN_H);
   SDL_RenderPresent(renderer);
-  SDL_DestroyWindow(window);
+  // SDL_DestroyWindow(window);
 }
 
 static inline void update_screen() {
