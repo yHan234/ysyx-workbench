@@ -41,9 +41,7 @@ void device_update() {
   }
   last = now;
 
-  printf("device_update\n");
-
-  IFDEF(CONFIG_HAS_VGA, vga_update_screen());
+  // IFDEF(CONFIG_HAS_VGA, vga_update_screen());
 
 #ifndef CONFIG_TARGET_AM
   SDL_Event event;
