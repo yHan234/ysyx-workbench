@@ -21,7 +21,7 @@ void engine_start();
 int is_exit_status_bad();
 
 void test_expr();
-#include <SDL2/SDL.h>
+
 int main(int argc, char *argv[]) {
   /* Initialize the monitor. */
 #ifdef CONFIG_TARGET_AM
@@ -35,7 +35,6 @@ int main(int argc, char *argv[]) {
   /* Start engine. */
   engine_start();
 
-  SDL_Quit();
   return is_exit_status_bad();
 }
 
