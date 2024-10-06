@@ -1,6 +1,6 @@
 #include <am.h>
 #include <nemu.h>
-// #include <stdio.h>
+
 #define SYNC_ADDR (VGACTL_ADDR + 4)
 
 AM_GPU_CONFIG_T cfg;
