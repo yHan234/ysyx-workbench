@@ -53,7 +53,7 @@ void init_map() {
 }
 
 void free_device_map() {
-  // free(io_space);
+  free(io_space);
 }
 
 word_t map_read(paddr_t addr, int len, IOMap *map) {
