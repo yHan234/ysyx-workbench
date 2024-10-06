@@ -35,8 +35,6 @@ int main(int argc, char *argv[]) {
   /* Start engine. */
   engine_start();
 
-  void cleanup_sdl();
-  cleanup_sdl();
   return is_exit_status_bad();
 }
 

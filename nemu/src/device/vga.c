@@ -38,11 +38,11 @@ static uint32_t *vgactl_port_base = NULL;
 #ifndef CONFIG_TARGET_AM
 #include <SDL2/SDL.h>
 
-static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 
 static void init_screen() {
+  SDL_Window *window = NULL;
   char title[128];
   sprintf(title, "%s-NEMU", str(__GUEST_ISA__));
   SDL_Init(SDL_INIT_VIDEO);
@@ -61,19 +61,6 @@ static inline void update_screen() {
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
-}
-
-void cleanup_sdl() {
-  if (texture) {
-    SDL_DestroyTexture(texture);
-    texture = NULL;
-  }
-  if (renderer) {
-    SDL_DestroyRenderer(renderer);
-    renderer = NULL;
-  }
-  SDL_DestroyWindow(window);
-  SDL_Quit();
 }
 #else
 static void init_screen() {}
