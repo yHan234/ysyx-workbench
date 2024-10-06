@@ -18,7 +18,6 @@
 void init_monitor(int, char *[]);
 void am_init_monitor();
 void engine_start();
-void free_device_map();
 int is_exit_status_bad();
 
 void test_expr();
@@ -36,7 +35,6 @@ int main(int argc, char *argv[]) {
   /* Start engine. */
   engine_start();
 
-  free_device_map();
   return is_exit_status_bad();
 }
 
