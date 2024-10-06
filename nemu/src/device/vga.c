@@ -38,12 +38,11 @@ static uint32_t *vgactl_port_base = NULL;
 #ifndef CONFIG_TARGET_AM
 #include <SDL2/SDL.h>
 
-// static SDL_Window *window = NULL;
+static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
 
 static void init_screen() {
-  SDL_Window *window = NULL;
   char title[128];
   sprintf(title, "%s-NEMU", str(__GUEST_ISA__));
   SDL_Init(SDL_INIT_VIDEO);
@@ -55,14 +54,26 @@ static void init_screen() {
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
       SDL_TEXTUREACCESS_STATIC, SCREEN_W, SCREEN_H);
   SDL_RenderPresent(renderer);
-  // SDL_DestroyWindow(window);
 }
 
 static inline void update_screen() {
-  // SDL_UpdateTexture(texture, NULL, vmem, SCREEN_W * sizeof(uint32_t));
-  // SDL_RenderClear(renderer);
-  // SDL_RenderCopy(renderer, texture, NULL, NULL);
-  // SDL_RenderPresent(renderer);
+  SDL_UpdateTexture(texture, NULL, vmem, SCREEN_W * sizeof(uint32_t));
+  SDL_RenderClear(renderer);
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_RenderPresent(renderer);
+}
+
+void cleanup_sdl() {
+  if (texture) {
+    SDL_DestroyTexture(texture);
+    texture = NULL;
+  }
+  if (renderer) {
+    SDL_DestroyRenderer(renderer);
+    renderer = NULL;
+  }
+  SDL_DestroyWindow(window);
+  SDL_Quit();
 }
 #else
 static void init_screen() {}
