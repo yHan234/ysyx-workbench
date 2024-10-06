@@ -29,7 +29,7 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   for (int i = 0; i < ctl->w; ++i) {
     for (int j = 0; j < ctl->h; ++j) {
-      ((uint32_t *)FB_ADDR)[(ctl->x + i) * cfg.height + ctl->y + j] = ((uint32_t *)ctl->pixels)[i * ctl->h + j];
+      ((uint32_t *)FB_ADDR)[(ctl->y + j) * cfg.width + (ctl->x + i)] = ((uint32_t *)ctl->pixels)[j * ctl->w + i];
     }
   }
   if (ctl->sync) {
