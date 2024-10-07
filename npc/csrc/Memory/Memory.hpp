@@ -6,7 +6,8 @@
 class Memory {
 public:
   Memory(MemoryManager &mgr);
+  ~Memory();
 
   // public 因为方便 main.cpp:LoadImage
-  byte mem[MEM_SIZE];
+  byte *mem;
 };
