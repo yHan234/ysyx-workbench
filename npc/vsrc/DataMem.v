@@ -104,15 +104,13 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
     })
 );
 
-always @(posedge RdClk) begin
+always @(*) begin
     if (MemRd) begin
         read = pmem_read(aligned_addr);
     end else begin
         read = 0;
     end
-end
 
-always @(posedge WrClk) begin
     if (MemWr) begin
         pmem_write(aligned_addr, write, write_mask);
     end

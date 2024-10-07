@@ -8,12 +8,14 @@ extern CPU cpu;
 
 extern "C" int pmem_read(u_int32_t addr) {
   try {
-  return mem_mgr.PAddrRead(addr & ~0x3u, 4);
-  } catch (std::string &msg) { std::cerr << msg << std::endl; }
-  return 0;
+    return mem_mgr.PAddrRead(addr & ~0x3u, 4);
+  } catch (...) {
+    return 0;
+  }
 }
 
 extern "C" void pmem_write(u_int32_t addr, u_int32_t data, char mask) {
+  std::cerr << "pmem_write" << std::endl;
   addr &= ~0x3u;
   for (int i = 0; i < 4; ++i) {
     if (((mask >> i) & 1) == 0) {
