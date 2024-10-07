@@ -18,8 +18,8 @@ Debugger::Command::Command(const char *name,
         int (Debugger::*handler)(std::string &))
     : name(name), description(description), handler(handler) {}
 
-Debugger::Debugger(CPU &cpu, MemoryManager &mem_mgr, Monitor &monitor, bool batch_mode)
-    : cpu(cpu), mem_mgr(mem_mgr), monitor(monitor), batch_mode(batch_mode) {
+Debugger::Debugger(CPU &cpu, Memory &mem, Monitor &monitor, bool batch_mode)
+    : cpu(cpu), mem(mem), monitor(monitor), batch_mode(batch_mode) {
   cmd_table.emplace_back("help", "Display information about all supported commands", &Debugger::CMD_help);
   cmd_table.emplace_back("c", "Continue the execution of the program", &Debugger::CMD_c);
   cmd_table.emplace_back("q", "Exit", &Debugger::CMD_q);
@@ -154,7 +154,7 @@ int Debugger::CMD_x(std::string &args) {
   for (unsigned long i = 0; i < n; ++i) {
     vaddr_t addr = base + i * 4;
     try {
-      std::cout << string_format("0x%08x\t\t0x%08x", addr, mem_mgr.PAddrRead(addr, 4)) << std::endl;
+      std::cout << string_format("0x%08x\t\t0x%08x", addr, mem.VRead(addr, 4)) << std::endl;
     } catch (std::string &msg) {
       std::cout << msg << std::endl;
       return 0;

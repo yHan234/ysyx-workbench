@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CPU/CPU.hpp"
-#include "MemoryManager/MemoryManager.hpp"
+#include "Memory/Memory.hpp"
 #include "Monitor/Monitor.hpp"
 #include <iostream>
 #include <regex>
@@ -9,7 +9,7 @@
 
 class Debugger {
 public:
-  Debugger(CPU &cpu, MemoryManager &mem_mgr, Monitor &monitor, bool batch_mode = false);
+  Debugger(CPU &cpu, Memory &mem, Monitor &monitor, bool batch_mode = false);
   void SetBatchMode();
   void MainLoop();
 
@@ -34,7 +34,7 @@ private:
   std::vector<Command> cmd_table;
 
   CPU &cpu;
-  MemoryManager &mem_mgr;
+  Memory &mem;
   Monitor &monitor;
   bool batch_mode;
 };
