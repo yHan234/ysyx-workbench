@@ -53,13 +53,10 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
       PrintMTrace();
       if (state == State::ABORT) {
         std::cout << "ABORT" << std::endl;
-        log << "ABORT" << '\n';
       } else if (ret == 0) {
         std::cout << "HIT GOOD TRAP" << std::endl;
-        log << "HIT GOOD TRAP" << '\n';
       } else {
         std::cout << "HIT BAD TRAP" << std::endl;
-        log << "HIT BAD TRAP" << '\n';
       }
     }
     return 0;
@@ -108,6 +105,10 @@ void Monitor::ITrace() {
 
 void Monitor::PrintITrace() {
 #ifdef ITRACE
+  if (!log.is_open()) {
+    return;
+  }
+
   log << "ITRACE:" << '\n';
   for (auto &info : ibuf) {
     log << info.ToString() << '\n';
@@ -127,6 +128,10 @@ void Monitor::MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w
 
 void Monitor::PrintMTrace() {
 #ifdef MTRACE
+  if (!log.is_open()) {
+    return;
+  }
+
   log << "MTRACE:" << '\n';
   for (auto &info : mbuf) {
     log << info.ToString() << '\n';
