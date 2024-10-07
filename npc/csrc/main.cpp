@@ -52,22 +52,22 @@ int main(int argc, char *argv[]) {
     return 1;
   };
 
-  // try {
-  //   // Initialize
-  //   if (args["-b"] == true) {
-  //     dbg.SetBatchMode();
-  //   }
+  try {
+    // Initialize
+    if (args["-b"] == true) {
+      dbg.SetBatchMode();
+    }
 
-  //   cpu.Reset(10);
+    cpu.Reset(10);
 
-  //   Memory mem(mem_mgr);
-  //   LoadImage(args.get("img"), mem.mem, args.get("-d"));
-  //   // Start
-  //   dbg.MainLoop();
-  // } catch (std::string &msg) {
-  //   std::cerr << msg << std::endl;
-  //   return 1;
-  // }
+    // Memory mem(mem_mgr);
+    // LoadImage(args.get("img"), mem.mem, args.get("-d"));
+    // // Start
+    // dbg.MainLoop();
+  } catch (std::string &msg) {
+    std::cerr << msg << std::endl;
+    return 1;
+  }
 
-  // return monitor.IsExitStatusBad();
+  return monitor.IsExitStatusBad();
 }
