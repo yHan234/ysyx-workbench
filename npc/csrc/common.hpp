@@ -10,6 +10,6 @@ using word_t = uint32_t;
 using paddr_t = word_t;
 using vaddr_t = word_t;
 
-#define MEM_BASE 0x80000000ul
-#define MEM_SIZE 0x80000000ul
-#define INITIAL_PC 0x80000000ul
+#define MEM_BASE 0x80000000ull
+#define MEM_SIZE 0x80000000ull
+#define INITIAL_PC 0x80000000ull
