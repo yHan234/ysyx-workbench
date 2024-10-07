@@ -4,7 +4,7 @@ void __am_timer_init() {
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  uptime->us = 0;
+  uptime->us = *(uint64_t *)0xA0000048; // NPC 约定的 uptime 地址
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

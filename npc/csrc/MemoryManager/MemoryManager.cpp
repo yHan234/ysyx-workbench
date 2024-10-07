@@ -35,7 +35,7 @@ word_t MemoryManager::PAddrRead(paddr_t addr, int len) {
     }
     succ = true; // 假设 HostRead 不会有问题
     uint32_t offset = addr - b;
-    callback(offset, len, true);
+    callback(offset, len, false);
     data = HostRead(hbegin + offset, len);
   }
   trace_read(succ, addr, len, data);

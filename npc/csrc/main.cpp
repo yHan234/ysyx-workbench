@@ -11,6 +11,7 @@
 MemoryManager mem_mgr;
 Memory mem(mem_mgr);
 Serial serial(mem_mgr);
+Timer timer(mem_mgr);
 CPU cpu;
 Monitor monitor(cpu, mem_mgr);
 Debugger dbg(cpu, mem_mgr, monitor);

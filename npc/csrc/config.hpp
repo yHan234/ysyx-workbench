@@ -14,3 +14,4 @@
 // Device
 
 #define SERIAL_ADDR 0xA00003F8
+#define UPTIME_ADDR 0xA0000048
