@@ -10,9 +10,10 @@ void CPU::SingleCycle() {
 void CPU::Reset(uint64_t n) {
   dut.rst = 1;
   while (n--) {
-    std::cerr << n << ' ' << GetPC() << std::endl;
-    SingleCycle();
-    std::cerr << n << ' ' << GetPC() << std::endl;
+    // std::cerr << n << ' ' << GetPC() << std::endl;
+    try {
+    SingleCycle();}catch(...){}
+    // std::cerr << n << ' ' << GetPC() << std::endl;
   }
   dut.rst = 0;
 }
