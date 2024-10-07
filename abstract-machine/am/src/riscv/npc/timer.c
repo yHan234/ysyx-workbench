@@ -2,10 +2,9 @@
 
 void __am_timer_init() {
 }
-// #include <stdio.h>
+
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
   uptime->us = *(uint64_t *)0xA0000048; // NPC 约定的 uptime 地址
-  // printf("%x", uptime->us);
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

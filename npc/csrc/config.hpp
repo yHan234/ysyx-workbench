@@ -7,8 +7,8 @@
 // Monitor
 
 #define BUF_SIZE 128
-#define ITRACE
-#define MTRACE
+// #define ITRACE
+// #define MTRACE
 // #define DIFFTEST
 
 // Device
