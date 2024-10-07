@@ -19,7 +19,7 @@ module top(
             .rst  ( rst    ),
             .din  ( NextPC ),
             .dout ( pc     ),
-            .wen  ( 1'b1   )
+            .wen  ( 0   )
         );
     assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
 
