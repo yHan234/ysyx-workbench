@@ -124,7 +124,6 @@ void Monitor::PrintMTrace() {
 #ifdef MTRACE
   std::cout << "MTRACE:" << std::endl;
   for (auto &info : mbuf) {
-    std::cout << info.pc << std::endl;
     std::cout << info.ToString() << std::endl;
   }
 #endif
