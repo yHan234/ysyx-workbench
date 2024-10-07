@@ -24,7 +24,7 @@ module top(
     assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
 
     always @(*) begin
-        $display(rst, PCAsrc, imm, PCBsrc, pc, rbus1);
+        $display(clk, rst, PCAsrc, imm, PCBsrc, pc, rbus1);
     end
 
     // GPR
