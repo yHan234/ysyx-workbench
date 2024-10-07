@@ -11,10 +11,10 @@ void CPU::Reset(uint64_t n) {
   dut.rst = 1;
   while (n--) {
     // std::cerr << GetPC() << std::endl;
-    try {
+    // try {
       SingleCycle();
-    } catch (...) {
-    }
+    // } catch (...) {
+    // }
   }
   dut.rst = 0;
 }

@@ -56,13 +56,13 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
     return 0;
   };
 
-  // mem_mgr.trace_read = [&](paddr_t addr, int len, word_t data) {
-  //   MTrace(0, addr, len, data);
-  // };
+  mem_mgr.trace_read = [&](paddr_t addr, int len, word_t data) {
+    MTrace(0, addr, len, data);
+  };
 
-  // mem_mgr.trace_write = [&](paddr_t addr, int len, word_t data) {
-  //   MTrace(1, addr, len, data);
-  // };
+  mem_mgr.trace_write = [&](paddr_t addr, int len, word_t data) {
+    MTrace(1, addr, len, data);
+  };
 }
 
 bool Monitor::IsExitStatusBad() {
