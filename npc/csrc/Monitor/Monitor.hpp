@@ -41,7 +41,6 @@ public:
   State state;
   int ret; // valid when state == END
 
-
   bool IsExitStatusBad();
   void OpenLogFile(const std::string &log_file);
   void LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, size_t img_size);

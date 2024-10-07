@@ -6,7 +6,7 @@
 
 // Monitor
 
-#define BUF_SIZE 32
+#define BUF_SIZE 128
 #define ITRACE
 #define MTRACE
 // #define DIFFTEST
@@ -14,3 +14,4 @@
 // Device
 
 #define SERIAL_ADDR 0xA00003F8
+#define UPTIME_ADDR 0xA0000048
