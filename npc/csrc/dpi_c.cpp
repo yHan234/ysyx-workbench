@@ -13,6 +13,7 @@ extern "C" int pmem_read(u_int32_t addr) {
 }
 
 extern "C" void pmem_write(u_int32_t addr, u_int32_t data, char mask) {
+  std::cerr << "write" << std::endl;
   addr &= ~0x3u;
   for (int i = 0; i < 4; ++i) {
     if (((mask >> i) & 1) == 0) {
