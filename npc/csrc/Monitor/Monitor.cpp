@@ -5,11 +5,11 @@ std::string InstInfo::ToString() {
 }
 
 std::string MemInfo::ToString() {
-  return string_format("0x%08x: %08x %d %s %08x", pc, addr, len, op ? "<-" : "->", data);
+  return string_format("0x%08x: %08x %d %s %08x", pc, addr, len, is_write ? "<-" : "->", data);
 }
 
-Monitor::Monitor(CPU &cpu, Memory &mem)
-    : cpu(cpu), mem(mem), state(State::STOP) {
+Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
+    : cpu(cpu), mem_mgr(mem_mgr), state(State::STOP) {
   // init_disasm("riscv32");
 
   cpu.before_exec = [&]() -> int {
@@ -56,11 +56,11 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     return 0;
   };
 
-  mem.trace_pread = [&](paddr_t addr, int len, word_t data) {
+  mem_mgr.trace_read = [&](paddr_t addr, int len, word_t data) {
     MTrace(0, addr, len, data);
   };
 
-  mem.trace_pwrite = [&](paddr_t addr, int len, word_t data) {
+  mem_mgr.trace_write = [&](paddr_t addr, int len, word_t data) {
     MTrace(1, addr, len, data);
   };
 }
@@ -89,15 +89,15 @@ void Monitor::PrintITrace() {
 #endif
 }
 
-void Monitor::MTrace(bool op, vaddr_t addr, int len, word_t data) {
+void Monitor::MTrace(bool is_write, vaddr_t addr, int len, word_t data) {
 #ifdef MTRACE
-  if (op == 0 && addr == pc) { // 取指令不记录
+  if (!is_write && addr == pc) { // 取指令不记录
     return;
   }
-  if (op == 0) { // 读取不记录，因为设计的电路中每个周期都会读取一次，不论是否有用
+  if (!is_write) { // 读取不记录，因为设计的电路中每个周期都会读取一次，不论是否有用
     return;
   }
-  mbuf.Write({op, pc, addr, len, data});
+  mbuf.Write({is_write, pc, addr, len, data});
 #endif
 }
 
@@ -110,12 +110,12 @@ void Monitor::PrintMTrace() {
 #endif
 }
 
-void Monitor::LoadDiffTestRef(const std::string &file) {
+void Monitor::LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, size_t img_size) {
 #ifdef DIFFTEST
   static word_t regs_pc[33];
 
   void *handle;
-  handle = dlopen(file.c_str(), RTLD_LAZY);
+  handle = dlopen(ref_so_file.c_str(), RTLD_LAZY);
   if (!handle) {
     throw(std::string("Failed to open DiffTest ref so file."));
   }
@@ -130,13 +130,13 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   }
 
   DTRefInit(0);
-  DTRefMemCpy(INITIAL_PC, mem.GuestToHost(INITIAL_PC), mem.img_size, DUT_TO_REF);
+  DTRefMemCpy(INITIAL_PC, img_addr, img_size, DUT_TO_REF);
 
   memset(regs_pc, 0, sizeof(CPU::Regs));
   regs_pc[32] = 0x80000000;
   DTRefRegCpy(regs_pc, DUT_TO_REF);
 #else
-  if (!file.empty()) {
+  if (!ref_so_file.empty()) {
     std::cerr << "DiffTest is not enabled" << std::endl;
   }
 #endif
