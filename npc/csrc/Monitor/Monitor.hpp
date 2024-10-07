@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CPU/CPU.hpp"
-#include "MemoryManager/MemoryManager.hpp"
+#include "Memory/Memory.hpp"
 #include "Utils/CircularBuffer.hpp"
 #include "Utils/disasm.hpp"
 #include <dlfcn.h>
@@ -10,7 +10,7 @@
 #define BUF_SIZE 32
 #define ITRACE
 #define MTRACE
-// #define DIFFTEST
+#define DIFFTEST
 
 struct InstInfo {
   vaddr_t pc;
@@ -21,7 +21,7 @@ struct InstInfo {
 };
 
 struct MemInfo {
-  bool is_write;
+  bool op; // 0: read, 1: write
   vaddr_t pc;
   vaddr_t addr;
   int len;
@@ -32,7 +32,7 @@ struct MemInfo {
 
 class Monitor {
 public:
-  Monitor(CPU &cpu, MemoryManager &mem_mgr);
+  Monitor(CPU &cpu, Memory &mem);
 
   // State
   enum class State {
@@ -47,11 +47,11 @@ public:
   int ret; // valid when state == END
 
   bool IsExitStatusBad();
-  void LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, size_t img_size);
+  void LoadDiffTestRef(const std::string &file);
 
 private:
   CPU &cpu;
-  MemoryManager &mem_mgr;
+  Memory &mem;
 
   paddr_t pc;
   word_t inst;
@@ -64,7 +64,7 @@ private:
 #endif
 
   // Memory Trace
-  void MTrace(bool is_write, vaddr_t addr, int len, word_t data);
+  void MTrace(bool op, vaddr_t addr, int len, word_t data);
   void PrintMTrace();
 #ifdef MTRACE
   WriteOnlyCircularBuffer<MemInfo, BUF_SIZE> mbuf;
