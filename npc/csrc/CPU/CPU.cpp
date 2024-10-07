@@ -6,10 +6,11 @@ void CPU::SingleCycle() {
   dut.clk = 1;
   dut.eval();
 }
-
+#include <iostream>
 void CPU::Reset(uint64_t n) {
   dut.rst = 1;
   while (n--) {
+    std::cerr << GetPC() << std::endl;
     SingleCycle();
   }
   dut.rst = 0;
