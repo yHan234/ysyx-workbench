@@ -55,13 +55,13 @@ int main(int argc, char *argv[]) {
 
   try {
     // Initialize
-    // if (args["-b"] == true) {
-    //   dbg.SetBatchMode();
-    // }
-    // cpu.Reset(10);
-    // LoadImage(args.get("img"), mem.mem, args.get("-d"));
-    // // Start
-    // dbg.MainLoop();
+    if (args["-b"] == true) {
+      dbg.SetBatchMode();
+    }
+    cpu.Reset(10);
+    LoadImage(args.get("img"), mem.mem, args.get("-d"));
+    // Start
+    dbg.MainLoop();
   } catch (std::string &msg) {
     std::cerr << msg << std::endl;
     return 1;
