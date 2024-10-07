@@ -6,9 +6,9 @@ std::string InstInfo::ToString() {
 
 std::string MemInfo::ToString() {
   if (is_write) {
-    return string_format("%#08x: %08x [%0*x => %0*x]", pc, addr, len * 2, w_pre_data, len * 2, data);
+    return string_format("%#08x: %08x [%#0*x => %#0*x]", pc, addr, len * 2, w_pre_data, len * 2, data);
   } else {
-    return string_format("%#08x: %08x [%0*x]", pc, addr, len * 2, data);
+    return string_format("%#08x: %08x [%#0*x]", pc, addr, len * 2, data);
   }
 }
 
@@ -61,6 +61,10 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
   };
 
   mem_mgr.trace_write = [&](bool succ, paddr_t addr, int len, word_t cur_data, word_t pre_data) {
+    if (cpu.IsResetting()) {
+      return;
+    }
+
     if (!succ) {
       state = State::ABORT;
       std::cerr << "Memory write failed. Check the last MTrace." << std::endl;
@@ -69,6 +73,10 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
   };
 
   mem_mgr.trace_read = [&](bool succ, paddr_t addr, int len, word_t data) {
+    if (cpu.IsResetting()) {
+      return;
+    }
+
     if (!succ) {
       state = State::ABORT;
       std::cerr << "Memory read failed. Check the last MTrace." << std::endl;

@@ -43,3 +43,7 @@ vaddr_t CPU::GetPC() {
 word_t CPU::GetInst() {
   return dut.top->inst;
 }
+
+bool CPU::IsResetting() {
+  return dut.rst;
+}
