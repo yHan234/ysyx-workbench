@@ -44,13 +44,13 @@ int main(int argc, char *argv[]) {
       .default_value("")
       .help("run DiffTest with reference REF_SO");
 
-  // try {
-  //   args.parse_args(argc, argv);
-  // } catch (const std::exception &err) {
-  //   std::cerr << err.what() << std::endl;
-  //   std::cerr << args;
-  //   return 1;
-  // };
+  try {
+    args.parse_args(argc, argv);
+  } catch (const std::exception &err) {
+    std::cerr << err.what() << std::endl;
+    std::cerr << args;
+    return 1;
+  };
 
   // try {
   //   // Initialize
