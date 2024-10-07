@@ -7,11 +7,6 @@
 #include <dlfcn.h>
 #include <iostream>
 
-#define BUF_SIZE 128
-#define ITRACE
-#define MTRACE
-// #define DIFFTEST
-
 struct InstInfo {
   vaddr_t pc;
   uint32_t inst;

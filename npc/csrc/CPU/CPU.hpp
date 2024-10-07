@@ -20,8 +20,6 @@ public:
 
   word_t GetInst();
 
-  bool IsResetting();
-
   std::function<int()> before_exec;
   std::function<int()> before_step;
   std::function<int()> after_step;
