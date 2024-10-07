@@ -1,7 +1,9 @@
 #include "MemoryManager.hpp"
 
 void MemoryManager::Map(paddr_t begin, paddr_t end, callback_t callback, byte *host_begin) {
-  CheckOverlap(begin, end);
+  if (CheckOverlap(begin, end)) {
+    throw string_format("MemoryManager::Map addr overlap [%lx, %lx]", begin, end);
+  }
   maps.push_back({begin, end, callback, host_begin});
 }
 
@@ -34,10 +36,10 @@ word_t MemoryManager::PAddrRead(paddr_t paddr, int len) {
 bool MemoryManager::CheckOverlap(paddr_t begin, paddr_t end) {
   for (const auto &[b, e, _, __] : maps) {
     if (b <= end && begin <= e) {
-      return false;
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 word_t MemoryManager::HostRead(void *addr, int len) {
