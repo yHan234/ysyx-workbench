@@ -7,11 +7,11 @@ extern MemoryManager mem_mgr;
 extern CPU cpu;
 
 extern "C" int pmem_read(u_int32_t addr) {
-  try {
+  // try {
     return mem_mgr.PAddrRead(addr & ~0x3u, 4);
-  } catch (...) {
-    return 0;
-  }
+  // } catch (...) {
+  //   return 0;
+  // }
 }
 
 extern "C" void pmem_write(u_int32_t addr, u_int32_t data, char mask) {
