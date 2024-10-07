@@ -12,6 +12,7 @@ void CPU::Reset(uint64_t n) {
   while (n--) {
     std::cerr << n << ' ' << GetPC() << std::endl;
     SingleCycle();
+    std::cerr << n << ' ' << GetPC() << std::endl;
   }
   dut.rst = 0;
 }
