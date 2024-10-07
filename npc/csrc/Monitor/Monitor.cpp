@@ -61,7 +61,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
   };
 
   mem_mgr.trace_write = [&](bool succ, paddr_t addr, int len, word_t cur_data, word_t pre_data) {
-    if (cpu.IsResetting() || cpu.GetPC() == INITIAL_PC) {
+    if (cpu.IsResetting() || pc == INITIAL_PC) {
       return;
     }
 
@@ -69,11 +69,12 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
       state = State::ABORT;
       std::cerr << "Memory write failed. Check the last MTrace." << std::endl;
     }
+
     MTrace(1, addr, len, cur_data, pre_data);
   };
 
   mem_mgr.trace_read = [&](bool succ, paddr_t addr, int len, word_t data) {
-    if (cpu.IsResetting() || cpu.GetPC() == INITIAL_PC) {
+    if (cpu.IsResetting() || pc == INITIAL_PC) {
       return;
     }
 
@@ -81,6 +82,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
       state = State::ABORT;
       std::cerr << "Memory read failed. Check the last MTrace." << std::endl;
     }
+
     MTrace(0, addr, len, data, 0);
   };
 }
