@@ -10,6 +10,7 @@ void MemoryManager::Map(paddr_t begin, paddr_t end, callback_t callback, byte *h
 void MemoryManager::PAddrWrite(paddr_t addr, int len, word_t data) {
   bool succ = false; // for trace
   word_t pre_data;   // for trace
+  word_t cur_data;   // for trace
   for (const auto &[b, e, callback, hbegin] : maps) {
     if (addr < b || e <= addr) {
       continue;
@@ -18,11 +19,11 @@ void MemoryManager::PAddrWrite(paddr_t addr, int len, word_t data) {
     uint32_t offset = addr - b;
     callback(offset, len, true);
     pre_data = HostRead(hbegin + offset, len);
-    printf("read %d %d\n", len, pre_data);
     HostWrite(hbegin + offset, len, data);
+    cur_data = HostRead(hbegin + offset, len); // 再读一遍的原因是 data 与长度可能不匹配
     break;
   }
-  trace_write(succ, addr, len, data, pre_data);
+  trace_write(succ, addr, len, cur_data, pre_data);
 }
 
 word_t MemoryManager::PAddrRead(paddr_t addr, int len) {
