@@ -18,7 +18,7 @@ void MemoryManager::PAddrWrite(paddr_t addr, int len, word_t data) {
     uint32_t offset = addr - b;
     callback(offset, len, true);
     pre_data = HostRead(hbegin + offset, len);
-    printf("read %d %d", len, pre_data);
+    printf("read %d %d\n", len, pre_data);
     HostWrite(hbegin + offset, len, data);
     break;
   }
