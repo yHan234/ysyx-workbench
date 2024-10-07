@@ -61,28 +61,20 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
   };
 
   mem_mgr.trace_write = [&](bool succ, paddr_t addr, int len, word_t cur_data, word_t pre_data) {
-    // if (cpu.IsResetting() || pc == INITIAL_PC) {
-    //   return;
-    // }
-
+    // 未开启内存读写错误检查，因为电路设计原因，经常有实际不需要的错误内存读写行为
     // if (!succ) {
     //   state = State::ABORT;
     //   std::cerr << "Memory write failed. Check the last MTrace." << std::endl;
     // }
-
     MTrace(1, addr, len, cur_data, pre_data);
   };
 
   mem_mgr.trace_read = [&](bool succ, paddr_t addr, int len, word_t data) {
-    // if (cpu.IsResetting() || pc == INITIAL_PC) {
-    //   return;
-    // }
-
+    // 未开启内存读写错误检查，因为电路设计原因，经常有实际不需要的错误内存读写行为
     // if (!succ) {
     //   state = State::ABORT;
     //   std::cerr << "Memory read failed. Check the last MTrace." << std::endl;
     // }
-
     MTrace(0, addr, len, data, 0);
   };
 }
