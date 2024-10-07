@@ -2,10 +2,10 @@
 #include <iostream>
 void CPU::SingleCycle() {
   dut.clk = 0;
-    std::cerr << dut.clk << std::endl;
+    std::cerr << "eval" << std::endl;
   dut.eval();
   dut.clk = 1;
-    std::cerr << dut.clk << std::endl;
+    std::cerr << "eval" << std::endl;
   dut.eval();
 }
 
