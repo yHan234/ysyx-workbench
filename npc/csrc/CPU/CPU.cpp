@@ -12,7 +12,7 @@ void CPU::Reset(uint64_t n) {
   while (n--) {
     try {
       SingleCycle();
-    } catch (std::exception &e) {
+    } catch (std::runtime_error &e) {
       std::cerr << e.what() << std::endl;
     }
   }
