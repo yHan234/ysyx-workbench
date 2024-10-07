@@ -54,10 +54,10 @@ int main(int argc, char *argv[]) {
   };
 
   // reset 会导致错误地址的内存读写，无视异常
-  try {
+  // try {
     cpu.Reset(10);
-  } catch (...) {
-  }
+  // } catch (...) {
+  // }
 
   try {
     // Initialize
