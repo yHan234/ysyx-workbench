@@ -106,7 +106,7 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
 );
 
 always @(*) begin
-        $display("rst: ", rst);
+    $display("rst: ", rst);
     if (!rst && MemRd) begin
         $display("MemRd:", MemRd);
         read = pmem_read(aligned_addr);
