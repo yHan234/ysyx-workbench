@@ -6,5 +6,5 @@ Memory::Memory(MemoryManager &mgr) {
 }
 
 Memory::~Memory() {
-  delete mem;
+  delete[] mem;
 }
