@@ -15,6 +15,7 @@
 
 #include <device/map.h>
 #include <memory/paddr.h>
+#include <isa.h>
 
 #define NR_MAP 16
 
@@ -53,11 +54,52 @@ void add_mmio_map(const char *name, paddr_t addr, void *space, uint32_t len, io_
   nr_map ++;
 }
 
+#ifdef CONFIG_DTRACE
+extern CPU_state cpu;
+#define DRINGBUF_LEN 128
+struct {
+  vaddr_t pc;
+  char op;
+  paddr_t addr;
+  int len;
+  word_t data;
+} dringbuf[DRINGBUF_LEN];
+uint dringbuf_wptr = 0;
+uint dringbuf_size = 0;
+
+static void dringbuf_write(char op, paddr_t addr, int len, word_t data) {
+  dringbuf[dringbuf_wptr].pc = cpu.pc;
+  dringbuf[dringbuf_wptr].op = op;
+  dringbuf[dringbuf_wptr].addr = addr;
+  dringbuf[dringbuf_wptr].len = len;
+  dringbuf[dringbuf_wptr].data = data;
+
+  dringbuf_wptr = (dringbuf_wptr + 1) % DRINGBUF_LEN;
+  if (dringbuf_size < DRINGBUF_LEN) {
+    dringbuf_size += 1;
+  }
+}
+
+void dringbuf_print() {
+  extern FILE *log_fp;
+  if (dringbuf_size) {
+    uint i = dringbuf_size == DRINGBUF_LEN ? dringbuf_wptr : 0;
+    do {
+      log_write("0x%08x: %c 0x%08x %d 0x%08x\n", dringbuf[i].pc, dringbuf[i].op, dringbuf[i].addr, dringbuf[i].len, dringbuf[i].data);
+      i = (i + 1) % DRINGBUF_LEN;
+    } while (i != dringbuf_wptr);
+  }
+}
+#endif
+
 /* bus interface */
 word_t mmio_read(paddr_t addr, int len) {
-  return map_read(addr, len, fetch_mmio_map(addr));
+  word_t data = map_read(addr, len, fetch_mmio_map(addr));
+  IFDEF(CONFIG_DTRACE, dringbuf_write('W', addr, len, data));
+  return data;
 }
 
 void mmio_write(paddr_t addr, int len, word_t data) {
   map_write(addr, len, data, fetch_mmio_map(addr));
+  IFDEF(CONFIG_DTRACE, dringbuf_write('R', addr, len, data));
 }
