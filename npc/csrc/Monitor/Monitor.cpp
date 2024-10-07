@@ -61,7 +61,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
   };
 
   mem_mgr.trace_write = [&](bool succ, paddr_t addr, int len, word_t cur_data, word_t pre_data) {
-    if (cpu.IsResetting()) {
+    if (cpu.IsResetting() || cpu.GetPC() == INITIAL_PC) {
       return;
     }
 
@@ -73,7 +73,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
   };
 
   mem_mgr.trace_read = [&](bool succ, paddr_t addr, int len, word_t data) {
-    if (cpu.IsResetting()) {
+    if (cpu.IsResetting() || cpu.GetPC() == INITIAL_PC) {
       return;
     }
 
