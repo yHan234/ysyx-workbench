@@ -53,9 +53,10 @@ int main(int argc, char *argv[]) {
     return 1;
   };
 
+  // reset 会导致错误地址的内存读写，无视异常
   try {
     cpu.Reset(10);
-  } catch (std::exception &e) {
+  } catch (...) {
   }
 
   try {
