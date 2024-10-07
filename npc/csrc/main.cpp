@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
       dbg.SetBatchMode();
     }
 
-    cpu.Reset(10);
+    // cpu.Reset(10);
 
     // Memory mem(mem_mgr);
     // LoadImage(args.get("img"), mem.mem, args.get("-d"));
