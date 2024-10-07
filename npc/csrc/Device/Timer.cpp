@@ -3,6 +3,7 @@
 Timer::Timer(MemoryManager &mem_mgr)
     : boot_time(std::chrono::high_resolution_clock::now()) {
   uptime_mem = new byte[UPTIME_SIZE];
+  std::fill(uptime_mem, uptime_mem + UPTIME_SIZE, 0);
   mem_mgr.Map(UPTIME_ADDR, UPTIME_ADDR + UPTIME_SIZE, [&](uint32_t offset, int len, bool is_write) { HandleUptime(offset, len, is_write); }, uptime_mem);
 }
 
