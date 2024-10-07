@@ -1,15 +1,19 @@
 #include "Monitor.hpp"
 
 std::string InstInfo::ToString() {
-  return string_format("0x%08x: %08x %s", pc, inst, disasm.c_str());
+  return string_format("%#08x: %08x %s", pc, inst, disasm.c_str());
 }
 
 std::string MemInfo::ToString() {
-  return string_format("0x%08x: %08x %d %s %08x", pc, addr, len, op ? "<-" : "->", data);
+  if (is_write) {
+    return string_format("%#08x: %08x %d [%#0*x => %#0*x]", pc, addr, len, len * 2 + 2, w_pre_data, len * 2 + 2, data);
+  } else {
+    return string_format("%#08x: %08x %d [%#0*x]", pc, addr, len, len * 2, data);
+  }
 }
 
-Monitor::Monitor(CPU &cpu, Memory &mem)
-    : cpu(cpu), mem(mem), state(State::STOP) {
+Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
+    : cpu(cpu), mem_mgr(mem_mgr), state(State::STOP) {
   // init_disasm("riscv32");
 
   cpu.before_exec = [&]() -> int {
@@ -56,12 +60,22 @@ Monitor::Monitor(CPU &cpu, Memory &mem)
     return 0;
   };
 
-  mem.trace_pread = [&](paddr_t addr, int len, word_t data) {
-    MTrace(0, addr, len, data);
+  mem_mgr.trace_write = [&](bool succ, paddr_t addr, int len, word_t cur_data, word_t pre_data) {
+    // 未开启内存读写错误检查，因为电路设计原因，经常有实际不需要的错误内存读写行为
+    // if (!succ) {
+    //   state = State::ABORT;
+    //   std::cerr << "Memory write failed. Check the last MTrace." << std::endl;
+    // }
+    MTrace(1, addr, len, cur_data, pre_data);
   };
 
-  mem.trace_pwrite = [&](paddr_t addr, int len, word_t data) {
-    MTrace(1, addr, len, data);
+  mem_mgr.trace_read = [&](bool succ, paddr_t addr, int len, word_t data) {
+    // 未开启内存读写错误检查，因为电路设计原因，经常有实际不需要的错误内存读写行为
+    // if (!succ) {
+    //   state = State::ABORT;
+    //   std::cerr << "Memory read failed. Check the last MTrace." << std::endl;
+    // }
+    MTrace(0, addr, len, data, 0);
   };
 }
 
@@ -89,15 +103,12 @@ void Monitor::PrintITrace() {
 #endif
 }
 
-void Monitor::MTrace(bool op, vaddr_t addr, int len, word_t data) {
+void Monitor::MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w_pre_data) {
 #ifdef MTRACE
-  if (op == 0 && addr == pc) { // 取指令不记录
+  if (!is_write && addr == pc) { // 取指令不记录
     return;
   }
-  if (op == 0) { // 读取不记录，因为设计的电路中每个周期都会读取一次，不论是否有用
-    return;
-  }
-  mbuf.Write({op, pc, addr, len, data});
+  mbuf.Write({is_write, pc, addr, len, data, w_pre_data});
 #endif
 }
 
@@ -110,12 +121,12 @@ void Monitor::PrintMTrace() {
 #endif
 }
 
-void Monitor::LoadDiffTestRef(const std::string &file) {
+void Monitor::LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, size_t img_size) {
 #ifdef DIFFTEST
   static word_t regs_pc[33];
 
   void *handle;
-  handle = dlopen(file.c_str(), RTLD_LAZY);
+  handle = dlopen(ref_so_file.c_str(), RTLD_LAZY);
   if (!handle) {
     throw(std::string("Failed to open DiffTest ref so file."));
   }
@@ -130,13 +141,13 @@ void Monitor::LoadDiffTestRef(const std::string &file) {
   }
 
   DTRefInit(0);
-  DTRefMemCpy(INITIAL_PC, mem.GuestToHost(INITIAL_PC), mem.img_size, DUT_TO_REF);
+  DTRefMemCpy(INITIAL_PC, img_addr, img_size, DUT_TO_REF);
 
   memset(regs_pc, 0, sizeof(CPU::Regs));
   regs_pc[32] = 0x80000000;
   DTRefRegCpy(regs_pc, DUT_TO_REF);
 #else
-  if (!file.empty()) {
+  if (!ref_so_file.empty()) {
     std::cerr << "DiffTest is not enabled" << std::endl;
   }
 #endif

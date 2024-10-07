@@ -1,16 +1,11 @@
 #pragma once
 
 #include "CPU/CPU.hpp"
-#include "Memory/Memory.hpp"
+#include "MemoryManager/MemoryManager.hpp"
 #include "Utils/CircularBuffer.hpp"
 #include "Utils/disasm.hpp"
 #include <dlfcn.h>
 #include <iostream>
-
-#define BUF_SIZE 32
-#define ITRACE
-#define MTRACE
-#define DIFFTEST
 
 struct InstInfo {
   vaddr_t pc;
@@ -21,18 +16,19 @@ struct InstInfo {
 };
 
 struct MemInfo {
-  bool op; // 0: read, 1: write
+  bool is_write;
   vaddr_t pc;
   vaddr_t addr;
   int len;
   word_t data;
+  word_t w_pre_data;
 
   std::string ToString();
 };
 
 class Monitor {
 public:
-  Monitor(CPU &cpu, Memory &mem);
+  Monitor(CPU &cpu, MemoryManager &mem_mgr);
 
   // State
   enum class State {
@@ -47,11 +43,11 @@ public:
   int ret; // valid when state == END
 
   bool IsExitStatusBad();
-  void LoadDiffTestRef(const std::string &file);
+  void LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, size_t img_size);
 
 private:
   CPU &cpu;
-  Memory &mem;
+  MemoryManager &mem_mgr;
 
   paddr_t pc;
   word_t inst;
@@ -64,7 +60,7 @@ private:
 #endif
 
   // Memory Trace
-  void MTrace(bool op, vaddr_t addr, int len, word_t data);
+  void MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w_pre_data);
   void PrintMTrace();
 #ifdef MTRACE
   WriteOnlyCircularBuffer<MemInfo, BUF_SIZE> mbuf;

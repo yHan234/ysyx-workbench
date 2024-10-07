@@ -1,4 +1,4 @@
-import "DPI-C" function int pmem_read(input int addr);
+import "DPI-C" function void pmem_read(input int addr, output int read);
 import "DPI-C" function void pmem_write(input int addr, input int data, input byte mask);
 
 /*
@@ -106,7 +106,7 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
 
 always @(*) begin
     if (MemRd) begin
-        read = pmem_read(aligned_addr);
+        pmem_read(aligned_addr, read);
     end else begin
         read = 0;
     end

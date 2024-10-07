@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Utils/string_format.hpp"
+#include "config.hpp"
 #include <cstddef>
 
-using std::byte;
+using byte = char;
 using std::size_t;
 
 using word_t = uint32_t;

@@ -4,12 +4,34 @@
 #include "Monitor/Monitor.hpp"
 #include "Utils/argparse.hpp"
 #include <ctime>
+#include <fstream>
 #include <iostream>
 
-Memory mem;
+MemoryManager mem_mgr;
+Memory mem(mem_mgr);
 CPU cpu;
-Monitor monitor(cpu, mem);
-Debugger dbg(cpu, mem, monitor);
+Monitor monitor(cpu, mem_mgr);
+Debugger dbg(cpu, mem_mgr, monitor);
+
+size_t img_size;
+
+void LoadImage(const std::string &path, char *addr, const std::string &ref_so_path) {
+  std::ifstream file(path, std::ios::binary | std::ios::ate);
+  if (!file.is_open()) {
+    throw string_format("Failed to open image file: %s", path);
+  }
+
+  img_size = file.tellg();
+  if (img_size > MEM_SIZE) {
+    throw std::string("Image file is too big.");
+  }
+
+  file.seekg(0, std::ios::beg);
+  file.read(addr, img_size);
+  file.close();
+
+  monitor.LoadDiffTestRef(ref_so_path, addr, img_size);
+}
 
 int main(int argc, char *argv[]) {
   // Parse Arguments
@@ -33,13 +55,11 @@ int main(int argc, char *argv[]) {
 
   try {
     // Initialize
-    std::srand(time(nullptr));
     if (args["-b"] == true) {
       dbg.SetBatchMode();
     }
     cpu.Reset(10);
-    mem.LoadImage(args.get("img"));
-    monitor.LoadDiffTestRef(args.get("-d"));
+    LoadImage(args.get("img"), mem.mem, args.get("-d"));
     // Start
     dbg.MainLoop();
   } catch (std::string &msg) {
