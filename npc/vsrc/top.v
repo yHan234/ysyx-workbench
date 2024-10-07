@@ -23,6 +23,8 @@ module top(
         );
     assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
 
+    always @(*) $display(clk);
+
     // GPR
 
     wire [31:0] rbus1, rbus2;
