@@ -10,7 +10,7 @@
 #define BUF_SIZE 32
 #define ITRACE
 #define MTRACE
-#define DIFFTEST
+// #define DIFFTEST
 
 struct InstInfo {
   vaddr_t pc;
