@@ -57,14 +57,14 @@ private:
 
   // Instruction Trace
   void ITrace();
-  void PrintITrace();
+  void LogITrace();
 #ifdef ITRACE
   WriteOnlyCircularBuffer<InstInfo, BUF_SIZE> ibuf;
 #endif
 
   // Memory Trace
   void MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w_pre_data);
-  void PrintMTrace();
+  void LogMTrace();
 #ifdef MTRACE
   WriteOnlyCircularBuffer<MemInfo, BUF_SIZE> mbuf;
 #endif

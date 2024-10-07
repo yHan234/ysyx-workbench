@@ -22,7 +22,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
     switch (state) {
     case State::END:
     case State::ABORT:
-      std::cout << "Program execution has ended. To restart the program, exit NEMU and run again." << std::endl;
+      std::cout << "Program execution has ended. To restart the program, exit and run again." << std::endl;
       return 1;
     default:
       state = State::RUNNING;
@@ -49,8 +49,8 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
       break;
     case State::END:
     case State::ABORT:
-      PrintITrace();
-      PrintMTrace();
+      LogITrace();
+      LogMTrace();
       if (state == State::ABORT) {
         std::cout << "ABORT" << std::endl;
       } else if (ret == 0) {
@@ -103,7 +103,7 @@ void Monitor::ITrace() {
 #endif
 }
 
-void Monitor::PrintITrace() {
+void Monitor::LogITrace() {
 #ifdef ITRACE
   if (!log.is_open()) {
     return;
@@ -126,7 +126,7 @@ void Monitor::MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w
 #endif
 }
 
-void Monitor::PrintMTrace() {
+void Monitor::LogMTrace() {
 #ifdef MTRACE
   if (!log.is_open()) {
     return;
