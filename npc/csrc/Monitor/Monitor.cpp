@@ -6,9 +6,9 @@ std::string InstInfo::ToString() {
 
 std::string MemInfo::ToString() {
   if (is_write) {
-    return string_format("%#08x: %08x [%#0*x => %#0*x]", pc, addr, len * 2, w_pre_data, len * 2, data);
+    return string_format("%#08x: %08x %d [%#0*x => %#0*x]", pc, addr, len, len * 2, w_pre_data, len * 2, data);
   } else {
-    return string_format("%#08x: %08x [%#0*x]", pc, addr, len * 2, data);
+    return string_format("%#08x: %08x %d [%#0*x]", pc, addr, len, len * 2, data);
   }
 }
 
