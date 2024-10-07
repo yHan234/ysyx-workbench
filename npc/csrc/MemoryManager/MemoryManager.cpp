@@ -20,8 +20,11 @@ void MemoryManager::PAddrWrite(paddr_t paddr, int len, word_t data) {
   throw string_format("PAddrWrite: addr %#lx out of bound", paddr);
 }
 
+#include <iostream>
+
 word_t MemoryManager::PAddrRead(paddr_t paddr, int len) {
   for (const auto &[b, e, callback, hbegin] : maps) {
+    std::cerr << b << ' ' << e << std::endl;
     if (paddr < b || e <= paddr) {
       continue;
     }

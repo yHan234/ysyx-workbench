@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     cpu.Reset(10);
 
     LoadImage(args.get("img"), mem.mem, args.get("-d"));
-    // // Start
+    // Start
     dbg.MainLoop();
   } catch (std::string &msg) {
     std::cerr << msg << std::endl;
