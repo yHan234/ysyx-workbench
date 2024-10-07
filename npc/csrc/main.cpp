@@ -33,41 +33,42 @@ void LoadImage(const std::string &path, char *addr, const std::string &ref_so_pa
 }
 
 int main(int argc, char *argv[]) {
-  // Parse Arguments
-  argparse::ArgumentParser args("npc");
-  args.add_argument("img")
-      .help("Image file to execute.");
-  args.add_argument("-b", "--batch")
-      .flag()
-      .help("run with batch mode");
-  args.add_argument("-d", "--diff")
-      .default_value("")
-      .help("run DiffTest with reference REF_SO");
+  Memory mem(mem_mgr);
+  // // Parse Arguments
+  // argparse::ArgumentParser args("npc");
+  // args.add_argument("img")
+  //     .help("Image file to execute.");
+  // args.add_argument("-b", "--batch")
+  //     .flag()
+  //     .help("run with batch mode");
+  // args.add_argument("-d", "--diff")
+  //     .default_value("")
+  //     .help("run DiffTest with reference REF_SO");
 
-  try {
-    args.parse_args(argc, argv);
-  } catch (const std::exception &err) {
-    std::cerr << err.what() << std::endl;
-    std::cerr << args;
-    return 1;
-  };
+  // try {
+  //   args.parse_args(argc, argv);
+  // } catch (const std::exception &err) {
+  //   std::cerr << err.what() << std::endl;
+  //   std::cerr << args;
+  //   return 1;
+  // };
 
-  try {
-    // Initialize
-    if (args["-b"] == true) {
-      dbg.SetBatchMode();
-    }
+  // try {
+  //   // Initialize
+  //   if (args["-b"] == true) {
+  //     dbg.SetBatchMode();
+  //   }
 
-    cpu.Reset(10);
+  //   cpu.Reset(10);
 
-    Memory mem(mem_mgr);
-    // LoadImage(args.get("img"), mem.mem, args.get("-d"));
-    // // Start
-    // dbg.MainLoop();
-  } catch (std::string &msg) {
-    std::cerr << msg << std::endl;
-    return 1;
-  }
+  //   Memory mem(mem_mgr);
+  //   // LoadImage(args.get("img"), mem.mem, args.get("-d"));
+  //   // // Start
+  //   // dbg.MainLoop();
+  // } catch (std::string &msg) {
+  //   std::cerr << msg << std::endl;
+  //   return 1;
+  // }
 
-  return monitor.IsExitStatusBad();
+  // return monitor.IsExitStatusBad();
 }
