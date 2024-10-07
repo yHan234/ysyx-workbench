@@ -54,9 +54,9 @@ int main(int argc, char *argv[]) {
 
   try {
     // Initialize
-    if (args["-b"] == true) {
-      dbg.SetBatchMode();
-    }
+    // if (args["-b"] == true) {
+    //   dbg.SetBatchMode();
+    // }
 
     // cpu.Reset(10);
 
