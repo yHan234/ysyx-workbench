@@ -54,13 +54,13 @@ int main(int argc, char *argv[]) {
 
   try {
     // Initialize
-    // if (args["-b"] == true) {
-    //   dbg.SetBatchMode();
-    // }
+    if (args["-b"] == true) {
+      dbg.SetBatchMode();
+    }
 
-    // cpu.Reset(10);
+    cpu.Reset(10);
 
-    // Memory mem(mem_mgr);
+    Memory mem(mem_mgr);
     // LoadImage(args.get("img"), mem.mem, args.get("-d"));
     // // Start
     // dbg.MainLoop();
