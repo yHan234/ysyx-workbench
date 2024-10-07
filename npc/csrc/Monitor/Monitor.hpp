@@ -4,8 +4,7 @@
 #include "MemoryManager/MemoryManager.hpp"
 #include "Utils/CircularBuffer.hpp"
 #include "Utils/disasm.hpp"
-#include <dlfcn.h>
-#include <iostream>
+#include <fstream>
 
 struct InstInfo {
   vaddr_t pc;
@@ -43,9 +42,12 @@ public:
   int ret; // valid when state == END
 
   bool IsExitStatusBad();
+  void OpenLogFile(const std::string &log_file);
   void LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, size_t img_size);
 
 private:
+  std::ofstream log;
+
   CPU &cpu;
   MemoryManager &mem_mgr;
 
@@ -54,14 +56,14 @@ private:
 
   // Instruction Trace
   void ITrace();
-  void PrintITrace();
+  void LogITrace();
 #ifdef ITRACE
   WriteOnlyCircularBuffer<InstInfo, BUF_SIZE> ibuf;
 #endif
 
   // Memory Trace
   void MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w_pre_data);
-  void PrintMTrace();
+  void LogMTrace();
 #ifdef MTRACE
   WriteOnlyCircularBuffer<MemInfo, BUF_SIZE> mbuf;
 #endif

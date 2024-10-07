@@ -2,7 +2,7 @@
 #define MEM_SIZE 0x8000000
 #define INITIAL_PC 0x80000000
 
-#define BUF_SIZE 32
+#define BUF_SIZE 128
 #define ITRACE
 #define MTRACE
 // #define DIFFTEST

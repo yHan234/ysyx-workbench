@@ -1,4 +1,6 @@
 #include "Monitor.hpp"
+#include <dlfcn.h>
+#include <iostream>
 
 std::string InstInfo::ToString() {
   return string_format("%#08x: %08x %s", pc, inst, disasm.c_str());
@@ -20,7 +22,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
     switch (state) {
     case State::END:
     case State::ABORT:
-      std::cout << "Program execution has ended. To restart the program, exit NEMU and run again." << std::endl;
+      std::cout << "Program execution has ended. To restart the program, exit and run again." << std::endl;
       return 1;
     default:
       state = State::RUNNING;
@@ -47,8 +49,8 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
       break;
     case State::END:
     case State::ABORT:
-      PrintITrace();
-      PrintMTrace();
+      LogITrace();
+      LogMTrace();
       if (state == State::ABORT) {
         std::cout << "ABORT" << std::endl;
       } else if (ret == 0) {
@@ -62,6 +64,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
 
   mem_mgr.trace_write = [&](bool succ, paddr_t addr, int len, word_t cur_data, word_t pre_data) {
     // 未开启内存读写错误检查，因为电路设计原因，经常有实际不需要的错误内存读写行为
+    // TODO: 修正电路设计
     // if (!succ) {
     //   state = State::ABORT;
     //   std::cerr << "Memory write failed. Check the last MTrace." << std::endl;
@@ -71,6 +74,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
 
   mem_mgr.trace_read = [&](bool succ, paddr_t addr, int len, word_t data) {
     // 未开启内存读写错误检查，因为电路设计原因，经常有实际不需要的错误内存读写行为
+    // TODO: 修正电路设计
     // if (!succ) {
     //   state = State::ABORT;
     //   std::cerr << "Memory read failed. Check the last MTrace." << std::endl;
@@ -84,6 +88,14 @@ bool Monitor::IsExitStatusBad() {
   return !good;
 }
 
+void Monitor::OpenLogFile(const std::string &log_file) {
+  // 没有关闭文件，程序退出自动关闭
+  log.open(log_file, std::ios_base::out);
+  if (!log.is_open()) {
+    throw string_format("Log file %s open failed.", log_file.c_str());
+  }
+}
+
 void Monitor::ITrace() {
 #ifdef ITRACE
   InstInfo info;
@@ -94,12 +106,17 @@ void Monitor::ITrace() {
 #endif
 }
 
-void Monitor::PrintITrace() {
+void Monitor::LogITrace() {
 #ifdef ITRACE
-  std::cout << "ITRACE:" << std::endl;
-  for (auto &info : ibuf) {
-    std::cout << info.ToString() << std::endl;
+  if (!log.is_open()) {
+    return;
   }
+
+  log << "ITRACE:" << '\n';
+  for (auto &info : ibuf) {
+    log << info.ToString() << '\n';
+  }
+  log << '\n';
 #endif
 }
 
@@ -112,12 +129,17 @@ void Monitor::MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w
 #endif
 }
 
-void Monitor::PrintMTrace() {
+void Monitor::LogMTrace() {
 #ifdef MTRACE
-  std::cout << "MTRACE:" << std::endl;
-  for (auto &info : mbuf) {
-    std::cout << info.ToString() << std::endl;
+  if (!log.is_open()) {
+    return;
   }
+
+  log << "MTRACE:" << '\n';
+  for (auto &info : mbuf) {
+    log << info.ToString() << '\n';
+  }
+  log << '\n';
 #endif
 }
 

@@ -37,10 +37,13 @@ int main(int argc, char *argv[]) {
   // Parse Arguments
   argparse::ArgumentParser args("npc");
   args.add_argument("img")
-      .help("Image file to execute.");
+      .help("IMAGE FILE to execute.");
   args.add_argument("-b", "--batch")
       .flag()
       .help("run with batch mode");
+  args.add_argument("-l", "--log")
+      .default_value("")
+      .help("output log to FILE");
   args.add_argument("-d", "--diff")
       .default_value("")
       .help("run DiffTest with reference REF_SO");
@@ -57,6 +60,9 @@ int main(int argc, char *argv[]) {
     // Initialize
     if (args["-b"] == true) {
       dbg.SetBatchMode();
+    }
+    if (!args.get("-l").empty()) {
+      monitor.OpenLogFile(args.get("-l"));
     }
     cpu.Reset(10);
     LoadImage(args.get("img"), mem.mem, args.get("-d"));
