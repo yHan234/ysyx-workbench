@@ -63,12 +63,15 @@ int main(int argc, char *argv[]) {
     if (args["-b"] == true) {
       dbg.SetBatchMode();
     }
+    if (!args.get("-l").empty()) {
+      monitor.OpenLogFile(args.get("-l"));
+    }
     cpu.Reset(10);
-    monitor.OpenLogFile(args.get("-l"));
     LoadImage(args.get("img"), mem.mem, args.get("-d"));
     // Start
     dbg.MainLoop();
   } catch (std::string &msg) {
+    // TODO: 异常重写
     std::cerr << msg << std::endl;
     return 1;
   }
