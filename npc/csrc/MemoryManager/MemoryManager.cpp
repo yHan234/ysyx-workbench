@@ -59,7 +59,6 @@ word_t MemoryManager::HostRead(void *addr, int len) {
     return *(uint32_t *)addr;
   default:
     throw "HostRead: bad len";
-    // return -1;
   }
 }
 
