@@ -12,8 +12,8 @@ void CPU::Reset(uint64_t n) {
   while (n--) {
     try {
       SingleCycle();
-    } catch (std::runtime_error &e) {
-      std::cerr << e.what() << std::endl;
+    } catch (std::string &s) {
+      std::cerr << s << std::endl;
     }
   }
   dut.rst = 0;
