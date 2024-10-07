@@ -136,4 +136,6 @@ module top(
         .in    ( rbus2   )
     );
 
+    always @(posedge clk) $display(pc);
+
 endmodule
