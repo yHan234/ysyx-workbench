@@ -54,12 +54,15 @@ int main(int argc, char *argv[]) {
   };
 
   try {
+    cpu.Reset(10);
+  } catch (std::exception &e) {
+  }
+
+  try {
     // Initialize
     if (args["-b"] == true) {
       dbg.SetBatchMode();
     }
-
-    cpu.Reset(10);
 
     LoadImage(args.get("img"), mem.mem, args.get("-d"));
     // Start
