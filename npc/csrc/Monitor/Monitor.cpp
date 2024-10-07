@@ -91,6 +91,9 @@ bool Monitor::IsExitStatusBad() {
 void Monitor::OpenLogFile(const std::string &log_file) {
   // 没有关闭文件，程序退出自动关闭
   log.open(log_file, std::ios_base::out);
+  if (!log.is_open()) {
+    std::cerr << "???????";
+  }
 }
 
 void Monitor::ITrace() {
