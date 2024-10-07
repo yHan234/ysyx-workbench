@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
     if (args["-b"] == true) {
       dbg.SetBatchMode();
     }
+    std::cerr << "rest" << std::endl;
     cpu.Reset(10);
     LoadImage(args.get("img"), mem.mem, args.get("-d"));
     // Start
