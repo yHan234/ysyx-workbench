@@ -22,14 +22,22 @@ $(SRC_AUTO_BIND): $(NXDC_FILES)
 # project source
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
-CSRCS += $(SRC_AUTO_BIND)
+# CSRCS += $(SRC_AUTO_BIND)
+
+# add csrc include path
+INC_PATH += $(abspath ./csrc)
+
+# Include all filelist.mk to merge file lists
+FILELIST_MK = $(shell find -L ./csrc -name "filelist.mk")
+include $(FILELIST_MK)
 
 # rules for NVBoard
 include $(NVBOARD_HOME)/scripts/nvboard.mk
 
 # rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" -g -fsanitize=address
+LDFLAGS += -lasan
 
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 	@rm -rf $(OBJ_DIR)
@@ -42,7 +50,7 @@ all: default
 
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	@$^
+	$(BIN) $(ARGS) $(IMG) -d $(REF)
 
 clean:
 	rm -rf $(BUILD_DIR)

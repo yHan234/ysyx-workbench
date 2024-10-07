@@ -43,6 +43,9 @@ static void mringbuf_write(char op, paddr_t addr, int len, word_t data) {
   if (addr < mtrace_begin || mtrace_end < addr) {
     return;
   }
+  if (cpu.pc == addr) {
+    return;
+  }
 
   mringbuf[mringbuf_wptr].pc = cpu.pc;
   mringbuf[mringbuf_wptr].op = op;
@@ -57,7 +60,6 @@ static void mringbuf_write(char op, paddr_t addr, int len, word_t data) {
 }
 
 void mringbuf_print() {
-  extern FILE *log_fp;
   if (mringbuf_size) {
     uint i = mringbuf_size == MRINGBUF_LEN ? mringbuf_wptr : 0;
     do {

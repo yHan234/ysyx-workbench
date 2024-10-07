@@ -236,13 +236,6 @@ void cpu_exec(uint64_t n) {
       log_write("==================== MTRACE ====================\n");
       log_write("\n");
 #endif
-#ifdef CONFIG_DTRACE
-      void dringbuf_print();
-      log_write("==================== DTRACE ====================\n");
-      dringbuf_print();
-      log_write("==================== DTRACE ====================\n");
-      log_write("\n");
-#endif
 #ifdef CONFIG_FTRACE
       log_write("==================== FTRACE ====================\n");
       if (fringbuf_size) {
