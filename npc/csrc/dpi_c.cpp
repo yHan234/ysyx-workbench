@@ -7,7 +7,6 @@ extern MemoryManager mem_mgr;
 extern CPU cpu;
 
 extern "C" int pmem_read(u_int32_t addr) {
-  std::cerr << "pmem_read" << std::endl;
   return mem_mgr.PAddrRead(addr & ~0x3u, 4);
 }
 
@@ -22,7 +21,6 @@ extern "C" void pmem_write(u_int32_t addr, u_int32_t data, char mask) {
 }
 
 extern "C" int get_inst() {
-  std::cerr << "get_inst" << std::endl;
   return mem_mgr.PAddrRead(cpu.GetPC(), 4);
 }
 
