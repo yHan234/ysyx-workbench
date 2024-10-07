@@ -13,7 +13,6 @@ MemOp:
 //! 均使用小端序
 
 module DataMem (
-    input rst,
     input [31:0] addr,
 
     // read
@@ -105,15 +104,16 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
     })
 );
 
-always @(*) begin
-    // if (!rst && MemRd) begin
-    //     $display("reset", rst);
-    //     read = pmem_read(aligned_addr);
-    // end else begin
-    //     read = 0;
-    // end
+always @(posedge RdClk) begin
+    if (MemRd) begin
+        read = pmem_read(aligned_addr);
+    end else begin
+        read = 0;
+    end
+end
 
-    if (!rst && MemWr) begin
+always @(posedge WrClk) begin
+    if (MemWr) begin
         pmem_write(aligned_addr, write, write_mask);
     end
 end

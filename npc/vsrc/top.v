@@ -126,7 +126,6 @@ module top(
 
     wire [31:0] MemOut;
     DataMem data_mem(
-        .rst   ( rst     ),
         .addr  ( ALUout  ),
         .RdClk ( clk     ),
         .out   ( MemOut  ),
@@ -136,7 +135,5 @@ module top(
         .MemOp ( MemOp   ),
         .in    ( rbus2   )
     );
-
-    always @(posedge clk) $display(rst, MemWr);
 
 endmodule
