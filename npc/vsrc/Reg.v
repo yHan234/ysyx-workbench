@@ -7,7 +7,6 @@ module Reg #(WIDTH = 1, RESET_VAL = 0) (
 );
   always @(posedge clk) begin
     if (rst) dout <= RESET_VAL;
-    else if (wen) dout <= RESET_VAL;
-    $display(123);
+    else if (wen) dout <= din;
   end
 endmodule

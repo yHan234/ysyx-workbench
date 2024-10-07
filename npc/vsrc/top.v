@@ -19,13 +19,9 @@ module top(
             .rst  ( rst    ),
             .din  ( NextPC ),
             .dout ( pc     ),
-            .wen  ( !rst   )
+            .wen  ( 1'b1   )
         );
     assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
-
-    always @(*) begin
-        $display(clk, rst, PCAsrc, imm, PCBsrc, pc, rbus1);
-    end
 
     // GPR
 
