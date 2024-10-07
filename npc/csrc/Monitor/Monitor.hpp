@@ -26,6 +26,7 @@ struct MemInfo {
   vaddr_t addr;
   int len;
   word_t data;
+  word_t w_pre_data;
 
   std::string ToString();
 };
@@ -64,7 +65,7 @@ private:
 #endif
 
   // Memory Trace
-  void MTrace(bool is_write, vaddr_t addr, int len, word_t data);
+  void MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w_pre_data);
   void PrintMTrace();
 #ifdef MTRACE
   WriteOnlyCircularBuffer<MemInfo, BUF_SIZE> mbuf;

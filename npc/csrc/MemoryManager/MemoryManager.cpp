@@ -7,30 +7,37 @@ void MemoryManager::Map(paddr_t begin, paddr_t end, callback_t callback, byte *h
   maps.push_back({begin, end, callback, host_begin});
 }
 
-void MemoryManager::PAddrWrite(paddr_t paddr, int len, word_t data) {
+void MemoryManager::PAddrWrite(paddr_t addr, int len, word_t data) {
+  bool succ = false; // for trace
+  word_t pre_data;   // for trace
   for (const auto &[b, e, callback, hbegin] : maps) {
-    if (paddr < b || e <= paddr) {
+    if (addr < b || e <= addr) {
       continue;
     }
-    uint32_t offset = paddr - b;
+    succ = true; // 假设 HostRead HostWrite 不会有问题
+    uint32_t offset = addr - b;
     callback(offset, len, true);
+    pre_data = HostRead(hbegin + offset, len);
     HostWrite(hbegin + offset, len, data);
-    return;
+    break;
   }
-  throw string_format("PAddrWrite: addr %#lx out of bound", paddr);
+  trace_write(succ, addr, len, data, pre_data);
 }
 
-word_t MemoryManager::PAddrRead(paddr_t paddr, int len) {
+word_t MemoryManager::PAddrRead(paddr_t addr, int len) {
+  bool succ = false; // for trace
+  word_t data;       // for trace
   for (const auto &[b, e, callback, hbegin] : maps) {
-    if (paddr < b || e <= paddr) {
+    if (addr < b || e <= addr) {
       continue;
     }
-    uint32_t offset = paddr - b;
+    succ = true; // 假设 HostRead 不会有问题
+    uint32_t offset = addr - b;
     callback(offset, len, true);
-    word_t data = HostRead(hbegin + offset, len);
+    data = HostRead(hbegin + offset, len);
     return data;
   }
-  throw string_format("PAddrRead: addr %#lx out of bound", paddr);
+  trace_read(succ, addr, len, data);
 }
 
 bool MemoryManager::CheckOverlap(paddr_t begin, paddr_t end) {
@@ -52,7 +59,7 @@ word_t MemoryManager::HostRead(void *addr, int len) {
     return *(uint32_t *)addr;
   default:
     throw "HostRead: bad len";
-    return -1;
+    // return -1;
   }
 }
 

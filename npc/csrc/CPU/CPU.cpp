@@ -1,18 +1,15 @@
 #include "CPU.hpp"
-#include <iostream>
+
 void CPU::SingleCycle() {
   dut.clk = 0;
-    std::cerr << "eval" << std::endl;
   dut.eval();
   dut.clk = 1;
-    std::cerr << "eval" << std::endl;
   dut.eval();
 }
 
 void CPU::Reset(uint64_t n) {
   dut.rst = 1;
   while (n--) {
-    std::cerr << n << std::endl;
     SingleCycle();
   }
   dut.rst = 0;

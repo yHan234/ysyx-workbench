@@ -1,11 +1,15 @@
 #include "Monitor.hpp"
 
 std::string InstInfo::ToString() {
-  return string_format("0x%08x: %08x %s", pc, inst, disasm.c_str());
+  return string_format("%#08x: %08x %s", pc, inst, disasm.c_str());
 }
 
 std::string MemInfo::ToString() {
-  return string_format("0x%08x: %08x %d %s %08x", pc, addr, len, is_write ? "<-" : "->", data);
+  if (is_write) {
+    return string_format("%#08x: %08x [%0*x => %0*x]", pc, addr, len * 2, w_pre_data, len * 2, data);
+  } else {
+    return string_format("%#08x: %08x [%0*x]", pc, addr, len * 2, data);
+  }
 }
 
 Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
@@ -56,12 +60,20 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
     return 0;
   };
 
-  mem_mgr.trace_read = [&](paddr_t addr, int len, word_t data) {
-    MTrace(0, addr, len, data);
+  mem_mgr.trace_write = [&](bool succ, paddr_t addr, int len, word_t cur_data, word_t pre_data) {
+    if (!succ) {
+      state = State::ABORT;
+      std::cerr << "Memory write failed. Check the last MTrace." << std::endl;
+    }
+    MTrace(1, addr, len, cur_data, pre_data);
   };
 
-  mem_mgr.trace_write = [&](paddr_t addr, int len, word_t data) {
-    MTrace(1, addr, len, data);
+  mem_mgr.trace_read = [&](bool succ, paddr_t addr, int len, word_t data) {
+    if (!succ) {
+      state = State::ABORT;
+      std::cerr << "Memory read failed. Check the last MTrace." << std::endl;
+    }
+    MTrace(0, addr, len, data, 0);
   };
 }
 
@@ -89,15 +101,12 @@ void Monitor::PrintITrace() {
 #endif
 }
 
-void Monitor::MTrace(bool is_write, vaddr_t addr, int len, word_t data) {
+void Monitor::MTrace(bool is_write, vaddr_t addr, int len, word_t data, word_t w_pre_data) {
 #ifdef MTRACE
   if (!is_write && addr == pc) { // 取指令不记录
     return;
   }
-  if (!is_write) { // 读取不记录，因为设计的电路中每个周期都会读取一次，不论是否有用
-    return;
-  }
-  mbuf.Write({is_write, pc, addr, len, data});
+  mbuf.Write({is_write, pc, addr, len, data, w_pre_data});
 #endif
 }
 
