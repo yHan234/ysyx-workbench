@@ -17,10 +17,10 @@ void MemoryManager::PAddrWrite(paddr_t addr, int len, word_t data) {
     }
     succ = true; // 假设 HostRead HostWrite 不会有问题
     uint32_t offset = addr - b;
-    callback(offset, len, true);
     pre_data = HostRead(hbegin + offset, len);
     HostWrite(hbegin + offset, len, data);
     cur_data = HostRead(hbegin + offset, len); // 再读一遍的原因是 data 与长度可能不匹配
+    callback(offset, len, true);
     break;
   }
   trace_write(succ, addr, len, cur_data, pre_data);
