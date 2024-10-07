@@ -8,6 +8,6 @@ public:
   Memory(MemoryManager &mgr);
   ~Memory();
 
-  // public 因为方便 main.cpp:LoadImage
+  // public 为了方便 main.cpp:LoadImage
   byte *mem;
 };
