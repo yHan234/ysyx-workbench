@@ -13,6 +13,7 @@ MemOp:
 //! 均使用小端序
 
 module DataMem (
+    input rst,
     input [31:0] addr,
 
     // read
@@ -105,7 +106,7 @@ MuxKey #(3, 2, 40) mux_mem_write_byte2(
 );
 
 always @(*) begin
-        // $display("234132413");
+        $display("rst: ", rst);
     if (MemRd) begin
         $display("MemRd:", MemRd);
         read = pmem_read(aligned_addr);

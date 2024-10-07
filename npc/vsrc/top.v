@@ -126,6 +126,7 @@ module top(
 
     wire [31:0] MemOut;
     DataMem data_mem(
+        .rst   ( rst     ),
         .addr  ( ALUout  ),
         .RdClk ( clk     ),
         .out   ( MemOut  ),
