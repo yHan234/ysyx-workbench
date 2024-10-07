@@ -4,8 +4,8 @@ void CPU::SingleCycle() {
   dut.clk = 0;
     std::cerr << dut.clk << std::endl;
   dut.eval();
-    std::cerr << dut.clk << std::endl;
   dut.clk = 1;
+    std::cerr << dut.clk << std::endl;
   dut.eval();
 }
 
