@@ -1,16 +1,16 @@
 #include "Debugger.hpp"
 
-#define TRY_STRING_TO_UL(str, res, name)        \
-  do {                                          \
-    try {                                       \
-      res = std::stoul(str, nullptr, 0);        \
-    } catch (std::invalid_argument const &ex) { \
-      std::cout << "invalid " name << '\n';     \
-      return 0;                                 \
-    } catch (std::out_of_range const &ex) {     \
-      std::cout << "too big " name << '\n';     \
-      return 0;                                 \
-    }                                           \
+#define TRY_STRING_TO_UL(str, res, name)         \
+  do {                                           \
+    try {                                        \
+      res = std::stoul(str, nullptr, 0);         \
+    } catch (std::invalid_argument const &ex) {  \
+      std::cout << "invalid " name << std::endl; \
+      return 0;                                  \
+    } catch (std::out_of_range const &ex) {      \
+      std::cout << "too big " name << std::endl; \
+      return 0;                                  \
+    }                                            \
   } while (0)
 
 Debugger::Command::Command(const char *name,
@@ -75,7 +75,7 @@ void Debugger::MainLoop() {
     }
 
     if (!found) {
-      std::cout << "Unknown command '" << cmd << "'\n";
+      std::cout << "Unknown command '" << cmd << "'" << std::endl;
     }
   }
 }

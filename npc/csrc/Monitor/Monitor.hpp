@@ -4,8 +4,7 @@
 #include "MemoryManager/MemoryManager.hpp"
 #include "Utils/CircularBuffer.hpp"
 #include "Utils/disasm.hpp"
-#include <dlfcn.h>
-#include <iostream>
+#include <fstream>
 
 struct InstInfo {
   vaddr_t pc;
@@ -42,10 +41,14 @@ public:
   State state;
   int ret; // valid when state == END
 
+
   bool IsExitStatusBad();
+  void OpenLogFile(const std::string &log_file);
   void LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, size_t img_size);
 
 private:
+  std::ofstream log;
+
   CPU &cpu;
   MemoryManager &mem_mgr;
 

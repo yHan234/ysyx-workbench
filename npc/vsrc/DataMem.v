@@ -110,9 +110,7 @@ always @(*) begin
     end else begin
         read = 0;
     end
-end
 
-always @(posedge WrClk) begin
     if (MemWr) begin
         pmem_write(aligned_addr, write, write_mask);
     end

@@ -1,6 +1,5 @@
 #include "CPU/CPU.hpp"
 #include "Debugger/Debugger.hpp"
-#include "Device/devices.hpp"
 #include "Memory/Memory.hpp"
 #include "Monitor/Monitor.hpp"
 #include "Utils/argparse.hpp"
@@ -10,7 +9,6 @@
 
 MemoryManager mem_mgr;
 Memory mem(mem_mgr);
-Serial serial(mem_mgr);
 CPU cpu;
 Monitor monitor(cpu, mem_mgr);
 Debugger dbg(cpu, mem_mgr, monitor);
@@ -39,10 +37,13 @@ int main(int argc, char *argv[]) {
   // Parse Arguments
   argparse::ArgumentParser args("npc");
   args.add_argument("img")
-      .help("Image file to execute.");
+      .help("IMAGE FILE to execute.");
   args.add_argument("-b", "--batch")
       .flag()
       .help("run with batch mode");
+  args.add_argument("-l", "--log")
+      .default_value("")
+      .help("output log to FILE");
   args.add_argument("-d", "--diff")
       .default_value("")
       .help("run DiffTest with reference REF_SO");
@@ -61,6 +62,7 @@ int main(int argc, char *argv[]) {
       dbg.SetBatchMode();
     }
     cpu.Reset(10);
+    monitor.OpenLogFile(args.get("-l"));
     LoadImage(args.get("img"), mem.mem, args.get("-d"));
     // Start
     dbg.MainLoop();
