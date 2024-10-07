@@ -35,9 +35,9 @@ word_t MemoryManager::PAddrRead(paddr_t addr, int len) {
     uint32_t offset = addr - b;
     callback(offset, len, true);
     data = HostRead(hbegin + offset, len);
-    return data;
   }
   trace_read(succ, addr, len, data);
+  return data;
 }
 
 bool MemoryManager::CheckOverlap(paddr_t begin, paddr_t end) {
