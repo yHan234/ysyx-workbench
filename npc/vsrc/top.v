@@ -23,8 +23,8 @@ module top(
         );
     assign NextPC = (PCAsrc == 0 ? 4 : imm) + (PCBsrc == 0 ? pc : rbus1);
 
-    // always @(*) $display("clk", clk, "rst", rst);
-    always @(posedge clk) $display("clk", clk, "rst", rst);
+    always @(*) $display("clk", clk);
+    // always @(posedge clk) $display("clk", clk, "rst", rst);
 
     // GPR
 
