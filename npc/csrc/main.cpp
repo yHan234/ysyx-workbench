@@ -1,5 +1,6 @@
 #include "CPU/CPU.hpp"
 #include "Debugger/Debugger.hpp"
+#include "Device/devices.hpp"
 #include "Memory/Memory.hpp"
 #include "Monitor/Monitor.hpp"
 #include "Utils/argparse.hpp"
@@ -9,6 +10,7 @@
 
 MemoryManager mem_mgr;
 Memory mem(mem_mgr);
+Serial serial(mem_mgr);
 CPU cpu;
 Monitor monitor(cpu, mem_mgr);
 Debugger dbg(cpu, mem_mgr, monitor);
