@@ -31,6 +31,7 @@ static inline const char* reg_name(int idx) {
 }
 
 static inline int check_csr_idx(int idx) {
+  printf("csr idx = %x\n", idx);
   IFDEF(CONFIG_RT_CHECK, assert(idx == 0x341 || idx == 0x342 || idx == 0x343));
   return idx;
 }
