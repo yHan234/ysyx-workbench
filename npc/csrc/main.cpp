@@ -1,81 +1,29 @@
-#include "CPU/CPU.hpp"
-#include "Debugger/Debugger.hpp"
-#include "Device/devices.hpp"
-#include "Memory/Memory.hpp"
-#include "Monitor/Monitor.hpp"
-#include "Utils/argparse.hpp"
-#include <ctime>
-#include <fstream>
-#include <iostream>
+#include <nvboard.h>
+#include <Vtop.h>
 
-MemoryManager mem_mgr;
-Memory mem(mem_mgr);
-Serial serial(mem_mgr);
-Timer timer(mem_mgr);
-CPU cpu;
-Monitor monitor(cpu, mem_mgr);
-Debugger dbg(cpu, mem_mgr, monitor);
+static Vtop dut;
 
-size_t img_size;
+void nvboard_bind_all_pins(Vtop* top);
 
-void LoadImage(const std::string &path, char *addr, const std::string &ref_so_path) {
-  std::ifstream file(path, std::ios::binary | std::ios::ate);
-  if (!file.is_open()) {
-    throw string_format("Failed to open image file: %s", path);
-  }
-
-  img_size = file.tellg();
-  if (img_size > MEM_SIZE) {
-    throw std::string("Image file is too big.");
-  }
-
-  file.seekg(0, std::ios::beg);
-  file.read(addr, img_size);
-  file.close();
-
-  monitor.LoadDiffTestRef(ref_so_path, addr, img_size);
+static void single_cycle() {
+  dut.clk = 0; dut.eval();
+  dut.clk = 1; dut.eval();
 }
 
-int main(int argc, char *argv[]) {
-  // Parse Arguments
-  argparse::ArgumentParser args("npc");
-  args.add_argument("img")
-      .help("IMAGE FILE to execute.");
-  args.add_argument("-b", "--batch")
-      .flag()
-      .help("run with batch mode");
-  args.add_argument("-l", "--log")
-      .default_value("")
-      .help("output log to FILE");
-  args.add_argument("-d", "--diff")
-      .default_value("")
-      .help("run DiffTest with reference REF_SO");
+static void reset(int n) {
+  dut.rst = 1;
+  while (n -- > 0) single_cycle();
+  dut.rst = 0;
+}
 
-  try {
-    args.parse_args(argc, argv);
-  } catch (const std::exception &err) {
-    std::cerr << err.what() << std::endl;
-    std::cerr << args;
-    return 1;
-  };
+int main() {
+  nvboard_bind_all_pins(&dut);
+  nvboard_init();
 
-  try {
-    // Initialize
-    if (args["-b"] == true) {
-      dbg.SetBatchMode();
-    }
-    if (!args.get("-l").empty()) {
-      monitor.OpenLogFile(args.get("-l"));
-    }
-    cpu.Reset(10);
-    LoadImage(args.get("img"), mem.mem, args.get("-d"));
-    // Start
-    dbg.MainLoop();
-  } catch (std::string &msg) {
-    // TODO: 异常重写
-    std::cerr << msg << std::endl;
-    return 1;
+  reset(10);
+
+  while(1) {
+    nvboard_update();
+    single_cycle();
   }
-
-  return monitor.IsExitStatusBad();
 }
