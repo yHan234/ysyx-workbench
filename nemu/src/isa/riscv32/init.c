@@ -34,7 +34,7 @@ static void restart() {
   cpu.gpr[0] = 0;
 
   /* 设置好 CSR */
-  cpu.csr.mstatus = 0x1800; // 为了让DiffTest机制正确工作
+  cpu.csr[MSTATUS] = 0x1800; // 为了让DiffTest机制正确工作
 }
 
 void init_isa() {

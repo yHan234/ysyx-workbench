@@ -30,17 +30,5 @@ static inline const char* reg_name(int idx) {
   return regs[check_reg_idx(idx)];
 }
 
-static inline int check_csr_idx(int idx) {
-  IFDEF(CONFIG_RT_CHECK, assert(idx == 0x300 || idx == 0x305 || idx == 0x341 || idx == 0x342));
-  return idx;
-}
-
-#define csr(idx) *(                                \
-  check_csr_idx(idx) == 0x300 ? &cpu.csr.mstatus : \
-                idx  == 0x305 ? &cpu.csr.mtvec   : \
-                idx  == 0x341 ? &cpu.csr.mepc    : \
-                idx  == 0x342 ? &cpu.csr.mcause  : \
-                NULL                               \
-)
-
+#define csr(idx) (cpu.csr[idx])
 #endif
