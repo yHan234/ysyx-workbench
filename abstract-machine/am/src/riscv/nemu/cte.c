@@ -16,6 +16,7 @@ Context* __am_irq_handle(Context *c) {
     assert(c != NULL);
     printf("mepc: %x\n", c->mepc);
     printf("sp: %x\n", c->gpr[2]);
+    printf("a0: %x\n", c->gpr[10]);
   }
 
   return c;
