@@ -7,7 +7,7 @@ static Context* (*user_handler)(Event, Context*) = NULL;
 static inline void mepc_add4() {
   uint32_t mepc;
   asm volatile("csrr %0, mepc" : "=r"(mepc));
-  asm volatile("csrw mepc, %0" : : "r" (mepc));
+  asm volatile("csrw mepc, %0" : : "r" (mepc + 4));
 }
 
 Context* __am_irq_handle(Context *c) {
