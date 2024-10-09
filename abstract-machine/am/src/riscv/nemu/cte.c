@@ -7,6 +7,7 @@ static Context* (*user_handler)(Event, Context*) = NULL;
 static inline void mepc_add4() {
   static uint32_t mepc;
   asm volatile("csrr %0, mepc" : "=r"(mepc));
+  printf("%d\n", mepc);
   mepc += 4;
   asm volatile("csrw mepc, %0" : : "r" (mepc));
 }
