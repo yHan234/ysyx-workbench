@@ -32,14 +32,14 @@ static inline const char* reg_name(int idx) {
 
 static inline int check_csr_idx(int idx) {
   printf("csr idx = %x\n", idx);
-  IFDEF(CONFIG_RT_CHECK, assert(idx == 0x341 || idx == 0x342 || idx == 0x343));
+  IFDEF(CONFIG_RT_CHECK, assert(idx == 0x305 || idx == 0x341 || idx == 0x342));
   return idx;
 }
 
 #define csr(idx) *(                               \
-  check_csr_idx(idx) == 0x341 ? &cpu.csr.mepc   : \
+  check_csr_idx(idx) == 0x305 ? &cpu.csr.mtvec  : \
+                idx  == 0x341 ? &cpu.csr.mepc   : \
                 idx  == 0x342 ? &cpu.csr.mcause : \
-                idx  == 0x343 ? &cpu.csr.mtvec  : \
                 NULL                              \
 )
 
