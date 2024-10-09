@@ -4,19 +4,11 @@
 
 static Context* (*user_handler)(Event, Context*) = NULL;
 
-static inline void mepc_add4() {
-  static uint32_t mepc;
-  asm volatile("csrr %0, mepc" : "=r"(mepc));
-  printf("%d\n", mepc);
-  mepc += 4;
-  asm volatile("csrw mepc, %0" : : "r" (mepc));
-}
-
 Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
-      case 0xb: ev.event = EVENT_YIELD; mepc_add4(); break;
+      case 0xb: ev.event = EVENT_YIELD; c->mepc += 4; break;
       default:  ev.event = EVENT_ERROR;              break;
     }
 
