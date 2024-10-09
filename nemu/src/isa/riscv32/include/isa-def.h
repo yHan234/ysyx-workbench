@@ -20,9 +20,9 @@
 
 typedef struct {
   word_t mstatus;
+  word_t mtvec;
   vaddr_t mepc;
   word_t mcause;
-  word_t mtvec;
 } riscv32_CSR;
 
 typedef struct {
