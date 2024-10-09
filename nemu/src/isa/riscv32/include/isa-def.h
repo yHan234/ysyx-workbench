@@ -19,10 +19,10 @@
 #include <common.h>
 
 enum CSR {
-  MSTATUS = 0x300,
-  MTVEC   = 0x305,
-  MEPC    = 0x341,
-  MCAUSE  = 0x342,
+  CSR_MSTATUS = 0x300,
+  CSR_MTVEC   = 0x305,
+  CSR_MEPC    = 0x341,
+  CSR_MCAUSE  = 0x342,
 };
 
 typedef struct {
