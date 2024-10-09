@@ -62,9 +62,9 @@ __am_asm_trap:
   mv sp, a0 # 将 sp 更改为 __am_irq_handle 返回的 Context* 中的 sp
 
 #   LOAD t1, OFFSET_STATUS(sp)
-#   LOAD t2, OFFSET_EPC(sp)
+  LOAD t2, OFFSET_EPC(sp)
 #   csrw mstatus, t1
-#   csrw mepc, t2
+  csrw mepc, t2
 
   MAP(REGS, POP)
 
