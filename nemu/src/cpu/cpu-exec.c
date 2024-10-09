@@ -36,7 +36,7 @@ void check_watchpoints();
 // ITRACE
 
 #ifdef CONFIG_ITRACE
-#define IRINGBUF_LEN 1024
+#define IRINGBUF_LEN 128
 #define IRINGBUF_MNEMONIC_LEN 8
 #define IRINGBUF_OP_STR_LEN 64
 static struct {
