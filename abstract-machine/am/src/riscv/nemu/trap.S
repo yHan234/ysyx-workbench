@@ -57,7 +57,7 @@ __am_asm_trap:
   or t1, t1, a0
   csrw mstatus, t1
 
-  mv a0, sp # 将上面存储的内容作为 Context * 参数传递给 __am_irq_handle
+  mv a0, sp # 将上面存储的内容作为 Context* 参数传递给 __am_irq_handle
   call __am_irq_handle
 
   LOAD t1, OFFSET_STATUS(sp)
