@@ -38,9 +38,9 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   // kstack 中写入一个新的 Context
   // 其中 mepc 为 entry
   // sp 指向 Context 末尾
-  Context *p = (Context *)kstack.start;
+  Context *p = kstack.end - sizeof(Context);
   p->mepc = (uintptr_t)entry;
-  p->gpr[2] /*sp*/ = (uintptr_t)p + sizeof(Context);
+  p->gpr[2] /*sp*/ = (uintptr_t)p;
   return p;
 }
 
