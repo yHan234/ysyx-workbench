@@ -32,6 +32,9 @@ static void restart() {
 
   /* The zero register is always 0. */
   cpu.gpr[0] = 0;
+
+  /* Set CSR */
+  cpu.csr[CSR_MSTATUS] = 0x1800; // 为了让DiffTest机制正确工作
 }
 
 void init_isa() {
