@@ -260,6 +260,13 @@ void cpu_exec(uint64_t n) {
       log_write("==================== FTRACE ====================\n");
       log_write("\n");
 #endif
+#ifdef CONFIG_ETRACE
+      log_write("==================== ETRACE ====================\n");
+      void eringbuf_print();
+      eringbuf_print();
+      log_write("==================== ETRACE ====================\n");
+      log_write("\n");
+#endif
 
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
