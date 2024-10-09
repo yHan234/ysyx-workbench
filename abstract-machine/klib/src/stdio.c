@@ -114,7 +114,7 @@ static int format(output_func_t output_func, void *arg, const char *fmt, va_list
         break;
       }
       case 'x': {
-        written += format_x(output_func, arg, va_arg(args, unsigned long long));
+        written += format_x(output_func, arg, va_arg(args, unsigned long));
         break;
       }
       default: // 不支持的格式符，直接输出原字符
