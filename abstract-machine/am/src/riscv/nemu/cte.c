@@ -37,6 +37,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   // sp 指向 Context 末尾
   Context *p = kstack.end - sizeof(Context);
   p->mepc = (uintptr_t)entry - 4;
+  printf("%x\n", p->mepc);
   return p;
 }
 
