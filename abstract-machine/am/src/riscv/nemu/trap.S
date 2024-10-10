@@ -59,9 +59,9 @@ __am_asm_trap:
 
   mv a0, sp # 将上面存储的内容作为 Context* 参数传递给 __am_irq_handle
   call __am_irq_handle
-  mv sp, a0 # 将 sp 更改为 __am_irq_handle 返回的 Context* 中的 sp
+  mv sp, a0 # 将 sp 更改为 __am_irq_handle 的返回值
 
-# 沿用以前的 mstatus，因为不考虑 mstatus 的变更
+# 沿用之前的 mstatus
 # LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)
 # csrw mstatus, t1
