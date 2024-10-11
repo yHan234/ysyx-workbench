@@ -68,6 +68,15 @@ MuxKey #(2, 1, 20) mux_func7_00100_101 (
 		1'b1, 20'b00010000000000011101
 	})
 );
+wire [19:0] mux_func7_01100_000_out;
+MuxKey #(2, 1, 20) mux_func7_01100_000 (
+	.key(func7[5:5]),
+	.out(mux_func7_01100_000_out),
+	.lut({
+		1'b0, 20'b00010000000000000000,
+		1'b1, 20'b00010000000000001000
+	})
+);
 wire [19:0] mux_func3_01100_out;
 MuxKey #(8, 3, 20) mux_func3_01100 (
 	.key(func3),
@@ -81,15 +90,6 @@ MuxKey #(8, 3, 20) mux_func3_01100 (
 		3'b101, mux_func7_01100_101_out,
 		3'b110, mux_func7_01100_110_out,
 		3'b111, mux_func7_01100_111_out
-	})
-);
-wire [19:0] mux_func7_01100_000_out;
-MuxKey #(2, 1, 20) mux_func7_01100_000 (
-	.key(func7[5:5]),
-	.out(mux_func7_01100_000_out),
-	.lut({
-		1'b0, 20'b00010000000000000000,
-		1'b1, 20'b00010000000000001000
 	})
 );
 wire [19:0] mux_func7_01100_001_out;
