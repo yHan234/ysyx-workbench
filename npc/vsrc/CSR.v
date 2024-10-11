@@ -4,6 +4,7 @@ module CSR (
     // write port
     input wr_clk,
     input wr_en,
+    input wr_set,
     input [11:0] wr_reg,
     input [31:0] wr_bus,
 
@@ -34,13 +35,22 @@ module CSR (
       mepc    = 0;
       mcause  = 0;
     end else if (wr_en) begin
-      case (wr_reg)
-        12'h300: mstatus = wr_bus;
-        12'h305: mtvec = wr_bus;
-        12'h341: mepc = wr_bus;
-        12'h342: mcause = wr_bus;
-        default: ;
-      endcase
+      if (wr_set)
+        case (wr_reg)
+          12'h300: mstatus |= wr_bus;
+          12'h305: mtvec |= wr_bus;
+          12'h341: mepc |= wr_bus;
+          12'h342: mcause |= wr_bus;
+          default: ;
+        endcase
+      else
+        case (wr_reg)
+          12'h300: mstatus = wr_bus;
+          12'h305: mtvec = wr_bus;
+          12'h341: mepc = wr_bus;
+          12'h342: mcause = wr_bus;
+          default: ;
+        endcase
     end
   end
 

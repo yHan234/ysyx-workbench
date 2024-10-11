@@ -7,6 +7,7 @@ module top (
 
   wire [31:0] pc_next, pc  /* verilator public */;
   wire pc_src_a, pc_src_b;
+
   BranchCond bc (
       .branch  (branch),
       .less    (less),
@@ -30,9 +31,9 @@ module top (
   GPR gpr (
       .rst     (rst),
       .wr_clk  (clk),
-      .wr_en   (reg_wr_en),
+      .wr_en   (gpr_wr_en),
       .wr_reg  (rd),
-      .wr_bus  (mem2reg ? mem_out : alu_out),
+      .wr_bus  (gpr_wr_src == 2'b00 ? alu_out : gpr_wr_src == 2'b01 ? mem_out : csr_bus),
       .rd_reg_a(rs1),
       .rd_bus_a(rbus1),
       .rd_reg_b(rs2),
@@ -51,7 +52,6 @@ module top (
 
   // Instruction Decode
 
-  wire [ 2:0] inst_type;
   wire [ 6:0] op;
   wire [ 2:0] funct3;
   wire [ 6:0] funct7;
@@ -75,30 +75,35 @@ module top (
 
   // Control Signal Generate
 
-  wire       reg_wr_en;
-  wire       alu_src_a;
-  wire [1:0] alu_src_b;
-  wire [3:0] alu_ctr;
+  wire [2:0] inst_type;
+  wire       gpr_wr_en;
+  wire [1:0] gpr_wr_src;
   wire [2:0] branch;
-  wire       mem2reg;
   wire       mem_rd_en;
   wire       mem_wr_en;
   wire [2:0] mem_op;
+  wire       alu_src_a;
+  wire [1:0] alu_src_b;
+  wire [3:0] alu_ctr;
+  wire       csr_wr_en;
+  wire       csr_wr_set;
 
   CSG csg (
-      .op       (op),
-      .funct3   (funct3),
-      .funct7   (funct7),
-      .inst_type(inst_type),
-      .reg_wr_en(reg_wr_en),
-      .alu_src_a(alu_src_a),
-      .alu_src_b(alu_src_b),
-      .alu_ctr  (alu_ctr),
-      .branch   (branch),
-      .mem2reg  (mem2reg),
-      .mem_rd_en(mem_rd_en),
-      .mem_wr_en(mem_wr_en),
-      .mem_op   (mem_op)
+      .op        (op),
+      .funct3    (funct3),
+      .funct7    (funct7),
+      .inst_type (inst_type),
+      .gpr_wr_en (gpr_wr_en),
+      .gpr_wr_src(gpr_wr_src),
+      .branch    (branch),
+      .mem_rd_en (mem_rd_en),
+      .mem_wr_en (mem_wr_en),
+      .mem_op    (mem_op),
+      .alu_src_a (alu_src_a),
+      .alu_src_b (alu_src_b),
+      .alu_ctr   (alu_ctr),
+      .csr_wr_en (csr_wr_en),
+      .csr_wr_set(csr_wr_set)
   );
 
 
@@ -119,6 +124,7 @@ module top (
   // Data Memory
 
   wire [31:0] mem_out;
+
   DataMem data_mem (
       .addr  (alu_out),
       .rd_clk(clk),
@@ -128,6 +134,21 @@ module top (
       .wr_en (mem_wr_en),
       .op    (mem_op),
       .in    (rbus2)
+  );
+
+  // CSR
+
+  wire [31:0] csr_bus;
+
+  CSR csr (
+      .rst   (rst),
+      .wr_clk(clk),
+      .wr_en (csr_wr_en),
+      .wr_set(csr_wr_set),
+      .wr_reg(imm[11:0]),
+      .wr_bus(rbus1),
+      .rd_reg(imm[11:0]),
+      .rd_bus(csr_bus)
   );
 
 endmodule
