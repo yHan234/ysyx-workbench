@@ -13,50 +13,47 @@ ALUctr[3]	ALUctr[2:0] 	ALU操作
 ×	        111	            选择逻辑与输出
 */
 
-module ALU(
-        input [31:0] A,
-        input [31:0] B,
-        input [3:0] ctr,
-        output [31:0] out,
-        output Less,
-        output Zero
-    );
+module ALU (
+    input [31:0] a,
+    input [31:0] b,
+    input [3:0] ctr,
+    output [31:0] out,
+    output less,
+    output zero
+);
 
-    assign Less = ctr[3] ? A < B : $signed(A) < $signed(B);
-    assign Zero = A == B;
+  assign less = ctr[3] ? a < b : $signed(a) < $signed(b);
+  assign zero = a == b;
 
-    wire [31:0] adder_out;
-    MuxKey #(2, 1, 32) mux_adder (
-        .out(adder_out),
-        .key(ctr[3]),
-        .lut({
-            1'b0, A + B,
-            1'b1, A - B
-        })
-    );
+  wire [31:0] adder_out;
+  MuxKey #(2, 1, 32) mux_adder (
+      .out(adder_out),
+      .key(ctr[3]),
+      .lut({1'b0, a + b, 1'b1, a - b})
+  );
 
-    wire [31:0] shifter_out;
-    BarrelShifter shifter(
-        .la(ctr[3]),
-        .lr(ctr[2]),
-        .shamt(B[4:0]),
-        .in(A),
-        .out(shifter_out)
-    );
+  wire [31:0] shifter_out;
+  BarrelShifter shifter (
+      .la(ctr[3]),
+      .lr(ctr[2]),
+      .shamt(b[4:0]),
+      .in(a),
+      .out(shifter_out)
+  );
 
-    MuxKey #(8, 3, 32) mux_top (
-        .out(out),
-        .key(ctr[2:0]),
-        .lut({
-                3'b000, adder_out,
-                3'b001, shifter_out,
-                3'b010, {31'b0, Less},
-                3'b011, B,
-                3'b100, A ^ B,
-                3'b101, shifter_out,
-                3'b110, A | B,
-                3'b111, A & B
-        })
-    );
+  MuxKey #(8, 3, 32) mux_top (
+      .out(out),
+      .key(ctr[2:0]),
+      .lut({
+        3'b000, adder_out,
+        3'b001, shifter_out,
+        3'b010, {31'b0, less},
+        3'b011, b,
+        3'b100, a ^ b,
+        3'b101, shifter_out,
+        3'b110, a | b,
+        3'b111, a & b
+      })
+  );
 
 endmodule

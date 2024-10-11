@@ -7,30 +7,30 @@ class Inst:
         self.op = None
         self.func3 = None
         self.func7 = None
-        self.ExtOP = None
-        self.RegWr = None
-        self.Branch = None
-        self.MemToReg = None
-        self.MemRd = None
-        self.MemWr = None
-        self.MemOp = None
-        self.ALUAsrc = None
-        self.ALUBsrc = None
-        self.ALUctr = None
-        self.ALUAction = None
+        self.inst_type = None
+        self.reg_wr_en = None
+        self.branch = None
+        self.mem2reg = None
+        self.mem_rd_en = None
+        self.mem_wr_en = None
+        self.mem_op = None
+        self.alu_src_a = None
+        self.alu_src_b = None
+        self.alu_ctr = None
+        self.explain = None
 
     def res(self) -> str:
         return (
-            self.ExtOP
-            + self.RegWr
-            + self.Branch
-            + self.MemToReg
-            + self.MemRd
-            + self.MemWr
-            + self.MemOp
-            + self.ALUAsrc
-            + self.ALUBsrc
-            + self.ALUctr
+            self.inst_type
+            + self.reg_wr_en
+            + self.branch
+            + self.mem2reg
+            + self.mem_rd_en
+            + self.mem_wr_en
+            + self.mem_op
+            + self.alu_src_a
+            + self.alu_src_b
+            + self.alu_ctr
         )
 
 
@@ -44,17 +44,17 @@ def load_insts_from_csv(path: str):
             "op[6:2]",
             "func3",
             "func7[5]",
-            "ExtOP",
-            "RegWr",
-            "Branch",
-            "MemToReg",
-            "MemRd",
-            "MemWr",
-            "MemOp",
-            "ALUAsrc",
-            "ALUBsrc",
-            "ALUctr",
-            "ALUAction",
+            "inst_type",
+            "reg_wr_en",
+            "branch",
+            "mem2reg",
+            "mem_rd_en",
+            "mem_wr_en",
+            "mem_op",
+            "alu_src_a",
+            "alu_src_b",
+            "alu_ctr",
+            "explain",
         ]
         for row in reader:
             insts.append(Inst())
@@ -62,15 +62,15 @@ def load_insts_from_csv(path: str):
             insts[-1].op = None if row[1] == "" else row[1]
             insts[-1].func3 = None if row[2] == "" else row[2]
             insts[-1].func7 = None if row[3] == "" else row[3]
-            insts[-1].ExtOP = row[4].zfill(3)
-            insts[-1].RegWr = row[5].zfill(1)
-            insts[-1].Branch = row[6].zfill(3)
-            insts[-1].MemToReg = row[7].zfill(1)
-            insts[-1].MemRd = row[8].zfill(1)
-            insts[-1].MemWr = row[9].zfill(1)
-            insts[-1].MemOp = row[10].zfill(3)
-            insts[-1].ALUAsrc = row[11].zfill(1)
-            insts[-1].ALUBsrc = row[12].zfill(2)
-            insts[-1].ALUctr = row[13].zfill(4)
-            insts[-1].ALUAction = row[14]
+            insts[-1].inst_type = row[4].zfill(3)
+            insts[-1].reg_wr_en = row[5].zfill(1)
+            insts[-1].branch = row[6].zfill(3)
+            insts[-1].mem2reg = row[7].zfill(1)
+            insts[-1].mem_rd_en = row[8].zfill(1)
+            insts[-1].mem_wr_en = row[9].zfill(1)
+            insts[-1].mem_op = row[10].zfill(3)
+            insts[-1].alu_src_a = row[11].zfill(1)
+            insts[-1].alu_src_b = row[12].zfill(2)
+            insts[-1].alu_ctr = row[13].zfill(4)
+            insts[-1].explain = row[14]
     return insts

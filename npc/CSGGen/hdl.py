@@ -9,6 +9,10 @@ class Vector:
             当 val 为 list[Vector] 时，表示这是一些向量的拼接。
 
     slice:  tuple(l, r) 表示这个向量切片 val 的范围，None 表示全部。
+
+    切片 vec[l:r]
+    拼接 vec1 + vec2
+    长度 len(vec)
     """
 
     def __init__(self, name, val=None):
@@ -63,14 +67,10 @@ class Module:
         self.i_pins = i_pins
         self.o_pins = o_pins
 
-        self.vectors = []
         self.submodules = []
 
     def add_submodule(self, mod):
         self.submodules.append(mod)
-
-    def new_vector(self, *args):
-        self.vectors.append(Vector(*args))
 
     def dump_verilog(self):
         code = f"module {self.name}(\n"
