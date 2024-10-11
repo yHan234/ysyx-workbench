@@ -23,7 +23,7 @@ module CSG(
 );
 MuxKey #(9, 5, 20) mux_op (
 	.key(op[6:2]),
-	.out({ExtOP,RegWr,Branch,MemToReg,MemRd,MemWr,MemOp,ALUAsrc,ALUBsrc,ALUctr}),
+	.out({ExtOP, RegWr, Branch, MemToReg, MemRd, MemWr, MemOp, ALUAsrc, ALUBsrc, ALUctr}),
 	.lut({
 		5'b01101, 20'b00110000000000010011,
 		5'b00101, 20'b00110000000001010000,

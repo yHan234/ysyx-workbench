@@ -48,7 +48,7 @@ class Vector:
         if self.name is not None:
             s = self.name
         elif isinstance(self.val, list):
-            s = "{" + ",".join(str(vec) for vec in self.val) + "}"
+            s = "{" + ", ".join(str(vec) for vec in self.val) + "}"
         else:
             raise RuntimeError(f'Vector "{self.name}" 内部结构错误')
 
