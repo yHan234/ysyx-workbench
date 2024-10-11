@@ -12,7 +12,7 @@
 !README.md
 build/
 
-!ArchGraph/*
+!arch_graph/*
 !tests/*.py
 
-!CSGGen/*
+!csg_gen/*

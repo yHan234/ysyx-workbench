@@ -7,15 +7,13 @@ module InstMem (
     output reg [31:0] inst
 );
 
-    always @(*) begin
-        if (!rst)
-            inst = get_inst();
-        else
-            inst = 0;
+  always @(*) begin
+    if (!rst) inst = get_inst();
+    else inst = 0;
 
-        if (inst == 32'b00000000000100000000000001110011) begin
-            ebreak();
-        end
+    if (inst == 32'b00000000000100000000000001110011) begin
+      ebreak();
     end
+  end
 
 endmodule
