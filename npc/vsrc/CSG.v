@@ -21,20 +21,9 @@ module CSG(
 	output [1:0] ALUBsrc,
 	output [3:0] ALUctr
 );
-assign ExtOP = mux_op_out[19:17];
-assign RegWr = mux_op_out[16:16];
-assign Branch = mux_op_out[15:13];
-assign MemToReg = mux_op_out[12:12];
-assign MemRd = mux_op_out[11:11];
-assign MemWr = mux_op_out[10:10];
-assign MemOp = mux_op_out[9:7];
-assign ALUAsrc = mux_op_out[6:6];
-assign ALUBsrc = mux_op_out[5:4];
-assign ALUctr = mux_op_out[3:0];
-wire [19:0] mux_op_out;
 MuxKey #(9, 5, 20) mux_op (
 	.key(op[6:2]),
-	.out(mux_op_out),
+	.out({ExtOP, RegWr, Branch, MemToReg, MemRd, MemWr, MemOp, ALUAsrc, ALUBsrc, ALUctr}),
 	.lut({
 		5'b01101, 20'b00110000000000010011,
 		5'b00101, 20'b00110000000001010000,
@@ -79,6 +68,15 @@ MuxKey #(2, 1, 20) mux_func7_00100_101 (
 		1'b1, 20'b00010000000000011101
 	})
 );
+wire [19:0] mux_func7_01100_000_out;
+MuxKey #(2, 1, 20) mux_func7_01100_000 (
+	.key(func7[5:5]),
+	.out(mux_func7_01100_000_out),
+	.lut({
+		1'b0, 20'b00010000000000000000,
+		1'b1, 20'b00010000000000001000
+	})
+);
 wire [19:0] mux_func3_01100_out;
 MuxKey #(8, 3, 20) mux_func3_01100 (
 	.key(func3),
@@ -92,15 +90,6 @@ MuxKey #(8, 3, 20) mux_func3_01100 (
 		3'b101, mux_func7_01100_101_out,
 		3'b110, mux_func7_01100_110_out,
 		3'b111, mux_func7_01100_111_out
-	})
-);
-wire [19:0] mux_func7_01100_000_out;
-MuxKey #(2, 1, 20) mux_func7_01100_000 (
-	.key(func7[5:5]),
-	.out(mux_func7_01100_000_out),
-	.lut({
-		1'b0, 20'b00010000000000000000,
-		1'b1, 20'b00010000000000001000
 	})
 );
 wire [19:0] mux_func7_01100_001_out;

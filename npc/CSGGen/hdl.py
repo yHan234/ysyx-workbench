@@ -1,15 +1,33 @@
 class Vector:
-    def __init__(self, name, val):
+    """
+    表示一个一维向量。
+
+    name:   向量的名字，None 为匿名。
+
+    val:    当 val 为 tuple(l, r) 时，这是一个原始向量，l 和 r 表示这个向量表示的比特范围。
+            当 val 为 Vector 时，表示这个向量是另一个向量的切片，由 slice 表示切片范围。
+            当 val 为 list[Vector] 时，表示这是一些向量的拼接。
+
+    slice:  tuple(l, r) 表示这个向量切片 val 的范围，None 表示全部。
+
+    切片 vec[l:r]
+    拼接 vec1 + vec2
+    长度 len(vec)
+    """
+
+    def __init__(self, name, val=None):
         self.name = name
-        self.val = val
+        self.val = val if val is not None else (0, 0)
         self.slice = None
 
     def __getitem__(self, key):
         res = Vector(self.name, self.val)
         if isinstance(key, slice):
             res.slice = (key.start, key.stop)
-        else:
+        elif isinstance(key, int):
             res.slice = (key, key)
+        else:
+            raise RuntimeError("Invalid key")
         return res
 
     def __len__(self):
@@ -17,17 +35,27 @@ class Vector:
             return self.slice[0] - self.slice[1] + 1
         elif isinstance(self.val, tuple):
             return self.val[0] - self.val[1] + 1
+        elif isinstance(self.val, Vector):
+            return len(self.val)
         elif isinstance(self.val, list):
-            l = 0
-            for vec in list:
-                l += len(vec)
-            return l
+            return sum(len(vec) for vec in self.val)
         else:
             raise RuntimeError(f'Vector "{self.name}" 内部结构错误')
 
+    def __add__(self, other):
+        def to_list(vec):
+            return vec.val if isinstance(vec.val, list) else [vec]
+
+        return Vector(None, to_list(self) + to_list(other))
+
     def __str__(self):
-        # TODO: 向量拼接
-        s = self.name
+        if self.name is not None:
+            s = self.name
+        elif isinstance(self.val, list):
+            s = "{" + ", ".join(str(vec) for vec in self.val) + "}"
+        else:
+            raise RuntimeError(f'Vector "{self.name}" 内部结构错误')
+
         if self.slice is not None:
             s += f"[{self.slice[0]}:{self.slice[1]}]"
         return s
@@ -39,14 +67,10 @@ class Module:
         self.i_pins = i_pins
         self.o_pins = o_pins
 
-        self.vectors = []
         self.submodules = []
 
     def add_submodule(self, mod):
         self.submodules.append(mod)
-
-    def new_vector(self, *args):
-        self.vectors.append(Vector(*args))
 
     def dump_verilog(self):
         code = f"module {self.name}(\n"
@@ -57,13 +81,10 @@ class Module:
             assert vec.slice is None
             code += f"\tinput [{vec.val[0]}:{vec.val[1]}] {name},\n"
         for i, (name, vec) in enumerate(self.o_pins.items()):
-            # 特殊处理
-            code += f"\toutput [{vec.slice[0] - vec.slice[1]}:{0}] {name}"
+            code += f"\toutput [{vec.val[0]}:{vec.val[1]}] {name}"
             code += "\n" if i == len(self.o_pins) - 1 else ",\n"
         code += ");\n"
 
-        for name, vec in self.o_pins.items():
-            code += f"assign {name} = {vec.name}[{vec.slice[0]}:{vec.slice[1]}];\n"
         for submodule in self.submodules:
             code += submodule.dump_verilog()
 
@@ -79,7 +100,11 @@ class Mux:
         self.lut = {}
 
     def dump_verilog(self):
-        code = f"wire [{self.out.val[0]}:{self.out.val[1]}] {self.out.name};\n"
+        code = (
+            f"wire [{self.out.val[0]}:{self.out.val[1]}] {self.out.name};\n"
+            if self.out.name is not None
+            else ""
+        )
         code += f"MuxKey #({len(self.lut)}, {len(self.key)}, {len(self.out)}) {self.name} (\n"
         code += f"\t.key({self.key}),\n"
         code += f"\t.out({self.out}),\n"

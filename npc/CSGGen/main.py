@@ -12,76 +12,76 @@ if __name__ == "__main__":
             "func3": Vector("func3", (2, 0)),
             "func7": Vector("func7", (6, 0)),
         },
+        o_pins={
+            "ExtOP": Vector("ExtOP", (2, 0)),
+            "RegWr": Vector("RegWr"),
+            "Branch": Vector("Branch", (2, 0)),
+            "MemToReg": Vector("MemToReg"),
+            "MemRd": Vector("MemRd"),
+            "MemWr": Vector("MemWr"),
+            "MemOp": Vector("MemOp", (2, 0)),
+            "ALUAsrc": Vector("ALUAsrc"),
+            "ALUBsrc": Vector("ALUBsrc", (1, 0)),
+            "ALUctr": Vector("ALUctr", (3, 0)),
+        },
     )
 
     mux_op = Mux(
         "mux_op",
         csg.i_pins["op"][6:2],
-        Vector("mux_op_out", (19, 0)),
+        csg.o_pins["ExtOP"]
+        + csg.o_pins["RegWr"]
+        + csg.o_pins["Branch"]
+        + csg.o_pins["MemToReg"]
+        + csg.o_pins["MemRd"]
+        + csg.o_pins["MemWr"]
+        + csg.o_pins["MemOp"]
+        + csg.o_pins["ALUAsrc"]
+        + csg.o_pins["ALUBsrc"]
+        + csg.o_pins["ALUctr"],
     )
     csg.add_submodule(mux_op)
 
-    csg.o_pins = {
-        "ExtOP": mux_op.out[19:17],
-        "RegWr": mux_op.out[16],
-        "Branch": mux_op.out[15:13],
-        "MemToReg": mux_op.out[12],
-        "MemRd": mux_op.out[11],
-        "MemWr": mux_op.out[10],
-        "MemOp": mux_op.out[9:7],
-        "ALUAsrc": mux_op.out[6],
-        "ALUBsrc": mux_op.out[5:4],
-        "ALUctr": mux_op.out[3:0],
-    }
-
     mux_func3_dic = {}
     mux_func7_dic = {}
+
+    def get_mux_func3(op):
+        if op in mux_func3_dic:
+            mux_func3 = mux_func3_dic[op]
+        else:
+            mux_func3 = Mux(
+                name=f"mux_func3_{op}",
+                key=csg.i_pins["func3"],
+                out=Vector(f"mux_func3_{op}_out", (19, 0)),
+            )
+            csg.add_submodule(mux_func3)
+            mux_op.lut[op] = mux_func3.out
+            mux_func3_dic[op] = mux_func3
+        return mux_func3
+
+    def get_mux_func7(op, func3):
+        op_func3 = op + func3
+        if op_func3 in mux_func7_dic:
+            mux_func7 = mux_func7_dic[op_func3]
+        else:
+            mux_func7 = Mux(
+                name=f"mux_func7_{op}_{func3}",
+                key=csg.i_pins["func7"][5],
+                out=Vector(f"mux_func7_{op}_{func3}_out", (19, 0)),
+            )
+            csg.add_submodule(mux_func7)
+            get_mux_func3(op).lut[func3] = mux_func7.out
+            mux_func7_dic[op_func3] = mux_func7
+        return mux_func7
 
     for inst in insts:
         if inst.func3 is None:
             mux_op.lut[inst.op] = inst.res()
         elif inst.func7 is None:
-            if inst.op in mux_func3_dic:
-                mux_func3 = mux_func3_dic[inst.op]
-            else:
-                mux_func3 = Mux(
-                    name=f"mux_func3_{inst.op}",
-                    key=csg.i_pins["func3"],
-                    out=Vector(f"mux_func3_{inst.op}_out", (19, 0)),
-                )
-                csg.add_submodule(mux_func3)
-                mux_op.lut[inst.op] = mux_func3.out
-                mux_func3_dic[inst.op] = mux_func3
-
+            mux_func3 = get_mux_func3(inst.op)
             mux_func3.lut[inst.func3] = inst.res()
         else:
-            # copy 的上个 if 分支
-            # TODO: 精简代码
-            if inst.op in mux_func3_dic:
-                mux_func3 = mux_func3_dic[inst.op]
-            else:
-                mux_func3 = Mux(
-                    name=f"mux_func3_{inst.op}",
-                    key=csg.i_pins["func3"],
-                    out=Vector(f"mux_func3_{inst.op}_out", (19, 0)),
-                )
-                csg.add_submodule(mux_func3)
-                mux_op.lut[inst.op] = mux_func3.out
-                mux_func3_dic[inst.op] = mux_func3
-
-            op_func3 = inst.op + inst.func3
-            if op_func3 in mux_func7_dic:
-                mux_func7 = mux_func7_dic[op_func3]
-            else:
-                mux_func7 = Mux(
-                    name=f"mux_func7_{inst.op}_{inst.func3}",
-                    key=csg.i_pins["func7"][5],
-                    out=Vector(f"mux_func7_{inst.op}_{inst.func3}_out", (19, 0)),
-                )
-                csg.add_submodule(mux_func7)
-                mux_func3.lut[inst.func3] = mux_func7.out
-                mux_func7_dic[op_func3] = mux_func7
-
+            mux_func7 = get_mux_func7(inst.op, inst.func3)
             mux_func7.lut[inst.func7] = inst.res()
 
     print(
