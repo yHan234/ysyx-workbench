@@ -3,8 +3,8 @@ module IDU (
     input  [31:0] inst,
     input  [ 2:0] inst_type,
     output [ 6:0] op,
-    output [ 2:0] func3,
-    output [ 6:0] func7,
+    output [ 2:0] funct3,
+    output [ 6:0] funct7,
     output [ 4:0] rd,
     output [ 4:0] rs1,
     output [ 4:0] rs2,
@@ -12,8 +12,8 @@ module IDU (
 );
 
   assign op    = inst[6:0];
-  assign func3 = inst[14:12];
-  assign func7 = inst[31:25];
+  assign funct3 = inst[14:12];
+  assign funct7 = inst[31:25];
   assign rd    = inst[11:7];
   assign rs1   = inst[19:15];
   assign rs2   = inst[24:20];

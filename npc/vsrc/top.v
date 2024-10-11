@@ -53,8 +53,8 @@ module top (
 
   wire [ 2:0] inst_type;
   wire [ 6:0] op;
-  wire [ 2:0] func3;
-  wire [ 6:0] func7;
+  wire [ 2:0] funct3;
+  wire [ 6:0] funct7;
   wire [ 4:0] rd;
   wire [ 4:0] rs1;
   wire [ 4:0] rs2;
@@ -64,8 +64,8 @@ module top (
       .inst     (inst),
       .inst_type(inst_type),
       .op       (op),
-      .func3    (func3),
-      .func7    (func7),
+      .funct3   (funct3),
+      .funct7   (funct7),
       .rd       (rd),
       .rs1      (rs1),
       .rs2      (rs2),
@@ -87,8 +87,8 @@ module top (
 
   CSG csg (
       .op       (op),
-      .func3    (func3),
-      .func7    (func7),
+      .funct3   (funct3),
+      .funct7   (funct7),
       .inst_type(inst_type),
       .reg_wr_en(reg_wr_en),
       .alu_src_a(alu_src_a),

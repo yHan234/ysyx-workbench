@@ -17,7 +17,12 @@ class Vector:
 
     def __init__(self, name, val=None):
         self.name = name
-        self.val = val if val is not None else (0, 0)
+        if val is None:
+            self.val = (0, 0)
+        elif isinstance(val, int):
+            self.val = (val - 1, 0)
+        else:  # 应为 tuple(l, r)
+            self.val = val
         self.slice = None
 
     def __getitem__(self, key):

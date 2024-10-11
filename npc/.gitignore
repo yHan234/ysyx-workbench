@@ -15,4 +15,4 @@ build/
 !ArchGraph/*
 !tests/*.py
 
-!CSGGen/*
+!csg_gen/*
