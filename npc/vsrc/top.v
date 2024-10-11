@@ -5,24 +5,27 @@ module top (
 
   // PC
 
-  wire [31:0] pc_next, pc  /* verilator public */;
-  wire pc_src_a, pc_src_b;
+  wire [31:0] next_pc, pc  /* verilator public */;
 
   BranchCond bc (
-      .branch  (branch),
-      .less    (less),
-      .zero    (zero),
-      .pc_src_a(pc_src_a),
-      .pc_src_b(pc_src_b)
+      .branch    (branch),
+      .less      (less),
+      .zero      (zero),
+      .pc        (pc),
+      .imm       (imm),
+      .rbus1     (rbus1),
+      .csr_branch(csr_branch),
+      .mtvec     (csr_mtvec),
+      .mepc      (csr_mepc),
+      .next_pc   (next_pc)
   );
   Reg #(32, 32'h80000000) pc_r (
       .clk (clk),
       .rst (rst),
-      .din (pc_next),
+      .din (next_pc),
       .dout(pc),
       .wen (1'b1)
   );
-  assign pc_next = (pc_src_a == 0 ? 4 : imm) + (pc_src_b == 0 ? pc : rbus1);
 
   // GPR
 
@@ -86,7 +89,9 @@ module top (
   wire [1:0] alu_src_b;
   wire [3:0] alu_ctr;
   wire       csr_wr_en;
+  wire       csr_wr_src;
   wire       csr_wr_set;
+  wire [1:0] csr_branch;
 
   CSG csg (
       .op        (op),
@@ -103,7 +108,9 @@ module top (
       .alu_src_b (alu_src_b),
       .alu_ctr   (alu_ctr),
       .csr_wr_en (csr_wr_en),
-      .csr_wr_set(csr_wr_set)
+      .csr_wr_set(csr_wr_set),
+      .csr_wr_src(csr_wr_src),
+      .csr_branch(csr_branch)
   );
 
 
@@ -139,6 +146,8 @@ module top (
   // CSR
 
   wire [31:0] csr_bus;
+  wire [31:0] csr_mtvec;
+  wire [31:0] csr_mepc;
 
   CSR csr (
       .rst   (rst),
@@ -148,7 +157,9 @@ module top (
       .wr_reg(imm[11:0]),
       .wr_bus(rbus1),
       .rd_reg(imm[11:0]),
-      .rd_bus(csr_bus)
+      .rd_bus(csr_bus),
+      .mtvec (csr_mtvec),
+      .mepc  (csr_mepc)
   );
 
 endmodule

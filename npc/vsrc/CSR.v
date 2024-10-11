@@ -10,12 +10,14 @@ module CSR (
 
     // read port
     input [11:0] rd_reg,
-    output reg [31:0] rd_bus
+    output reg [31:0] rd_bus,
+
+    // expose for BranchCond
+    output reg[31:0] mtvec,
+    output reg[31:0] mepc
 );
 
   reg [31:0] mstatus;
-  reg [31:0] mtvec;
-  reg [31:0] mepc;
   reg [31:0] mcause;
 
   always @(*) begin
