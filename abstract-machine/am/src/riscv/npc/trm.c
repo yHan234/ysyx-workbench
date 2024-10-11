@@ -1,5 +1,6 @@
 #include <am.h>
 #include <klib-macros.h>
+#include <riscv/riscv.h>
 
 extern char _heap_start;
 int main(const char *args);
@@ -12,9 +13,13 @@ Area heap = RANGE(&_heap_start, PMEM_END);
 static const char mainargs[MAINARGS_MAX_LEN] = MAINARGS_PLACEHOLDER; // defined in CFLAGS
 
 void putch(char ch) {
+  outb(0xA00003F8, ch); // NPC 约定的串口地址
 }
 
 void halt(int code) {
+  asm volatile("mv a0, %0; ebreak" : :"r"(code));
+
+  // should not reach here
   while (1);
 }
 
