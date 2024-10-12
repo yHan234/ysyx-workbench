@@ -40,6 +40,7 @@ void check_watchpoints();
 #define IRINGBUF_MNEMONIC_LEN 8
 #define IRINGBUF_OP_STR_LEN 64
 static struct {
+  uint32_t num;
   vaddr_t pc;
   int inst_len;
   uint32_t inst;
@@ -48,22 +49,23 @@ static struct {
 } iringbuf[IRINGBUF_LEN];
 static uint iringbuf_wptr = 0;
 static uint iringbuf_size = 0;
+static uint iringbuf_num  = 0;
 
-#define iringbuf_print(printf)                                                 \
-  do {                                                                         \
-    if (iringbuf_size) {                                                       \
-      uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;              \
-      do {                                                                     \
-        printf("0x%08x:", iringbuf[i].pc);                                     \
-        uint8_t *inst = (uint8_t *)&iringbuf[i].inst;                          \
-        for (int j = iringbuf[i].inst_len - 1; j >= 0; j--) {                  \
-          printf(" %02x", inst[j]);                                            \
-        }                                                                      \
-        printf("%*s\t%s\n", IRINGBUF_MNEMONIC_LEN, iringbuf[i].mnemonic,       \
-               iringbuf[i].op_str);                                            \
-        i = (i + 1) % IRINGBUF_LEN;                                            \
-      } while (i != iringbuf_wptr);                                            \
-    }                                                                          \
+#define iringbuf_print(printf)                                           \
+  do {                                                                   \
+    if (iringbuf_size) {                                                 \
+      uint i = iringbuf_size == IRINGBUF_LEN ? iringbuf_wptr : 0;        \
+      do {                                                               \
+        printf("%u 0x%08x:", iringbuf[i].num, iringbuf[i].pc);           \
+        uint8_t *inst = (uint8_t *)&iringbuf[i].inst;                    \
+        for (int j = iringbuf[i].inst_len - 1; j >= 0; j--) {            \
+          printf(" %02x", inst[j]);                                      \
+        }                                                                \
+        printf("%*s\t%s\n", IRINGBUF_MNEMONIC_LEN, iringbuf[i].mnemonic, \
+               iringbuf[i].op_str);                                      \
+        i = (i + 1) % IRINGBUF_LEN;                                      \
+      } while (i != iringbuf_wptr);                                      \
+    }                                                                    \
   } while (0)
 #endif
 
@@ -130,6 +132,7 @@ static void fringbuf_ret(vaddr_t pc) {
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE
+  iringbuf[iringbuf_wptr].num = ++iringbuf_num;
   iringbuf[iringbuf_wptr].pc = _this->pc;
   iringbuf[iringbuf_wptr].inst_len = _this->snpc - _this->pc;
   iringbuf[iringbuf_wptr].inst = _this->isa.inst.val;
