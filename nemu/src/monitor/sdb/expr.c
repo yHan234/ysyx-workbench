@@ -282,6 +282,7 @@ static word_t eval(int bo, int eo, bool *success) {
     Log("Calculate: %u %s %u => %u" INDICATE_FMT, lhs, tokens[p].str, rhs, res, INDICATE_EXPR_ARG(tokens[p].pos));
     return res;
   }
+  return 0;
 }
 
 #undef EVAL_FAIL

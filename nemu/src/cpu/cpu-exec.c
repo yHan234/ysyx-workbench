@@ -193,7 +193,8 @@ static void statistic() {
   else Log("Finish running in less than 1 us and can not calculate the simulation frequency");
 }
 
-void assert_fail_msg() {
+void assert_fail() {
+  nemu_state.state = NEMU_ABORT;
   isa_reg_display();
   statistic();
 }
