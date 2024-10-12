@@ -16,6 +16,9 @@ NPCFLAGS  += -b
 ifneq ($(REF),)
     NPCFLAGS += -d $(REF)
 endif
+ifneq ($(LOG),)
+    NPCFLAGS += -l $(LOG)
+endif
 
 MAINARGS_MAX_LEN = 64
 MAINARGS_PLACEHOLDER = The insert-arg rule in Makefile will insert mainargs here.
