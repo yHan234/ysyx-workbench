@@ -173,7 +173,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->pc = pc;
   s->snpc = pc;
   isa_exec_once(s);
-  trace_and_difftest(s, cpu.pc);
   cpu.pc = s->dnpc;
 }
 
@@ -182,6 +181,7 @@ static void execute(uint64_t n) {
   for (;n > 0; n --) {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
+    trace_and_difftest(&s, cpu.pc);
     if (nemu_state.state != NEMU_RUNNING) break;
     IFDEF(CONFIG_DEVICE, device_update());
   }
@@ -196,8 +196,7 @@ static void statistic() {
   else Log("Finish running in less than 1 us and can not calculate the simulation frequency");
 }
 
-void assert_fail() {
-  nemu_state.state = NEMU_ABORT;
+void assert_fail_msg() {
   isa_reg_display();
   statistic();
 }
