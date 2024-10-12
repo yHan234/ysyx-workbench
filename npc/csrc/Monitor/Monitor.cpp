@@ -190,7 +190,7 @@ void Monitor::DiffTestStep() {
   auto &dut_regs = cpu.GetRegs();
   auto dut_pc = cpu.GetPC();
 
-  std::cout << ref_pc << std::endl;
+  std::cout << std::hex << ref_pc << std::endl;
 
   if (dut_pc != ref_pc) {
     state = State::ABORT;
