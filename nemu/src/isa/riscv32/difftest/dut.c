@@ -21,6 +21,9 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   extern const char *regs[];
   extern CPU_state cpu;
 
+  if (cpu.pc != pc) {
+    return false;
+  }
   for (int i = 0; i < sizeof(cpu.gpr) / sizeof(word_t); i++) {
     if (!difftest_check_reg(regs[i], pc, ref_r->gpr[i], cpu.gpr[i])) {
       return false;
