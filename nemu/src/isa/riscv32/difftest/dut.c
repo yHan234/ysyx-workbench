@@ -22,6 +22,9 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   extern CPU_state cpu;
 
   if (cpu.pc != pc) {
+    Log("PC is different"
+        ", right = " FMT_WORD ", wrong = " FMT_WORD ", diff = " FMT_WORD,
+        pc, cpu.pc, pc ^ cpu.pc);
     return false;
   }
   for (int i = 0; i < sizeof(cpu.gpr) / sizeof(word_t); i++) {
