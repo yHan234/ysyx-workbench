@@ -9,7 +9,7 @@
 #define BUF_SIZE 128
 #define ITRACE
 #define MTRACE
-// #define DIFFTEST
+#define DIFFTEST
 
 // Device
 

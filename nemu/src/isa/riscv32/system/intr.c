@@ -36,7 +36,6 @@ static void eringbuf_write() {
 }
 
 void eringbuf_print() {
-  extern FILE *log_fp;
   if (eringbuf_size) {
     uint i = eringbuf_size == ERINGBUF_LEN ? eringbuf_wptr : 0;
     do {
