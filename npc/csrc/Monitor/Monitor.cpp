@@ -177,6 +177,7 @@ void Monitor::LoadDiffTestRef(const std::string &ref_so_file, char *img_addr, si
 
 void Monitor::DiffTestStep() {
 #ifdef DIFFTEST
+  std::cout << "diff test" << std::endl;
   static word_t ref_regs[33];
   static word_t ref_pc;
 
