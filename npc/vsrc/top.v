@@ -7,7 +7,7 @@ module top (
 
   wire [31:0] next_pc, pc  /* verilator public */;
 
-  BranchCond bc (
+  BranchCond branch_cond (
       .branch    (branch),
       .less      (less),
       .zero      (zero),
@@ -89,9 +89,9 @@ module top (
   wire [1:0] alu_src_b;
   wire [3:0] alu_ctr;
   wire       csr_wr_en;
-  wire       csr_wr_src;
   wire       csr_wr_set;
   wire [1:0] csr_branch;
+  wire       csr_ecall;
 
   CSG csg (
       .op        (op),
@@ -109,8 +109,8 @@ module top (
       .alu_ctr   (alu_ctr),
       .csr_wr_en (csr_wr_en),
       .csr_wr_set(csr_wr_set),
-      .csr_wr_src(csr_wr_src),
-      .csr_branch(csr_branch)
+      .csr_branch(csr_branch),
+      .csr_ecall (csr_ecall)
   );
 
 
@@ -150,14 +150,16 @@ module top (
   wire [31:0] csr_mepc;
 
   CSR csr (
+      .clk   (clk),
       .rst   (rst),
-      .wr_clk(clk),
       .wr_en (csr_wr_en),
       .wr_set(csr_wr_set),
       .wr_reg(imm[11:0]),
       .wr_bus(rbus1),
       .rd_reg(imm[11:0]),
       .rd_bus(csr_bus),
+      .ecall (csr_ecall),
+      .pc    (pc),
       .mtvec (csr_mtvec),
       .mepc  (csr_mepc)
   );

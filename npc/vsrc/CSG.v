@@ -13,13 +13,13 @@ module CSG(
 	output [1:0] alu_src_b,
 	output [3:0] alu_ctr,
 	output [0:0] csr_wr_en,
-	output [0:0] csr_wr_src,
 	output [0:0] csr_wr_set,
-	output [1:0] csr_branch
+	output [1:0] csr_branch,
+	output [0:0] csr_ecall
 );
 MuxKey #(10, 5, 26) mux_op (
 	.key(op[6:2]),
-	.out({inst_type, gpr_wr_en, gpr_wr_src, branch, mem_rd_en, mem_wr_en, mem_op, alu_src_a, alu_src_b, alu_ctr, csr_wr_en, csr_wr_src, csr_wr_set, csr_branch}),
+	.out({inst_type, gpr_wr_en, gpr_wr_src, branch, mem_rd_en, mem_wr_en, mem_op, alu_src_a, alu_src_b, alu_ctr, csr_wr_en, csr_wr_set, csr_branch, csr_ecall}),
 	.lut({
 		5'b01101, 26'b00110000000000001001100000,
 		5'b00101, 26'b00110000000000101000000000,
@@ -195,7 +195,7 @@ MuxKey #(3, 3, 26) mux_funct3_11100 (
 	.out(mux_funct3_11100_out),
 	.lut({
 		3'b001, 26'b00011000000000000000010000,
-		3'b010, 26'b00011000000000000000010100,
+		3'b010, 26'b00011000000000000000011000,
 		3'b000, mux_funct7_11100_000_out
 	})
 );
@@ -204,8 +204,8 @@ MuxKey #(2, 1, 26) mux_funct7_11100_000 (
 	.key(funct7[5:5]),
 	.out(mux_funct7_11100_000_out),
 	.lut({
-		1'b0, 26'b00000000000000000000011001,
-		1'b1, 26'b00000000000000000000000010
+		1'b0, 26'b00000000000000000000010011,
+		1'b1, 26'b00000000000000000000000100
 	})
 );
 endmodule
