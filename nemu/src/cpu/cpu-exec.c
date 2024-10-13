@@ -72,7 +72,7 @@ static uint iringbuf_num  = 0;
 // FTRACE
 
 #ifdef CONFIG_FTRACE
-#define FRINGBUF_LEN 128
+#define FRINGBUF_LEN 1024
 typedef struct {
   vaddr_t addr;
   char *name;
