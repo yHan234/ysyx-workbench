@@ -41,7 +41,7 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
     if (state == State::RUNNING) {
       DiffTestStep();
       return 0;
-    } else {
+    } else { // 结束后不再进行 DiffTest
       return 1;
     }
   };

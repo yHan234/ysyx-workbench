@@ -97,7 +97,7 @@ class Module:
         return code
 
 
-class Mux:
+class MuxKey:
     def __init__(self, name, key=None, out=None):
         self.name = name
         self.key = key
@@ -113,6 +113,33 @@ class Mux:
         code += f"MuxKey #({len(self.lut)}, {len(self.key)}, {len(self.out)}) {self.name} (\n"
         code += f"\t.key({self.key}),\n"
         code += f"\t.out({self.out}),\n"
+        code += "\t.lut({\n"
+        for i, (k, v) in enumerate(self.lut.items()):
+            v_str = v if isinstance(v, Vector) else f"{len(v)}'b{v}"
+            code += f"\t\t{len(self.key)}'b{k}, {v_str}"
+            code += "\n" if i == len(self.lut) - 1 else ",\n"  # 最后一个不加逗号
+        code += "\t})\n"
+        code += ");\n"
+        return code
+
+class MuxKeyWithDefault:
+    def __init__(self, name, key=None, out=None, default=None):
+        self.name = name
+        self.key = key
+        self.out = out
+        self.default = default
+        self.lut = {}
+
+    def dump_verilog(self):
+        code = (
+            f"wire [{self.out.val[0]}:{self.out.val[1]}] {self.out.name};\n"
+            if self.out.name is not None
+            else ""
+        )
+        code += f"MuxKeyWithDefault #({len(self.lut)}, {len(self.key)}, {len(self.out)}) {self.name} (\n"
+        code += f"\t.key({self.key}),\n"
+        code += f"\t.out({self.out}),\n"
+        code += f"\t.default_out({self.default}),\n"
         code += "\t.lut({\n"
         for i, (k, v) in enumerate(self.lut.items()):
             v_str = v if isinstance(v, Vector) else f"{len(v)}'b{v}"

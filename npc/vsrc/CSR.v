@@ -61,7 +61,6 @@ module CSR (
       end
 
       if (ecall) begin
-        $display(pc);
         mcause = 32'hb;
         mepc = pc;
       end

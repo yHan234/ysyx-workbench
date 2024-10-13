@@ -94,6 +94,7 @@ module top (
   wire       csr_ecall;
 
   CSG csg (
+      .inst      (inst),
       .op        (op),
       .funct3    (funct3),
       .funct7    (funct7),

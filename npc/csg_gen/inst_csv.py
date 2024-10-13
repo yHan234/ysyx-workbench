@@ -5,7 +5,8 @@ class InstCSV:
     """
     CSV 格式：
 
-    row1: name, explain, op[6:2], funct3, funct7[5], {要生成的信号...}
+    row1: name, inst, op[6:2], funct3, funct7[5], {要生成的信号...}
+        inst 为全 32 位固定的指令特判
 
     row2: ,,,,,{要生成的信号的长度...}
 
@@ -18,7 +19,9 @@ class InstCSV:
             self.len = len
 
     class Inst:
-        def __init__(self, op, funct3, funct7, signals):
+        def __init__(self, name, inst, op, funct3, funct7, signals):
+            self.name = name
+            self.inst = inst
             self.op = op
             self.funct3 = funct3
             self.funct7 = funct7
@@ -40,7 +43,7 @@ class InstCSV:
             header = next(reader)
             assert header[0:5] == [
                 "name",
-                "explain",
+                "inst",
                 "op[6:2]",
                 "funct3",
                 "funct7[5]",
@@ -54,7 +57,9 @@ class InstCSV:
 
             icsv.insts = [
                 InstCSV.Inst(
-                    inst[2],  # op
+                    inst[0],  # name
+                    None if inst[1] == "" else inst[1],  # inst
+                    None if inst[2] == "" else inst[2],  # op
                     None if inst[3] == "" else inst[3],  # funct3
                     None if inst[4] == "" else inst[4],  # funct7
                     [
