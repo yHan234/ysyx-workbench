@@ -9,7 +9,7 @@
 !*.cpp
 !*.hpp
 !.gitignore
-!README.md
+!*.md
 build/
 
 !arch_graph/*

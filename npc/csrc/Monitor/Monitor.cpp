@@ -38,8 +38,12 @@ Monitor::Monitor(CPU &cpu, MemoryManager &mem_mgr)
   cpu.after_step = [&]() -> int {
     inst = cpu.GetInst(); // 本次执行的 inst
     ITrace();
-    DiffTestStep();
-    return state == State::RUNNING ? 0 : 1;
+    if (state == State::RUNNING) {
+      DiffTestStep();
+      return 0;
+    } else { // 结束后不再进行 DiffTest
+      return 1;
+    }
   };
 
   cpu.after_exec = [&]() -> int {
