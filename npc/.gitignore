@@ -12,7 +12,6 @@
 !*.md
 build/
 
-!arch_graph/*
 !tests/*.py
 
 !csg_gen/*

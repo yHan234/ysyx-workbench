@@ -6,6 +6,7 @@
 !/nanos-lite/*
 !/navy-apps/*
 !/npc/*
+!/summary/*
 !Makefile
 !README.md
 !.gitignore
